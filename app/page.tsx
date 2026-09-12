@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowDownLeft, ArrowRight, ArrowUp, BadgeCheck, Cherry, Check, ChevronDown, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, MapPin, Menu, Moon, PackageCheck, Play, Search, ShoppingCart, Star, Sunset, Truck, UserRound, Users, X, Youtube } from "lucide-react";
 
 type Product = { name: string; category: string; price: number; image: string; tag?: string };
-const productImage = "/product-honey.png";
+const productImage = "/amzad-food-website/product-honey.png";
 const products: Product[] = Array.from({ length: 12 }, (_, index) => ({
   name: ["Wildflower Honey & Black Seed", "Sundarbans Raw Honey", "Organic Black Seed Oil", "Premium Date Syrup"][index % 4],
   category: index % 2 ? "Pantry" : "Best seller",
@@ -13,9 +13,9 @@ const products: Product[] = Array.from({ length: 12 }, (_, index) => ({
 const exploreProducts = products.slice(0, 10).map((product, index) => ({ ...product, name: ["Pure Ghee", "Puffed Rice", "Premium Black Seed Oil", "Khejur Gur", "Mango Pickle"][index % 5], price: [550, 230, 650, 1000, 230][index % 5] }));
 const categories = ["All", "Fresh produce", "Pantry", "Dairy & eggs", "Bakery"];
 const blogReviews = [
-  { image: "/blog-review-1.png", alt: "মেদ ঝরানো এখন আরও সহজ" },
-  { image: "/blog-review-2.png", alt: "অতিরিক্ত ওজন কমান প্রাকৃতিক উপায়ে" },
-  { image: "/blog-review-3.png", alt: "ছোট বড় অভ্যাসেই স্বাস্থ্যকর জীবন" },
+  { image: "/amzad-food-website/blog-review-1.png", alt: "মেদ ঝরানো এখন আরও সহজ" },
+  { image: "/amzad-food-website/blog-review-2.png", alt: "অতিরিক্ত ওজন কমান প্রাকৃতিক উপায়ে" },
+  { image: "/amzad-food-website/blog-review-3.png", alt: "ছোট বড় অভ্যাসেই স্বাস্থ্যকর জীবন" },
 ];
 
 function ProductCard({ product, onAdd }: { product: Product; onAdd: () => void }) {
@@ -32,9 +32,9 @@ const dailyPrayerTimes = [
 ];
 
 const heroSlides = [
-  { image: "/hero-slide-1.png", eyebrow: "100% Pure & Organic", title: ["Bold Spices,", "Real Bangladeshi Taste"], desc: "Hand-ground turmeric, chili, cumin and garam masala — sourced fresh to bring authentic flavor to every meal.", cta: "Shop Spices" },
-  { image: "/hero-slide-2.png", eyebrow: "Traditional Recipes", title: ["Sweets & Snacks,", "Made With Love"], desc: "From badam barfi to protein bars — classic Bangladeshi treats made the way you remember, delivered fresh.", cta: "Shop Sweets" },
-  { image: "/hero-slide-3.png", eyebrow: "Nature's Best", title: ["Pure Honey & Ghee,", "Straight From the Source"], desc: "Raw honey, farm-fresh ghee and wellness essentials — sourced with care, trusted by thousands of families.", cta: "Shop Essentials" },
+  { image: "/amzad-food-website/hero-slide-1.png", eyebrow: "100% Pure & Organic", title: ["Bold Spices,", "Real Bangladeshi Taste"], desc: "Hand-ground turmeric, chili, cumin and garam masala — sourced fresh to bring authentic flavor to every meal.", cta: "Shop Spices" },
+  { image: "/amzad-food-website/hero-slide-2.png", eyebrow: "Traditional Recipes", title: ["Sweets & Snacks,", "Made With Love"], desc: "From badam barfi to protein bars — classic Bangladeshi treats made the way you remember, delivered fresh.", cta: "Shop Sweets" },
+  { image: "/amzad-food-website/hero-slide-3.png", eyebrow: "Nature's Best", title: ["Pure Honey & Ghee,", "Straight From the Source"], desc: "Raw honey, farm-fresh ghee and wellness essentials — sourced with care, trusted by thousands of families.", cta: "Shop Essentials" },
 ];
 
 function HeroSlider() {
@@ -109,7 +109,7 @@ export default function Home() {
     <HeroSlider />
     <section className="category-strip page-width" id="collection"><div className="category-intro"><strong>Shop by<br />Category</strong><ArrowRight size={15} /></div>{["🧂","🫙","🥭","🥜","🍯","🧺","🌱","🫘"].map((icon, index) => <button className="quick-category" key={`${icon}-${index}`}><span>{icon}</span><small>{["Pink Salt","Mosla","Mango","Pink Salt","Honey Nuts","Pink Salt","Seeds","Khejur"][index]}</small></button>)}<button className="gift-box"><span><Gift size={19} /></span><strong>Gift Boxes<small>Perfect for<br />every occasion</small></strong></button></section>
     <section className="promise-strip"><div className="page-width promises"><div className="source-label"><strong>From Source<br />to Your Table</strong><small>A journey of Trust &amp; Quality</small></div>{[[BadgeCheck,"Sourced","from Trusted Farmers"],[Check,"Quality Checked","for Your Safety"],[PackageCheck,"Premium Packaging","for Freshness"],[Truck,"Delivered","Across Bangladesh"]].map(([Icon, title, subtitle], index) => <div key={title as string}><span className="promise-icon"><Icon size={15} /></span><p><strong>{title as string}</strong><br />{subtitle as string}</p>{index < 3 && <ArrowRight size={13} />}</div>)}</div></section>
-    <section className="feature-band page-width"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br />Our Origin <span>🍃</span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="primary-button">Explore Origin Stories <ArrowRight size={14} /></button></div><div className="origin-map"><img src="/bangladesh-map.png" alt="Bangladesh sourcing map" /><span className="origin-pin sylhet"><i><Leaf size={13} /></i><b>Sylhet<small>Tea</small></b></span><span className="origin-pin rajshahi"><i><Cherry size={13} /></i><b>Rajshahi<small>Mango</small></b></span><span className="origin-pin comilla"><i><Flame size={13} /></i><b>Comilla<small>Spices</small></b></span><span className="origin-pin sundarbans"><i><Droplets size={13} /></i><b>Sundarbans<small>Honey</small></b></span></div></article><article className="honey-card"><img className="honey-bg" src="/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="primary-button" onClick={add}>Add to Cart <ShoppingCart size={14} /></button></div></article></section>
+    <section className="feature-band page-width"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br />Our Origin <span>🍃</span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="primary-button">Explore Origin Stories <ArrowRight size={14} /></button></div><div className="origin-map"><img src="/amzad-food-website/bangladesh-map.png" alt="Bangladesh sourcing map" /><span className="origin-pin sylhet"><i><Leaf size={13} /></i><b>Sylhet<small>Tea</small></b></span><span className="origin-pin rajshahi"><i><Cherry size={13} /></i><b>Rajshahi<small>Mango</small></b></span><span className="origin-pin comilla"><i><Flame size={13} /></i><b>Comilla<small>Spices</small></b></span><span className="origin-pin sundarbans"><i><Droplets size={13} /></i><b>Sundarbans<small>Honey</small></b></span></div></article><article className="honey-card"><img className="honey-bg" src="/amzad-food-website/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="primary-button" onClick={add}>Add to Cart <ShoppingCart size={14} /></button></div></article></section>
     <ProductSection title="Our Best Selling Products" eyebrow="Best Sellers" products={visibleProducts.slice(0, 8)} onAdd={add} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
     <section className="subscribe page-width"><div className="subscribe-content"><h2>Subscribe</h2><strong className="subscribe-discount">10% OFF</strong><p>Delve into the vibrant world of Bangladeshi flavors, showcasing carefully selected ingredients.</p></div><div className="subscribe-form"><input placeholder="Enter your email address" /><button>Subscribe</button></div></section>
     <ProductSection title="Combo Packages" eyebrow="Value Packs" products={products.slice(0, 8)} onAdd={add} />
