@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDownLeft, ArrowRight, ArrowUp, Cherry, ChevronDown, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, LogIn, MapPin, Menu, Moon, PackageSearch, Phone, Play, Search, ShoppingCart, Star, Sunset, UserRound, Users, X, Youtube } from "lucide-react";
+import { ArrowDownLeft, ArrowRight, ArrowUp, Cherry, ChevronDown, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, LogIn, MapPin, Menu, Moon, Nut, PackageSearch, Phone, Play, Search, ShoppingCart, Star, Sunset, TestTube, UserRound, Users, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
+import { IconDefinition, faAppleWhole, faArrowsRotate, faBoxOpen, faBowlFood, faCube, faCubes, faIceCream, faJar, faLeaf, faLemon, faMagnifyingGlass, faMortarPestle, faOilCan, faSeedling, faTruckFast } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
 type Product = { name: string; category: string; price: number; image: string; tag?: string };
@@ -15,15 +15,30 @@ const products: Product[] = Array.from({ length: 12 }, (_, index) => ({
 }));
 const exploreProducts = products.slice(0, 10).map((product, index) => ({ ...product, name: ["Pure Ghee", "Puffed Rice", "Premium Black Seed Oil", "Khejur Gur", "Mango Pickle"][index % 5], price: [550, 230, 650, 1000, 230][index % 5] }));
 const categories = ["All", "Fresh produce", "Pantry", "Dairy & eggs", "Bakery"];
-const shopCategories = [
-  { icon: "/amzad-food-website/icons/category-salt.png", label: "Pink Salt" },
-  { icon: "/amzad-food-website/icons/category-spices.png", label: "Mosla" },
-  { icon: "/amzad-food-website/icons/category-mango.png", label: "Mango" },
-  { icon: "/amzad-food-website/icons/category-peanuts.png", label: "Peanuts" },
-  { icon: "/amzad-food-website/icons/category-honey.png", label: "Honey" },
-  { icon: "/amzad-food-website/icons/category-basket.png", label: "Basket" },
-  { icon: "/amzad-food-website/icons/category-seeds.png", label: "Seeds" },
-  { icon: "/amzad-food-website/icons/category-dates.png", label: "Khejur" },
+type CategoryIconType = IconDefinition | typeof Nut;
+function isFontAwesomeIcon(icon: CategoryIconType): icon is IconDefinition {
+  return typeof icon === "object" && icon !== null && "iconName" in icon;
+}
+function CategoryIcon({ icon, size }: { icon: CategoryIconType; size: number }) {
+  if (isFontAwesomeIcon(icon)) return <FontAwesomeIcon icon={icon} fontSize={size} />;
+  const Icon = icon;
+  return <Icon size={size} />;
+}
+const shopCategories: { icon: CategoryIconType; label: string }[] = [
+  { icon: faSeedling, label: "Seeds" },
+  { icon: faAppleWhole, label: "Khejur" },
+  { icon: faJar, label: "Honey" },
+  { icon: faCubes, label: "Gur" },
+  { icon: faLemon, label: "Mango" },
+  { icon: Nut, label: "Nuts" },
+  { icon: faOilCan, label: "Ghee & Oil" },
+  { icon: faCube, label: "Pink Salt" },
+  { icon: faMortarPestle, label: "Mosla" },
+  { icon: faBoxOpen, label: "Combo" },
+  { icon: faBowlFood, label: "Shemai" },
+  { icon: faLeaf, label: "Veshoj Item" },
+  { icon: faIceCream, label: "Dessert" },
+  { icon: TestTube, label: "Test Catagory" },
 ];
 const trustPoints = [
   { icon: "/amzad-food-website/icons/trust-authentic.png", title: "100% Authentic", subtitle: "Original & pure products" },
@@ -177,15 +192,22 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [basketCount, setBasketCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileMenuTab, setMobileMenuTab] = useState<"menu" | "category">("menu");
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const visibleProducts = useMemo(() => products.filter((item) => (activeCategory === "All" || activeCategory === "Pantry") && item.name.toLowerCase().includes(query.toLowerCase())), [activeCategory, query]);
   const add = () => setBasketCount((value) => value + 1);
   return <main id="top">
     <div className="announcement"><div className="announcement-inner page-width"><span className="announcement-contacts-group"><span className="announcement-cta">প্রয়োজনে কল করুন</span><span className="announcement-contacts"><a className="announcement-contact" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={14} /> 01327406605</a><span className="announcement-divider" /><a className="announcement-contact" href="tel:+8809613824071"><Phone size={13} /> 09613824071</a></span></span><span className="announcement-links"><a className="announcement-link" href="#"><LogIn size={13} /> Sign In</a><span className="announcement-divider" /><a className="announcement-link" href="#"><PackageSearch size={13} /> Track Order</a></span></div></div>
-    <nav className="navbar page-width"><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button><a className="brand amzad-brand" href="#top"><span className="brand-wordmark"><b>amzad</b> <strong>food</strong><small>বিশ্বাসের সাথে, স্বাদের ঠিকানা</small></span></a><div className={menuOpen ? "nav-links open" : "nav-links"}><a href="#top" onClick={() => setMenuOpen(false)}>Home</a><a href="#shop" onClick={() => setMenuOpen(false)}>All Products</a><a href="#collection" onClick={() => setMenuOpen(false)}>Collection</a><a href="#top" onClick={() => setMenuOpen(false)}>Blogs</a><div className="nav-links-mobile-actions"><button className="nav-account"><UserRound size={16} /><small>Sign in</small></button><button className="nav-account wishlist"><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><div className="nav-search"><Search size={13} /><input placeholder="Search for food, brand..." value={query} onChange={(event) => setQuery(event.target.value)} /></div><button className="nav-account"><UserRound size={16} /><small>Sign in</small></button><button className="nav-account" onClick={add}><ShoppingCart size={16} /><small>Cart</small><b>{basketCount}</b></button><button className="nav-account wishlist"><Heart size={16} /><small>Wishlist</small></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen}><Menu size={14} /> Menu <ChevronDown size={12} /></button></div>{megaMenuOpen && <button className="mega-menu-backdrop" onClick={() => setMegaMenuOpen(false)} aria-label="Close menu" />}<div className={megaMenuOpen ? "mega-menu open" : "mega-menu"}><div className="mega-menu-inner"><div><p className="mega-menu-title">Shop by Category</p><div className="mega-category-grid">{shopCategories.map((category) => <a href="#collection" key={category.label} onClick={() => setMegaMenuOpen(false)}><span><img src={category.icon} alt="" aria-hidden="true" /></span>{category.label}</a>)}</div></div><div className="mega-promo"><span className="mega-promo-icon"><Gift size={20} /></span><strong>Gift Boxes</strong><p>Curated hampers perfect for festivals, weddings or a thoughtful everyday surprise.</p><a href="#shop" className="primary-button" onClick={() => setMegaMenuOpen(false)}>Explore Gifts <ArrowRight size={13} /></a></div></div></div></nav>
+    <nav className="navbar page-width"><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button><a className="brand amzad-brand" href="#top"><span className="brand-wordmark"><b>amzad</b> <strong>food</strong><small>বিশ্বাসের সাথে, স্বাদের ঠিকানা</small></span></a><div className={menuOpen ? "nav-links open" : "nav-links"}>
+      <div className="mobile-menu-tabs"><button className={mobileMenuTab === "menu" ? "active" : ""} onClick={() => setMobileMenuTab("menu")}>Menu</button><button className={mobileMenuTab === "category" ? "active" : ""} onClick={() => setMobileMenuTab("category")}>Category</button></div>
+      {mobileMenuTab === "menu" ? <>
+        <a href="#top" onClick={() => setMenuOpen(false)}>Home</a><a href="#shop" onClick={() => setMenuOpen(false)}>All Products</a><a href="#collection" onClick={() => setMenuOpen(false)}>Collection</a><a href="#top" onClick={() => setMenuOpen(false)}>Blogs</a>
+        <div className="nav-links-mobile-actions"><button className="nav-account"><UserRound size={16} /><small>Sign in</small></button><button className="nav-account wishlist"><Heart size={16} /><small>Wishlist</small></button></div>
+      </> : <div className="mobile-category-list">{shopCategories.map((category) => <a href="#collection" key={category.label} onClick={() => { setMenuOpen(false); setMobileMenuTab("menu"); }}><span><CategoryIcon icon={category.icon} size={16} /></span>{category.label}</a>)}</div>}
+    </div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><div className="nav-search"><Search size={13} /><input placeholder="Search for food, brand..." value={query} onChange={(event) => setQuery(event.target.value)} /></div><button className="nav-account"><UserRound size={16} /><small>Sign in</small></button><button className="nav-account" onClick={add}><ShoppingCart size={16} /><small>Cart</small><b>{basketCount}</b></button><button className="nav-account wishlist"><Heart size={16} /><small>Wishlist</small></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen}><Menu size={14} /> Menu <ChevronDown size={12} /></button></div>{megaMenuOpen && <button className="mega-menu-backdrop" onClick={() => setMegaMenuOpen(false)} aria-label="Close menu" />}<div className={megaMenuOpen ? "mega-menu open" : "mega-menu"}><div className="mega-menu-inner"><div><p className="mega-menu-title">Shop by Category</p><div className="mega-category-grid">{shopCategories.map((category) => <a href="#collection" key={category.label} onClick={() => setMegaMenuOpen(false)}><span><CategoryIcon icon={category.icon} size={20} /></span>{category.label}</a>)}</div></div><div className="mega-promo"><span className="mega-promo-icon"><Gift size={20} /></span><strong>Gift Boxes</strong><p>Curated hampers perfect for festivals, weddings or a thoughtful everyday surprise.</p><a href="#shop" className="primary-button" onClick={() => setMegaMenuOpen(false)}>Explore Gifts <ArrowRight size={13} /></a></div></div></div></nav>
     <HeroSlider />
-    <section className="category-strip page-width" id="collection"><div className="category-intro"><strong>Shop by<br />Category</strong><ArrowRight size={15} /></div>{shopCategories.map((category) => <button className="quick-category" key={category.label}><span><img src={category.icon} alt="" aria-hidden="true" /></span><small>{category.label}</small></button>)}<button className="gift-box"><span><Gift size={19} /></span><strong>Gift Boxes<small>Perfect for<br />every occasion</small></strong></button></section>
+    <section className="category-strip page-width" id="collection"><div className="category-intro"><strong>Shop by<br />Category</strong><ArrowRight size={15} /></div>{shopCategories.map((category) => <button className="quick-category" key={category.label}><span><CategoryIcon icon={category.icon} size={20} /></span><small>{category.label}</small></button>)}<button className="gift-box"><span><Gift size={19} /></span><strong>Gift Boxes<small>Perfect for<br />every occasion</small></strong></button></section>
     <section className="promise-strip"><div className="page-width promises"><div className="source-label"><strong>From Source<br />to Your Table</strong><small>A journey of Trust &amp; Quality</small></div>{[[faArrowsRotate,"Sourced","from Trusted Farmers"],[faMagnifyingGlass,"Quality Checked","for Your Safety"],[faBoxOpen,"Premium Packaging","for Freshness"],[faTruckFast,"Delivered","Across Bangladesh"]].map(([icon, title, subtitle], index) => <div key={title as string}><span className="promise-icon"><FontAwesomeIcon icon={icon as typeof faArrowsRotate} fontSize={15} /></span><p><strong>{title as string}</strong><br />{subtitle as string}</p>{index < 3 && <ArrowRight size={13} />}</div>)}</div></section>
     <section className="feature-band page-width"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br />Our Origin <span>🍃</span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="primary-button">Explore Origin Stories <ArrowRight size={14} /></button></div><div className="origin-map"><img src="/amzad-food-website/bangladesh-map.png" alt="Bangladesh sourcing map" /><span className="origin-pin sylhet"><i><Leaf size={13} /></i><b>Sylhet<small>Tea</small></b></span><span className="origin-pin rajshahi"><i><Cherry size={13} /></i><b>Rajshahi<small>Mango</small></b></span><span className="origin-pin comilla"><i><Flame size={13} /></i><b>Comilla<small>Spices</small></b></span><span className="origin-pin sundarbans"><i><Droplets size={13} /></i><b>Sundarbans<small>Honey</small></b></span></div></article><article className="honey-card"><img className="honey-bg" src="/amzad-food-website/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="primary-button" onClick={add}>Add to Cart <ShoppingCart size={14} /></button></div></article></section>
     <ProductSection title="Our Best Selling Products" eyebrow="Best Sellers" products={visibleProducts.slice(0, 8)} onAdd={add} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
