@@ -742,3 +742,45 @@ body { overflow-x: hidden; }
 	.side-drawer { width: 100vw; }
 	.modal-box { max-width: 100%; }
 }
+
+/* Checkout page */
+.checkout-page { padding-bottom: 100px; padding-top: 40px; }
+.checkout-back { align-items: center; color: var(--muted); display: inline-flex; font-size: 12px; font-weight: 600; gap: 8px; margin-bottom: 24px; transition: color .2s; }
+.checkout-back:hover { color: var(--orange); }
+.checkout-page h1 { font-size: 40px; margin-bottom: 30px; }
+.checkout-grid { align-items: flex-start; display: grid; gap: 28px; grid-template-columns: 1.4fr 1fr; }
+.checkout-form, .checkout-summary { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 26px; }
+.checkout-form h2, .checkout-summary h2 { font-size: 18px; margin-bottom: 20px; }
+.checkout-form { display: flex; flex-direction: column; gap: 16px; }
+.checkout-form label { color: #3d594b; display: flex; flex-direction: column; font-size: 12px; font-weight: 600; gap: 7px; position: relative; }
+.checkout-form input, .checkout-form textarea { background: #f6f8f2; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: inherit; padding: 12px 14px; resize: vertical; }
+.checkout-form input:focus, .checkout-form textarea:focus { border-color: var(--orange); outline: 0; }
+.field-error { color: #f0592b; font-size: 11px; font-weight: 600; }
+.checkout-payment { background: #f6f8f2; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; }
+.checkout-payment strong { font-size: 12px; }
+.checkout-radio { align-items: center; color: #3d594b; display: flex; flex-direction: row !important; font-size: 13px; font-weight: 500 !important; gap: 8px; }
+.checkout-submit { justify-content: center; margin-top: 4px; width: 100%; }
+.checkout-summary ul { display: flex; flex-direction: column; gap: 16px; list-style: none; margin: 0 0 18px; padding: 0; }
+.checkout-summary li { align-items: center; display: flex; gap: 12px; }
+.checkout-summary img { background: #f6f6f2; border-radius: 10px; flex-shrink: 0; height: 52px; object-fit: contain; width: 52px; }
+.checkout-item-info { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
+.checkout-item-info strong { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.checkout-item-info span { color: var(--muted); font-size: 12px; }
+.checkout-item-actions { align-items: center; display: flex; flex-shrink: 0; gap: 6px; }
+.checkout-item-actions button { align-items: center; background: #f6f6f2; border: 0; border-radius: 6px; display: flex; height: 24px; justify-content: center; width: 24px; }
+.checkout-item-actions b { font-size: 12px; min-width: 14px; text-align: center; }
+.checkout-remove { color: #9aa39c; margin-left: 4px; }
+.checkout-remove:hover { color: #f0592b; }
+.checkout-line { color: var(--muted); display: flex; font-size: 13px; justify-content: space-between; padding: 8px 0; }
+.checkout-total { border-top: 1px solid var(--line); color: var(--ink); font-size: 16px; font-weight: 700; margin-top: 6px; padding-top: 14px; }
+.checkout-empty { align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 20px; color: var(--muted); display: flex; flex-direction: column; gap: 14px; padding: 70px 20px; text-align: center; }
+.checkout-success { align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 24px; display: flex; flex-direction: column; gap: 10px; margin: 40px auto; max-width: 480px; padding: 50px 34px; text-align: center; }
+.checkout-success-icon { align-items: center; background: #eef7e4; border-radius: 50%; color: #147c46; display: flex; height: 68px; justify-content: center; margin-bottom: 8px; width: 68px; }
+.checkout-success h1 { font-size: 28px; margin-bottom: 4px; }
+.checkout-success-note { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 10px; }
+
+@media (max-width: 800px) {
+	.checkout-grid { grid-template-columns: 1fr; }
+	.checkout-page h1 { font-size: 32px; }
+	.checkout-form, .checkout-summary { padding: 20px; }
+}

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { CartItem, loadCart, saveCart } from "./lib/cart";
 import { ArrowDownLeft, ArrowRight, ArrowUp, Cherry, ChevronDown, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, LogIn, MapPin, Menu, Moon, PackageSearch, Phone, Play, Search, ShoppingCart, Star, Sunset, UserRound, Users, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
 type Product = { name: string; category: string; price: number; image: string; tag?: string };
-type CartItem = { name: string; price: number; image: string; qty: number };
 type WishItem = { name: string; price: number; image: string };
 const productImage = "/amzad-food-website/product-honey.png";
 const products: Product[] = Array.from({ length: 12 }, (_, index) => ({
@@ -54,9 +55,9 @@ const originStories = [
   { key: "sundarbans", className: "sundarbans", icon: Droplets, place: "Sundarbans", product: "Honey", desc: "Wild honey harvested sustainably from the mangrove forests of the Sundarbans." },
 ];
 
-function ProductCard({ product, onAdd, wishlisted, onToggleWishlist }: { product: Product; onAdd: () => void; wishlisted: boolean; onToggleWishlist: () => void }) {
+function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist }: { product: Product; onAdd: () => void; onOrderNow: () => void; wishlisted: boolean; onToggleWishlist: () => void }) {
   const [quickView, setQuickView] = useState(false);
-  return <article className="product-card"><div className="product-image"><img src={product.image} alt={product.name} /><span className="product-tag">Save ৳50</span><div className="card-actions"><button className={wishlisted ? "wishlist-action active" : "wishlist-action"} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`} title="Wishlist" onClick={onToggleWishlist}><Heart size={16} fill={wishlisted ? "currentColor" : "none"} /></button><button aria-label={`Quick view ${product.name}`} title="Quick view" onClick={() => setQuickView(true)}><Eye size={17} /></button><button className="cart-action" aria-label={`Add ${product.name} to cart`} title="Add to cart" onClick={onAdd}><ShoppingCart size={17} /></button></div></div><div className="product-info"><h3><span>কালোজিরা মধু / </span>{product.name}</h3><p className="product-unit">500 gm</p><div className="product-price-row"><strong>৳{product.price}</strong><span className="rating"><Star size={13} fill="currentColor" /><b>4.9</b><i>(46)</i></span></div><button className="order-button" onClick={onAdd}>Order Now</button></div>{quickView && <div className="quick-view" role="dialog" aria-label={`Quick view ${product.name}`}><button className="quick-view-close" onClick={() => setQuickView(false)} aria-label="Close quick view"><X size={16} /></button><img src={product.image} alt={product.name} /><h3>{product.name}</h3><strong>৳{product.price}</strong><button className="primary-button" onClick={() => { onAdd(); setQuickView(false); }}>Add to Cart <ShoppingCart size={14} /></button></div>}</article>;
+  return <article className="product-card"><div className="product-image"><img src={product.image} alt={product.name} /><span className="product-tag">Save ৳50</span><div className="card-actions"><button className={wishlisted ? "wishlist-action active" : "wishlist-action"} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`} title="Wishlist" onClick={onToggleWishlist}><Heart size={16} fill={wishlisted ? "currentColor" : "none"} /></button><button aria-label={`Quick view ${product.name}`} title="Quick view" onClick={() => setQuickView(true)}><Eye size={17} /></button><button className="cart-action" aria-label={`Add ${product.name} to cart`} title="Add to cart" onClick={onAdd}><ShoppingCart size={17} /></button></div></div><div className="product-info"><h3><span>কালোজিরা মধু / </span>{product.name}</h3><p className="product-unit">500 gm</p><div className="product-price-row"><strong>৳{product.price}</strong><span className="rating"><Star size={13} fill="currentColor" /><b>4.9</b><i>(46)</i></span></div><button className="order-button" onClick={onOrderNow}>Order Now</button></div>{quickView && <div className="quick-view" role="dialog" aria-label={`Quick view ${product.name}`}><button className="quick-view-close" onClick={() => setQuickView(false)} aria-label="Close quick view"><X size={16} /></button><img src={product.image} alt={product.name} /><h3>{product.name}</h3><strong>৳{product.price}</strong><button className="primary-button" onClick={() => { onOrderNow(); setQuickView(false); }}>Order Now <ShoppingCart size={14} /></button></div>}</article>;
 }
 
 const dailyPrayerTimes = [
@@ -249,11 +250,14 @@ function TrackOrderForm() {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState("All");
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
+  useEffect(() => { setCart(loadCart()); }, []);
+  useEffect(() => { saveCart(cart); }, [cart]);
   const [wishlist, setWishlist] = useState<WishItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
@@ -281,7 +285,17 @@ export default function Home() {
   const changeQty = (name: string, delta: number) => setCart((items) => items.map((item) => item.name === name ? { ...item, qty: item.qty + delta } : item).filter((item) => item.qty > 0));
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const cartTotal = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
-  const checkout = () => { notify("Order placed! We'll contact you shortly to confirm delivery."); setCart([]); setCartOpen(false); };
+  const goToCheckout = (product?: { name: string; price: number; image: string }) => {
+    let next = cart;
+    if (product) {
+      const found = cart.find((item) => item.name === product.name);
+      next = found ? cart.map((item) => item.name === product.name ? { ...item, qty: item.qty + 1 } : item) : [...cart, { name: product.name, price: product.price, image: product.image, qty: 1 }];
+      setCart(next);
+    }
+    saveCart(next);
+    setCartOpen(false);
+    router.push("/checkout/");
+  };
   const toggleWishlist = (product: { name: string; price: number; image: string }) => {
     setWishlist((items) => {
       if (items.some((item) => item.name === product.name)) { notify(`Removed ${product.name} from wishlist`); return items.filter((item) => item.name !== product.name); }
@@ -300,13 +314,13 @@ export default function Home() {
     <section className="category-strip page-width" id="collection"><div className="category-intro"><strong>Shop by<br />Category</strong><ArrowRight size={15} /></div>{shopCategories.map((category) => <button className="quick-category" key={category.label} onClick={scrollToShop}><span><img src={category.icon} alt="" aria-hidden="true" /></span><small>{category.label}</small></button>)}<button className="gift-box" onClick={scrollToShop}><span><Gift size={19} /></span><strong>Gift Boxes<small>Perfect for<br />every occasion</small></strong></button></section>
     <section className="promise-strip"><div className="page-width promises"><div className="source-label"><strong>From Source<br />to Your Table</strong><small>A journey of Trust &amp; Quality</small></div>{[[faArrowsRotate,"Sourced","from Trusted Farmers"],[faMagnifyingGlass,"Quality Checked","for Your Safety"],[faBoxOpen,"Premium Packaging","for Freshness"],[faTruckFast,"Delivered","Across Bangladesh"]].map(([icon, title, subtitle], index) => <div key={title as string}><span className="promise-icon"><FontAwesomeIcon icon={icon as typeof faArrowsRotate} fontSize={15} /></span><p><strong>{title as string}</strong><br />{subtitle as string}</p>{index < 3 && <ArrowRight size={13} />}</div>)}</div></section>
     <section className="feature-band page-width" id="story"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br />Our Origin <span>🍃</span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="primary-button" onClick={() => setOriginOpen(true)}>Explore Origin Stories <ArrowRight size={14} /></button></div><div className="origin-map"><img src="/amzad-food-website/bangladesh-map.png" alt="Bangladesh sourcing map" />{originStories.map((story) => <span className={`origin-pin ${story.className}`} key={story.key}><i><story.icon size={13} /></i><b>{story.place}<small>{story.product}</small></b></span>)}</div></article><article className="honey-card"><img className="honey-bg" src="/amzad-food-website/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="primary-button" onClick={add}>Add to Cart <ShoppingCart size={14} /></button></div></article></section>
-    <ProductSection title="Our Best Selling Products" eyebrow="Best Sellers" products={visibleProducts.slice(0, 8)} onAdd={addToCart} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
+    <ProductSection title="Our Best Selling Products" eyebrow="Best Sellers" products={visibleProducts.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
     <section className="subscribe page-width"><div className="subscribe-content"><h2>Subscribe</h2><strong className="subscribe-discount">10% OFF</strong><p>Delve into the vibrant world of Bangladeshi flavors, showcasing carefully selected ingredients.</p></div><NewsletterForm className="subscribe-form" placeholder="Enter your email address" buttonLabel="Subscribe" onSubscribe={() => notify("Subscribed! Your 10% off code is on its way.")} /></section>
-    <ProductSection title="Combo Packages" eyebrow="Value Packs" products={products.slice(0, 8)} onAdd={addToCart} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
+    <ProductSection title="Combo Packages" eyebrow="Value Packs" products={products.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
     <PrayerTimesCard notify={notify} />
     <section className="trust-section"><span className="trust-badge"><Star size={11} fill="currentColor" /> Why Choose Amzad Food</span><h2>Quality You Can Trust</h2><p>Trust is our most important ingredient</p><div className="trust-grid">{trustPoints.map((point) => <div key={point.title}><span className="trust-icon"><img src={point.icon} alt="" aria-hidden="true" /></span><strong>{point.title}</strong><small>{point.subtitle}</small></div>)}</div></section>
     <section className="review-section"><h2>Customer Reviews And Ratings</h2><ReviewCarousel /></section>
-    <ProductSection title="All Products" eyebrow="Explore our full collection" products={exploreProducts.slice(0, 8)} onAdd={addToCart} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
+    <ProductSection title="All Products" eyebrow="Explore our full collection" products={exploreProducts.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
     <section className="video-reviews" id="blogs"><h2>Customer Product Review</h2><div className="blog-grid">{blogReviews.map((item, index) => <article className="blog-card" key={index}><img src={item.image} alt={item.alt} /><button className="blog-play" aria-label="Play video" onClick={() => notify("Video coming soon")}><Play size={16} fill="currentColor" /></button></article>)}</div><div className="trust-banner"><h2>Trusted by Thousands of Families</h2><p>Integrity is the cornerstone of our mission.</p><div className="stats"><span><div className="stat-top"><i className="stat-icon"><Users size={20} /></i><b>50K+</b></div><small>Happy Customer</small></span><span><div className="stat-top"><i className="stat-icon"><Gift size={20} /></i><b>200+</b></div><small>Quality Products</small></span><span><div className="stat-top"><i className="stat-icon"><MapPin size={20} /></i><b>60+</b></div><small>Districts Covered</small></span><span><div className="stat-top"><i className="stat-icon"><Star size={20} /></i><b>4.8/5</b></div><small>Customer Rating</small></span></div></div></section>
     <footer className="footer">
       <div className="footer-cta page-width">
@@ -356,7 +370,7 @@ export default function Home() {
           <button className="drawer-remove" aria-label={`Remove ${item.name}`} onClick={() => removeFromCart(item.name)}><X size={14} /></button>
         </li>)}</ul>
         <div className="drawer-total"><span>Subtotal</span><strong>৳{cartTotal}</strong></div>
-        <button className="primary-button drawer-checkout" onClick={checkout}>Checkout <ArrowRight size={14} /></button>
+        <button className="primary-button drawer-checkout" onClick={() => goToCheckout()}>Checkout <ArrowRight size={14} /></button>
       </>}
     </Drawer>
 
@@ -387,7 +401,7 @@ export default function Home() {
   </main>;
 }
 
-function ProductSection({ title, eyebrow, products, onAdd, id, tabs, isWishlisted, onToggleWishlist }: { title: string; eyebrow: string; products: Product[]; onAdd: (product: Product) => void; id?: string; tabs?: { categories: string[]; activeCategory: string; setActiveCategory: (value: string) => void }; isWishlisted: (name: string) => boolean; onToggleWishlist: (product: Product) => void }) {
+function ProductSection({ title, eyebrow, products, onAdd, onOrderNow, id, tabs, isWishlisted, onToggleWishlist }: { title: string; eyebrow: string; products: Product[]; onAdd: (product: Product) => void; onOrderNow: (product: Product) => void; id?: string; tabs?: { categories: string[]; activeCategory: string; setActiveCategory: (value: string) => void }; isWishlisted: (name: string) => boolean; onToggleWishlist: (product: Product) => void }) {
   const [sortKey, setSortKey] = useState<"featured" | "price-asc" | "price-desc">("featured");
   const [sortOpen, setSortOpen] = useState(false);
   const sortLabels: Record<string, string> = { featured: "Featured", "price-asc": "Price: Low to High", "price-desc": "Price: High to Low" };
@@ -396,5 +410,5 @@ function ProductSection({ title, eyebrow, products, onAdd, id, tabs, isWishliste
     if (sortKey === "price-desc") return [...products].sort((a, b) => b.price - a.price);
     return products;
   }, [products, sortKey]);
-  return <section className="shop-section page-width" id={id}><div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2><p>Discover our handpicked collection of natural and delicious products.</p></div><a className="text-link" href="#shop">View all products <ArrowRight size={14} /></a></div>{tabs && <>{sortOpen && <button className="panel-backdrop transparent" onClick={() => setSortOpen(false)} aria-label="Close sort menu" />}<div className="category-tabs">{tabs.categories.map((category) => <button className={tabs.activeCategory === category ? "active" : ""} key={category} onClick={() => tabs.setActiveCategory(category)}>{category}</button>)}<div className="sort-dropdown"><button className="sort-button" onClick={() => setSortOpen((value) => !value)} aria-haspopup="true" aria-expanded={sortOpen}>{sortLabels[sortKey]} <ChevronDown size={13} className={sortOpen ? "flip" : ""} /></button>{sortOpen && <div className="sort-menu">{Object.entries(sortLabels).map(([key, label]) => <button key={key} className={sortKey === key ? "active" : ""} onClick={() => { setSortKey(key as "featured" | "price-asc" | "price-desc"); setSortOpen(false); }}>{label}</button>)}</div>}</div></div></>}<div className="product-grid">{sortedProducts.map((product, index) => <ProductCard product={{ ...product, tag: product.tag || (index % 3 === 0 ? "New" : undefined) }} onAdd={() => onAdd(product)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => onToggleWishlist(product)} key={`${product.name}-${index}`} />)}</div></section>;
+  return <section className="shop-section page-width" id={id}><div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2><p>Discover our handpicked collection of natural and delicious products.</p></div><a className="text-link" href="#shop">View all products <ArrowRight size={14} /></a></div>{tabs && <>{sortOpen && <button className="panel-backdrop transparent" onClick={() => setSortOpen(false)} aria-label="Close sort menu" />}<div className="category-tabs">{tabs.categories.map((category) => <button className={tabs.activeCategory === category ? "active" : ""} key={category} onClick={() => tabs.setActiveCategory(category)}>{category}</button>)}<div className="sort-dropdown"><button className="sort-button" onClick={() => setSortOpen((value) => !value)} aria-haspopup="true" aria-expanded={sortOpen}>{sortLabels[sortKey]} <ChevronDown size={13} className={sortOpen ? "flip" : ""} /></button>{sortOpen && <div className="sort-menu">{Object.entries(sortLabels).map(([key, label]) => <button key={key} className={sortKey === key ? "active" : ""} onClick={() => { setSortKey(key as "featured" | "price-asc" | "price-desc"); setSortOpen(false); }}>{label}</button>)}</div>}</div></div></>}<div className="product-grid">{sortedProducts.map((product, index) => <ProductCard product={{ ...product, tag: product.tag || (index % 3 === 0 ? "New" : undefined) }} onAdd={() => onAdd(product)} onOrderNow={() => onOrderNow(product)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => onToggleWishlist(product)} key={`${product.name}-${index}`} />)}</div></section>;
 }
