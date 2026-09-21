@@ -1,4 +1,5 @@
 export type CartItem = { name: string; price: number; image: string; qty: number };
+export type CartLine = Omit<CartItem, "qty">;
 
 const CART_KEY = "amzad-cart";
 

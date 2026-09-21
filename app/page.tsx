@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CartItem, loadCart, saveCart } from "./lib/cart";
+import { CartItem, CartLine, loadCart, saveCart } from "./lib/cart";
+import QuickView from "./components/QuickView";
 import { ArrowDownLeft, ArrowRight, ArrowUp, Cherry, ChevronDown, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, LogIn, MapPin, Menu, Moon, PackageSearch, Phone, Play, Search, ShoppingCart, Star, Sunset, UserRound, Users, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
@@ -55,9 +56,10 @@ const originStories = [
   { key: "sundarbans", className: "sundarbans", icon: Droplets, place: "Sundarbans", product: "Honey", desc: "Wild honey harvested sustainably from the mangrove forests of the Sundarbans." },
 ];
 
-function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist }: { product: Product; onAdd: () => void; onOrderNow: () => void; wishlisted: boolean; onToggleWishlist: () => void }) {
+function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist }: { product: Product; onAdd: (item?: CartLine, qty?: number) => void; onOrderNow: (item?: CartLine, qty?: number) => void; wishlisted: boolean; onToggleWishlist: () => void }) {
   const [quickView, setQuickView] = useState(false);
-  return <article className="product-card"><div className="product-image"><img src={product.image} alt={product.name} /><span className="product-tag">Save ৳50</span><div className="card-actions"><button className={wishlisted ? "wishlist-action active" : "wishlist-action"} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`} title="Wishlist" onClick={onToggleWishlist}><Heart size={16} fill={wishlisted ? "currentColor" : "none"} /></button><button aria-label={`Quick view ${product.name}`} title="Quick view" onClick={() => setQuickView(true)}><Eye size={17} /></button><button className="cart-action" aria-label={`Add ${product.name} to cart`} title="Add to cart" onClick={onAdd}><ShoppingCart size={17} /></button></div></div><div className="product-info"><h3><span>কালোজিরা মধু / </span>{product.name}</h3><p className="product-unit">500 gm</p><div className="product-price-row"><strong>৳{product.price}</strong><span className="rating"><Star size={13} fill="currentColor" /><b>4.9</b><i>(46)</i></span></div><button className="order-button" onClick={onOrderNow}>Order Now</button></div>{quickView && <div className="quick-view" role="dialog" aria-label={`Quick view ${product.name}`}><button className="quick-view-close" onClick={() => setQuickView(false)} aria-label="Close quick view"><X size={16} /></button><img src={product.image} alt={product.name} /><h3>{product.name}</h3><strong>৳{product.price}</strong><button className="primary-button" onClick={() => { onOrderNow(); setQuickView(false); }}>Order Now <ShoppingCart size={14} /></button></div>}</article>;
+  const closeQuickView = useCallback(() => setQuickView(false), []);
+  return <article className="product-card"><div className="product-image"><img src={product.image} alt={product.name} /><span className="product-tag">Save ৳50</span><div className="card-actions"><button className={wishlisted ? "wishlist-action active" : "wishlist-action"} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`} title="Wishlist" onClick={onToggleWishlist}><Heart size={16} fill={wishlisted ? "currentColor" : "none"} /></button><button aria-label={`Quick view ${product.name}`} title="Quick view" onClick={() => setQuickView(true)}><Eye size={17} /></button><button className="cart-action" aria-label={`Add ${product.name} to cart`} title="Add to cart" onClick={() => onAdd()}><ShoppingCart size={17} /></button></div></div><div className="product-info"><h3><span>কালোজিরা মধু / </span>{product.name}</h3><p className="product-unit">500 gm</p><div className="product-price-row"><strong>৳{product.price}</strong><span className="rating"><Star size={13} fill="currentColor" /><b>4.9</b><i>(46)</i></span></div><button className="order-button" onClick={() => onOrderNow()}>Order Now</button></div>{quickView && <QuickView product={product} wishlisted={wishlisted} onToggleWishlist={onToggleWishlist} onAdd={onAdd} onOrderNow={onOrderNow} onClose={closeQuickView} />}</article>;
 }
 
 const dailyPrayerTimes = [
@@ -273,23 +275,23 @@ export default function Home() {
   }, [toast]);
   const notify = (message: string) => setToast(message);
   const visibleProducts = useMemo(() => products.filter((item) => (activeCategory === "All" || activeCategory === "Pantry") && item.name.toLowerCase().includes(query.toLowerCase())), [activeCategory, query]);
-  const addToCart = (product: { name: string; price: number; image: string }) => {
+  const addToCart = (product: CartLine, qty = 1) => {
     setCart((items) => {
       const found = items.find((item) => item.name === product.name);
-      if (found) return items.map((item) => item.name === product.name ? { ...item, qty: item.qty + 1 } : item);
-      return [...items, { name: product.name, price: product.price, image: product.image, qty: 1 }];
+      if (found) return items.map((item) => item.name === product.name ? { ...item, qty: item.qty + qty } : item);
+      return [...items, { name: product.name, price: product.price, image: product.image, qty }];
     });
-    notify(`Added ${product.name} to cart`);
+    notify(qty > 1 ? `Added ${qty} × ${product.name} to cart` : `Added ${product.name} to cart`);
   };
   const removeFromCart = (name: string) => setCart((items) => items.filter((item) => item.name !== name));
   const changeQty = (name: string, delta: number) => setCart((items) => items.map((item) => item.name === name ? { ...item, qty: item.qty + delta } : item).filter((item) => item.qty > 0));
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const cartTotal = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
-  const goToCheckout = (product?: { name: string; price: number; image: string }) => {
+  const goToCheckout = (product?: CartLine, qty = 1) => {
     let next = cart;
     if (product) {
       const found = cart.find((item) => item.name === product.name);
-      next = found ? cart.map((item) => item.name === product.name ? { ...item, qty: item.qty + 1 } : item) : [...cart, { name: product.name, price: product.price, image: product.image, qty: 1 }];
+      next = found ? cart.map((item) => item.name === product.name ? { ...item, qty: item.qty + qty } : item) : [...cart, { name: product.name, price: product.price, image: product.image, qty }];
       setCart(next);
     }
     saveCart(next);
@@ -401,7 +403,7 @@ export default function Home() {
   </main>;
 }
 
-function ProductSection({ title, eyebrow, products, onAdd, onOrderNow, id, tabs, isWishlisted, onToggleWishlist }: { title: string; eyebrow: string; products: Product[]; onAdd: (product: Product) => void; onOrderNow: (product: Product) => void; id?: string; tabs?: { categories: string[]; activeCategory: string; setActiveCategory: (value: string) => void }; isWishlisted: (name: string) => boolean; onToggleWishlist: (product: Product) => void }) {
+function ProductSection({ title, eyebrow, products, onAdd, onOrderNow, id, tabs, isWishlisted, onToggleWishlist }: { title: string; eyebrow: string; products: Product[]; onAdd: (product: CartLine, qty?: number) => void; onOrderNow: (product: CartLine, qty?: number) => void; id?: string; tabs?: { categories: string[]; activeCategory: string; setActiveCategory: (value: string) => void }; isWishlisted: (name: string) => boolean; onToggleWishlist: (product: Product) => void }) {
   const [sortKey, setSortKey] = useState<"featured" | "price-asc" | "price-desc">("featured");
   const [sortOpen, setSortOpen] = useState(false);
   const sortLabels: Record<string, string> = { featured: "Featured", "price-asc": "Price: Low to High", "price-desc": "Price: High to Low" };
@@ -410,5 +412,5 @@ function ProductSection({ title, eyebrow, products, onAdd, onOrderNow, id, tabs,
     if (sortKey === "price-desc") return [...products].sort((a, b) => b.price - a.price);
     return products;
   }, [products, sortKey]);
-  return <section className="shop-section page-width" id={id}><div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2><p>Discover our handpicked collection of natural and delicious products.</p></div><a className="text-link" href="#shop">View all products <ArrowRight size={14} /></a></div>{tabs && <>{sortOpen && <button className="panel-backdrop transparent" onClick={() => setSortOpen(false)} aria-label="Close sort menu" />}<div className="category-tabs">{tabs.categories.map((category) => <button className={tabs.activeCategory === category ? "active" : ""} key={category} onClick={() => tabs.setActiveCategory(category)}>{category}</button>)}<div className="sort-dropdown"><button className="sort-button" onClick={() => setSortOpen((value) => !value)} aria-haspopup="true" aria-expanded={sortOpen}>{sortLabels[sortKey]} <ChevronDown size={13} className={sortOpen ? "flip" : ""} /></button>{sortOpen && <div className="sort-menu">{Object.entries(sortLabels).map(([key, label]) => <button key={key} className={sortKey === key ? "active" : ""} onClick={() => { setSortKey(key as "featured" | "price-asc" | "price-desc"); setSortOpen(false); }}>{label}</button>)}</div>}</div></div></>}<div className="product-grid">{sortedProducts.map((product, index) => <ProductCard product={{ ...product, tag: product.tag || (index % 3 === 0 ? "New" : undefined) }} onAdd={() => onAdd(product)} onOrderNow={() => onOrderNow(product)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => onToggleWishlist(product)} key={`${product.name}-${index}`} />)}</div></section>;
+  return <section className="shop-section page-width" id={id}><div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2><p>Discover our handpicked collection of natural and delicious products.</p></div><a className="text-link" href="#shop">View all products <ArrowRight size={14} /></a></div>{tabs && <>{sortOpen && <button className="panel-backdrop transparent" onClick={() => setSortOpen(false)} aria-label="Close sort menu" />}<div className="category-tabs">{tabs.categories.map((category) => <button className={tabs.activeCategory === category ? "active" : ""} key={category} onClick={() => tabs.setActiveCategory(category)}>{category}</button>)}<div className="sort-dropdown"><button className="sort-button" onClick={() => setSortOpen((value) => !value)} aria-haspopup="true" aria-expanded={sortOpen}>{sortLabels[sortKey]} <ChevronDown size={13} className={sortOpen ? "flip" : ""} /></button>{sortOpen && <div className="sort-menu">{Object.entries(sortLabels).map(([key, label]) => <button key={key} className={sortKey === key ? "active" : ""} onClick={() => { setSortKey(key as "featured" | "price-asc" | "price-desc"); setSortOpen(false); }}>{label}</button>)}</div>}</div></div></>}<div className="product-grid">{sortedProducts.map((product, index) => <ProductCard product={{ ...product, tag: product.tag || (index % 3 === 0 ? "New" : undefined) }} onAdd={(item, qty) => onAdd(item ?? product, qty)} onOrderNow={(item, qty) => onOrderNow(item ?? product, qty)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => onToggleWishlist(product)} key={`${product.name}-${index}`} />)}</div></section>;
 }
