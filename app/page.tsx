@@ -6,7 +6,9 @@ import { CartItem, CartLine, loadCart, saveCart } from "./lib/cart";
 import QuickView from "./components/QuickView";
 import CategoryRail from "./components/CategoryRail";
 import PrayerTimes from "./components/PrayerTimes";
-import { ArrowDownLeft, ArrowRight, ArrowUp, Check, Cherry, ChevronDown, Copy, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, LogIn, Mail, MapPin, Menu, PackageSearch, Phone, Play, Search, Send, ShoppingCart, Star, UserRound, Users, X, Youtube } from "lucide-react";
+import Reviews from "./components/Reviews";
+import ImpactStats from "./components/ImpactStats";
+import { ArrowDownLeft, ArrowRight, ArrowUp, Check, Cherry, ChevronDown, Copy, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, LogIn, Mail, MapPin, Menu, PackageSearch, Phone, Play, Search, Send, ShoppingCart, Star, UserRound, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
@@ -43,13 +45,6 @@ const blogReviews = [
   { image: "/amzad-food-website/blog-review-1.png", alt: "মেদ ঝরানো এখন আরও সহজ" },
   { image: "/amzad-food-website/blog-review-2.png", alt: "অতিরিক্ত ওজন কমান প্রাকৃতিক উপায়ে" },
   { image: "/amzad-food-website/blog-review-3.png", alt: "ছোট বড় অভ্যাসেই স্বাস্থ্যকর জীবন" },
-];
-const customerReviews = [
-  { name: "Rafiq Hasan", time: "3 days ago", rating: 4, color: "#fde3cf", text: "আমার অভিজ্ঞতা আমজাদ ফুডের সাথে অসাধারণ ছিল। সেবা ছিল অত্যন্ত সহায়ক এবং প্রয়োজনীয় তথ্য পেতে আমি খুব সহজেই যোগাযোগ করতে পেরেছিলাম। ধন্যবাদ আমজাদ ফুড।" },
-  { name: "Arif Chowdhury", time: "20 hours ago", rating: 5, color: "#dbe9ff", text: "এজেন্টের সহায়তা আমাকে আমজাদ ফুডের বিভিন্ন পণ্য সম্পর্কে জানাতে সাহায্য করেছে। তারা সবকিছু পরিষ্কারভাবে ব্যাখ্যা করেছে, যা আমাকে সিদ্ধান্ত নিতে সহজ করেছে।" },
-  { name: "Samiul Rahman", time: "2 days ago", rating: 4, color: "#e3ddff", text: "আমি দীর্ঘদিন ধরে আমজাদ ফুড কিনতে চেয়েছিলাম, কিন্তু তাদের সহায়তায় সবকিছু সহজ হয়ে গেছে। তাদের ধন্যবাদ।" },
-  { name: "Naimul Islam", time: "2 days ago", rating: 5, color: "#d7f0e2", text: "ফাহিমের সহায়তায় আমজাদ ফুডের কেনাকাটা প্রক্রিয়াটি খুব মসৃণ হয়েছে। তিনি আমাকে সবকিছুতে সাহায্য করেছেন এবং পণ্যগুলি খুবই সুসংগঠিত।" },
-  { name: "Tanvir Ahmed", time: "5 days ago", rating: 5, color: "#ffe1e6", text: "প্রতিবার অর্ডার করার পর দ্রুত ডেলিভারি পেয়েছি এবং পণ্যের মান সবসময় অসাধারণ। আমজাদ ফুড আমার পরিবারের প্রথম পছন্দ।" },
 ];
 const journeySteps = [
   { icon: faArrowsRotate, title: "Sourced", subtitle: "Direct from trusted farmers", hue: "#3f9a5c" },
@@ -124,54 +119,6 @@ function HeroSlider() {
       <button className="hero-arrow next" onClick={goNext} aria-label="Next slide"><ChevronRight size={18} /></button>
     </div>
   </section>;
-}
-
-function GoogleIcon() {
-  return <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-3.5z" /><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 6.1 29.5 4 24 4c-7.6 0-14.2 4.3-17.7 10.7z" /><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.5c-2.1 1.6-4.8 2.5-7.5 2.5-5.3 0-9.7-3.1-11.3-7.6l-6.5 5c3.5 6.5 10.1 11.1 17.8 11.1z" /><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.5 5.5C40.9 36.8 44 31.3 44 24c0-1.4-.1-2.7-.4-3.5z" /></svg>;
-}
-
-function ReviewCarousel() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
-  const scrollToReview = (index: number) => {
-    const track = trackRef.current;
-    const card = track?.children[index] as HTMLElement | undefined;
-    if (track && card) track.scrollTo({ left: card.offsetLeft - track.offsetLeft, behavior: "smooth" });
-    setActive(index);
-  };
-  const handleScroll = () => {
-    const track = trackRef.current;
-    if (!track) return;
-    let closest = 0;
-    let minDist = Infinity;
-    Array.from(track.children).forEach((child, index) => {
-      const dist = Math.abs((child as HTMLElement).offsetLeft - track.offsetLeft - track.scrollLeft);
-      if (dist < minDist) { minDist = dist; closest = index; }
-    });
-    setActive(closest);
-  };
-  return <>
-    <div className="reviews-carousel">
-      <button className="review-nav prev" onClick={() => scrollToReview(Math.max(0, active - 1))} aria-label="Previous reviews" disabled={active === 0}><ChevronLeft size={16} /></button>
-      <div className="reviews" ref={trackRef} onScroll={handleScroll}>
-        {customerReviews.map((review) => {
-          const initials = review.name.split(" ").map((part) => part[0]).slice(0, 2).join("");
-          return <article key={review.name}>
-            <div className="review-head">
-              <span className="review-avatar" style={{ background: review.color }}>{initials}</span>
-              <div className="review-who"><strong>{review.name}</strong><small>{review.time}</small></div>
-              <GoogleIcon />
-            </div>
-            <span className="review-stars">{Array.from({ length: 5 }, (_, index) => <Star key={index} size={13} fill={index < review.rating ? "#f5a623" : "none"} color={index < review.rating ? "#f5a623" : "#dbe0d8"} />)}</span>
-            <span className="review-quote">"</span>
-            <p>{review.text}</p>
-          </article>;
-        })}
-      </div>
-      <button className="review-nav next" onClick={() => scrollToReview(Math.min(customerReviews.length - 1, active + 1))} aria-label="Next reviews" disabled={active === customerReviews.length - 1}><ChevronRight size={16} /></button>
-    </div>
-    <div className="review-dots">{customerReviews.map((review, index) => <button key={review.name} className={index === active ? "active" : ""} onClick={() => scrollToReview(index)} aria-label={`Go to review ${index + 1}`} />)}</div>
-  </>;
 }
 
 const navItems = [{ href: "#top", label: "Home" }, { href: "#shop", label: "All Products" }, { href: "#story", label: "Collection" }, { href: "#blogs", label: "Blogs" }];
@@ -378,43 +325,78 @@ export default function Home() {
     <NewsletterBanner notify={notify} />
     <ProductSection title="Combo Packages" eyebrow="Value Packs" products={products.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
     <PrayerTimes notify={notify} />
-    <section className="trust-section"><span className="trust-badge"><Star size={11} fill="currentColor" /> Why Choose Amzad Food</span><h2>Quality You Can Trust</h2><p>Trust is our most important ingredient</p><div className="trust-grid">{trustPoints.map((point) => <div key={point.title}><span className="trust-icon"><img src={point.icon} alt="" aria-hidden="true" /></span><strong>{point.title}</strong><small>{point.subtitle}</small></div>)}</div></section>
-    <section className="review-section"><h2>Customer Reviews And Ratings</h2><ReviewCarousel /></section>
+    <section className="trust-section"><div className="tr page-width">
+      <div className="tr-intro">
+        <span className="tr-kicker"><Star size={11} fill="currentColor" /> Why Choose Amzad Food</span>
+        <h2>Quality you can <em>trust</em></h2>
+        <p>Trust is our most important ingredient. Every product is sourced, tested and packed with care before it reaches your family.</p>
+        <div className="tr-seal" aria-hidden="true">
+          <svg viewBox="0 0 124 124"><path id="trustSealPath" fill="none" d="M 62,62 m -48,0 a 48,48 0 1,1 96,0 a 48,48 0 1,1 -96,0" /><text><textPath href="#trustSealPath">100% PURE · LAB TESTED · TRUSTED ·</textPath></text></svg>
+          <span><Leaf size={22} /></span>
+        </div>
+      </div>
+      <ul className="tr-grid">{trustPoints.map((point, index) => <li key={point.title}>
+        <div className="tr-top"><span className="tr-icon"><img src={point.icon} alt="" aria-hidden="true" /></span><b>{String(index + 1).padStart(2, "0")}</b></div>
+        <strong>{point.title}</strong>
+        <small>{point.subtitle}</small>
+      </li>)}</ul>
+    </div></section>
+    <Reviews />
     <ProductSection title="All Products" eyebrow="Explore our full collection" products={exploreProducts.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
-    <section className="video-reviews" id="blogs"><h2>Customer Product Review</h2><div className="blog-grid">{blogReviews.map((item, index) => <article className="blog-card" key={index}><img src={item.image} alt={item.alt} /><button className="blog-play" aria-label="Play video" onClick={() => notify("Video coming soon")}><Play size={16} fill="currentColor" /></button></article>)}</div><div className="trust-banner"><h2>Trusted by Thousands of Families</h2><p>Integrity is the cornerstone of our mission.</p><div className="stats"><span><div className="stat-top"><i className="stat-icon"><Users size={20} /></i><b>50K+</b></div><small>Happy Customer</small></span><span><div className="stat-top"><i className="stat-icon"><Gift size={20} /></i><b>200+</b></div><small>Quality Products</small></span><span><div className="stat-top"><i className="stat-icon"><MapPin size={20} /></i><b>60+</b></div><small>Districts Covered</small></span><span><div className="stat-top"><i className="stat-icon"><Star size={20} /></i><b>4.8/5</b></div><small>Customer Rating</small></span></div></div></section>
-    <footer className="footer">
-      <div className="footer-cta page-width">
-        <h2 className="footer-cta-heading">LET&apos;S TALK<br /><em>ABOUT FOOD.</em></h2>
+    <section className="video-reviews" id="blogs"><h2>Customer Product Review</h2><div className="blog-grid">{blogReviews.map((item, index) => <article className="blog-card" key={index}><img src={item.image} alt={item.alt} /><button className="blog-play" aria-label="Play video" onClick={() => notify("Video coming soon")}><Play size={16} fill="currentColor" /></button></article>)}</div><ImpactStats /></section>
+    <footer className="ft">
+      <div className="ft-cta page-width">
+        <div className="ft-cta-copy">
+          <span className="ft-kicker"><i />প্রতিদিন খোলা · রাত ১১টা পর্যন্ত</span>
+          <h2>Let&apos;s talk <em>about food.</em></h2>
+          <p>Questions about an order, a product or a gift box? Our team is happy to help, every day.</p>
+        </div>
+        <div className="ft-cta-actions">
+          <a className="cta cta-whatsapp" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><span>Chat on WhatsApp</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={16} /></i></a>
+          <a className="cta cta-light" href="tel:+8809613824071"><span>Call 09613824071</span><i className="cta-icon"><Phone size={15} /></i></a>
+        </div>
         <a className="footer-orbit" href="#shop" aria-label="Order now">
           <svg viewBox="0 0 160 160"><path id="orbitPath" fill="none" d="M 80,80 m -68,0 a 68,68 0 1,1 136,0 a 68,68 0 1,1 -136,0" /><text><textPath href="#orbitPath" startOffset="0%">ORDER NOW · FREE DELIVERY · ORDER NOW · FREE DELIVERY ·</textPath></text></svg>
           <ArrowRight className="footer-orbit-arrow" size={22} />
         </a>
       </div>
-      <div className="footer-divider page-width" />
-      <div className="footer-main page-width">
-        <div className="footer-brand">
+
+      <div className="ft-main page-width">
+        <div className="ft-brand">
           <a className="brand amzad-brand" href="#top"><span className="brand-wordmark"><b>amzad</b> <strong>food</strong></span></a>
-          <p>Trusted food products for everyday Bangladesh.</p>
-          <div className="footer-newsletter"><strong>The Newsletter</strong><NewsletterForm className="footer-newsletter-form" placeholder="Your email address" buttonLabel={<ArrowRight size={14} />} onSubscribe={() => notify("Subscribed to the newsletter!")} /></div>
+          <p>Trusted food products for everyday Bangladesh, sourced with care from farms across the country.</p>
+          <ul className="ft-contact">
+            <li><MapPin size={15} /><span>বাড়ি ১২, রোড ৫, ধানমন্ডি, ঢাকা ১২০৯</span></li>
+            <li><Mail size={15} /><a href="mailto:hello@amzadfood.com">hello@amzadfood.com</a></li>
+            <li><Phone size={15} /><a href="tel:+8809613824071">09613824071</a></li>
+          </ul>
+          <div className="ft-social">
+            {[[Facebook, "Facebook"], [Instagram, "Instagram"], [Youtube, "YouTube"]].map(([Icon, label]) => { const SocialIcon = Icon as typeof Facebook; return <a key={label as string} href="#" aria-label={label as string} onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}><SocialIcon size={15} /></a>; })}
+          </div>
         </div>
-        <div className="footer-column"><strong>Quick Links</strong><a href="#shop">Browse Products</a><a href="#shop">Collections</a><a href="#story">About us</a></div>
-        <div className="footer-column"><strong>About</strong><a href="#story">Our Story</a><a href="#story">Mission</a><a href="#footer-contact">Contact</a></div>
-        <div className="footer-contact" id="footer-contact">
-          <strong>Contact</strong>
-          <a className="footer-phone" href="tel:+8801700000000">+৮৮০ ১৭০০-০০০০০০</a>
-          <a href="mailto:hello@amzadfood.com">hello@amzadfood.com</a>
-          <address>বাড়ি ১২, রোড ৫, ধানমন্ডি<br />ঢাকা ১২০৯, বাংলাদেশ</address>
-          <span className="footer-hours"><i />প্রতিদিন খোলা · রাত ১১টা পর্যন্ত</span>
+        <nav className="ft-col" aria-label="Shop"><strong>Shop</strong><a href="#shop">Honey</a><a href="#shop">Ghee &amp; Oil</a><a href="#shop">Khejur</a><a href="#shop">Mosla</a><a href="#shop">Combo &amp; Gifts</a></nav>
+        <nav className="ft-col" aria-label="Company"><strong>Company</strong><a href="#story">Our Story</a><a href="#blogs">Blogs</a><a href="#reviews">Reviews</a><a href="#prayer-times">Prayer Times</a></nav>
+        <nav className="ft-col" aria-label="Help"><strong>Help</strong><a href="#" onClick={(event) => { event.preventDefault(); setTrackOpen(true); }}>Track Order</a><a href="/amzad-food-website/checkout/">Checkout</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>FAQ</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Returns</a></nav>
+        <div className="ft-news">
+          <strong>Newsletter</strong>
+          <p>Deals, new arrivals and recipes, once a week.</p>
+          <NewsletterForm className="ft-news-form" placeholder="Your email address" buttonLabel={<ArrowRight size={15} />} onSubscribe={() => notify("Subscribed to the newsletter!")} />
         </div>
       </div>
-      <div className="footer-bottom page-width">
-        <div className="footer-bottom-left">
-          <span>© 2024 Amzad Food</span>
-          <div className="footer-social"><a href="#" aria-label="Facebook" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}><Facebook size={14} /></a><a href="#" aria-label="Instagram" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}><Instagram size={14} /></a><a href="#" aria-label="YouTube" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}><Youtube size={14} /></a></div>
-        </div>
-        <div className="footer-bottom-right">
-          <a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Privacy Policy</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Terms</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>FAQ</a>
-          <a className="footer-top-btn" href="#top" aria-label="Back to top"><ArrowUp size={14} /></a>
+
+      <div className="ft-pay page-width">
+        <span>We accept</span>
+        <b className="on"><Check size={13} /> Cash on Delivery</b>
+        <b>bKash</b><b>Nagad</b><b>Cards</b>
+        <small>Online payments coming soon</small>
+      </div>
+
+      <div className="ft-bottom page-width">
+        <span>© {new Date().getFullYear()} Amzad Food. All rights reserved.</span>
+        <div className="ft-legal">
+          <a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Privacy Policy</a>
+          <a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Terms</a>
+          <a className="ft-top" href="#top" aria-label="Back to top"><ArrowUp size={15} /></a>
         </div>
       </div>
       <div className="footer-giant" aria-hidden="true">amzad food</div>
