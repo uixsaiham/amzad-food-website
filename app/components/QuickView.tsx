@@ -99,10 +99,10 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
 
           <div className="qv-buy">
             <div className="qv-qty"><button onClick={() => setQty((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" disabled={qty === 1}><Minus size={14} /></button><b aria-live="polite">{qty}</b><button onClick={() => setQty((value) => Math.min(20, value + 1))} aria-label="Increase quantity" disabled={qty === 20}><Plus size={14} /></button></div>
-            <button className="qv-add" onClick={() => { onAdd(line, qty); onClose(); }}><ShoppingCart size={16} /> Add to Cart · ৳{price * qty}</button>
-            <button className="qv-order" onClick={() => { onOrderNow(line, qty); onClose(); }}><Zap size={16} /> Order Now</button>
+            <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }}><span>Add to Cart · ৳{price * qty}</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
+            <button className="qv-order cta cta-dark" onClick={() => { onOrderNow(line, qty); onClose(); }}><span>Order Now</span><i className="cta-icon"><Zap size={15} /></i></button>
           </div>
-          <a className="qv-whatsapp" href={`https://wa.me/8801327406605?text=${whatsappText}`} target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={16} /> Order via WhatsApp · 01327406605</a>
+          <a className="qv-whatsapp cta cta-whatsapp cta-outline cta-block" href={`https://wa.me/8801327406605?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Order via WhatsApp · 01327406605</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={16} /></i></a>
 
           <div className="qv-tabs" role="tablist">{tabs.map((item) => <button key={item.key} role="tab" aria-selected={tab === item.key} className={tab === item.key ? "active" : ""} onClick={() => setTab(item.key)}>{item.label}</button>)}</div>
           <div className="qv-panel" role="tabpanel">

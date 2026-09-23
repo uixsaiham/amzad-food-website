@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CartItem, CartLine, loadCart, saveCart } from "./lib/cart";
 import QuickView from "./components/QuickView";
-import { ArrowDownLeft, ArrowRight, ArrowUp, Cherry, ChevronDown, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, LogIn, MapPin, Menu, Moon, PackageSearch, Phone, Play, Search, ShoppingCart, Star, Sunset, UserRound, Users, X, Youtube } from "lucide-react";
+import CategoryRail from "./components/CategoryRail";
+import PrayerTimes from "./components/PrayerTimes";
+import { ArrowDownLeft, ArrowRight, ArrowUp, Check, Cherry, ChevronDown, Copy, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, LogIn, Mail, MapPin, Menu, PackageSearch, Phone, Play, Search, Send, ShoppingCart, Star, UserRound, Users, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
@@ -49,6 +51,12 @@ const customerReviews = [
   { name: "Naimul Islam", time: "2 days ago", rating: 5, color: "#d7f0e2", text: "ফাহিমের সহায়তায় আমজাদ ফুডের কেনাকাটা প্রক্রিয়াটি খুব মসৃণ হয়েছে। তিনি আমাকে সবকিছুতে সাহায্য করেছেন এবং পণ্যগুলি খুবই সুসংগঠিত।" },
   { name: "Tanvir Ahmed", time: "5 days ago", rating: 5, color: "#ffe1e6", text: "প্রতিবার অর্ডার করার পর দ্রুত ডেলিভারি পেয়েছি এবং পণ্যের মান সবসময় অসাধারণ। আমজাদ ফুড আমার পরিবারের প্রথম পছন্দ।" },
 ];
+const journeySteps = [
+  { icon: faArrowsRotate, title: "Sourced", subtitle: "Direct from trusted farmers", hue: "#3f9a5c" },
+  { icon: faMagnifyingGlass, title: "Quality Checked", subtitle: "Lab tested for your safety", hue: "#e59a12" },
+  { icon: faBoxOpen, title: "Premium Packaging", subtitle: "Sealed to lock in freshness", hue: "#f56619" },
+  { icon: faTruckFast, title: "Delivered", subtitle: "To your door, across Bangladesh", hue: "#2f7a8a" },
+];
 const originStories = [
   { key: "sylhet", className: "sylhet", icon: Leaf, place: "Sylhet", product: "Tea", desc: "Rolling tea gardens in the hills of Sylhet supply our hand-picked black tea leaves." },
   { key: "rajshahi", className: "rajshahi", icon: Cherry, place: "Rajshahi", product: "Mango", desc: "Rajshahi's fertile plains grow the sweetest, sun-ripened mangoes in Bangladesh." },
@@ -59,16 +67,26 @@ const originStories = [
 function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist }: { product: Product; onAdd: (item?: CartLine, qty?: number) => void; onOrderNow: (item?: CartLine, qty?: number) => void; wishlisted: boolean; onToggleWishlist: () => void }) {
   const [quickView, setQuickView] = useState(false);
   const closeQuickView = useCallback(() => setQuickView(false), []);
-  return <article className="product-card"><div className="product-image"><img src={product.image} alt={product.name} /><span className="product-tag">Save ৳50</span><div className="card-actions"><button className={wishlisted ? "wishlist-action active" : "wishlist-action"} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`} title="Wishlist" onClick={onToggleWishlist}><Heart size={16} fill={wishlisted ? "currentColor" : "none"} /></button><button aria-label={`Quick view ${product.name}`} title="Quick view" onClick={() => setQuickView(true)}><Eye size={17} /></button><button className="cart-action" aria-label={`Add ${product.name} to cart`} title="Add to cart" onClick={() => onAdd()}><ShoppingCart size={17} /></button></div></div><div className="product-info"><h3><span>কালোজিরা মধু / </span>{product.name}</h3><p className="product-unit">500 gm</p><div className="product-price-row"><strong>৳{product.price}</strong><span className="rating"><Star size={13} fill="currentColor" /><b>4.9</b><i>(46)</i></span></div><button className="order-button" onClick={() => onOrderNow()}>Order Now</button></div>{quickView && <QuickView product={product} wishlisted={wishlisted} onToggleWishlist={onToggleWishlist} onAdd={onAdd} onOrderNow={onOrderNow} onClose={closeQuickView} />}</article>;
+  return <article className="pc">
+    <div className="pc-media">
+      <div className="pc-badges"><span className="pc-save">Save ৳50</span>{product.tag && <span className="pc-tag">{product.tag}</span>}</div>
+      <button className={wishlisted ? "pc-wish active" : "pc-wish"} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`} aria-pressed={wishlisted} onClick={onToggleWishlist}><Heart size={16} fill={wishlisted ? "currentColor" : "none"} /></button>
+      <img src={product.image} alt={product.name} />
+      <div className="pc-quick">
+        <button className="pc-quick-btn" onClick={() => setQuickView(true)} aria-label={`Quick view ${product.name}`}><Eye size={15} /><span>Quick view</span></button>
+        <button className="pc-quick-btn add" onClick={() => onAdd()} aria-label={`Add ${product.name} to cart`}><ShoppingCart size={15} /><span>Add to cart</span></button>
+      </div>
+    </div>
+    <div className="pc-body">
+      <p className="pc-cat">কালোজিরা মধু</p>
+      <h3 className="pc-name">{product.name}</h3>
+      <div className="pc-meta"><span className="pc-unit">500 gm</span><span className="pc-rating"><Star size={12} fill="currentColor" />4.9<i>(46)</i></span></div>
+      <div className="pc-price"><strong>৳{product.price}</strong><del>৳{product.price + 50}</del></div>
+      <button className="pc-order cta cta-ghost cta-sm cta-block" onClick={() => onOrderNow()}><span>Order Now</span></button>
+    </div>
+    {quickView && <QuickView product={product} wishlisted={wishlisted} onToggleWishlist={onToggleWishlist} onAdd={onAdd} onOrderNow={onOrderNow} onClose={closeQuickView} />}
+  </article>;
 }
-
-const dailyPrayerTimes = [
-  { name: "ফজর", time: "৪:২০" },
-  { name: "যোহর", time: "১২:১৫" },
-  { name: "আসর", time: "৪:৩৫" },
-  { name: "মাগরিব", time: "৭:১৫" },
-  { name: "ইশা", time: "৭:৪১" },
-];
 
 const heroSlides = [
   { image: "/amzad-food-website/hero-slide-1.png", eyebrow: "100% Pure & Organic", title: ["Bold Spices,", "Real Bangladeshi Taste"], desc: "Hand-ground turmeric, chili, cumin and garam masala — sourced fresh to bring authentic flavor to every meal.", cta: "Shop Spices" },
@@ -90,11 +108,11 @@ function HeroSlider() {
   return <section className="hero page-width" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
     <div className="hero-copy" key={`copy-${active}`}>
       <p className="eyebrow"><span />{slide.eyebrow}</p>
-      <h1>{slide.title[0]}<br /><em>{slide.title[1]}</em></h1>
+      <h1><span>{slide.title[0]}</span><em>{slide.title[1]}</em></h1>
       <p className="hero-description">{slide.desc}</p>
       <div className="hero-actions">
-        <a href="#shop" className="primary-button">{slide.cta} <ArrowRight size={14} /></a>
-        <span className="hero-note"><span className="avatar-stack"><i>F</i><i>A</i><i>M</i></span>Loved by 10,000+ families</span>
+        <a href="#shop" className="cta cta-lg"><span>{slide.cta}</span><i className="cta-icon cta-arrow"><ArrowRight size={15} /></i></a>
+        <span className="hero-note"><span className="avatar-stack"><i>F</i><i>A</i><i>M</i></span><span className="hero-note-text"><b><Star size={11} fill="currentColor" /> 4.9 rating</b><small>Loved by 10,000+ families</small></span></span>
       </div>
       <div className="hero-dots">{heroSlides.map((item, index) => <button key={item.image} className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`Go to slide ${index + 1}`} />)}</div>
     </div>
@@ -156,32 +174,25 @@ function ReviewCarousel() {
   </>;
 }
 
-function PrayerTimesCard({ notify }: { notify: (message: string) => void }) {
-  const [showAll, setShowAll] = useState(false);
-  return <section className="prayer-widget page-width" id="prayer-times">
-    <div className="prayer-widget-head">
-      <div className="prayer-widget-title"><span className="prayer-moon-icon"><Moon size={17} fill="currentColor" /></span><div><h2>আজকের নামাজের সময়</h2><small>২৬ আগস্ট, ২০২৬ · ঢাকা</small></div></div>
-      <button className="prayer-location" onClick={() => notify("More cities coming soon — showing Dhaka")}><MapPin size={13} /> ঢাকা <ChevronDown size={13} /></button>
-    </div>
-    <div className="prayer-card">
-      <div className="prayer-card-main">
-        <span className="prayer-live-badge"><i />এখনকার নামাজ</span>
-        <h3>ইশা নামাজ</h3>
-        <p className="prayer-time">সময়: ৭:৪১</p>
-        <p className="prayer-next">পরবর্তী <b>ফজর নামাজ ৪:২০</b></p>
-      </div>
-      <div className="prayer-card-side">
-        <div className="prayer-date-box"><small>আজকের তারিখ</small><strong>২৬ আগস্ট, ২০২৬</strong><em>স্থান: ঢাকা</em></div>
-        <button className="prayer-all-btn" onClick={() => setShowAll((value) => !value)} aria-expanded={showAll}>আজকের সব নামাজ <ChevronDown size={13} className={showAll ? "flip" : ""} /></button>
-        {showAll && <ul className="prayer-all-list">{dailyPrayerTimes.map((prayer) => <li key={prayer.name}><span>{prayer.name}</span><b>{prayer.time}</b></li>)}</ul>}
-      </div>
-      <div className="prayer-chips">
-        <div className="prayer-chip"><div><small>সেহরি</small><strong>সেহরির শেষ সময় ৪:৫৯</strong></div><span className="prayer-chip-icon"><Moon size={15} /></span></div>
-        <div className="prayer-chip iftar"><div><small>ইফতার</small><strong>ইফতারের সময় ৭:১৫</strong></div><span className="prayer-chip-icon iftar-icon"><Sunset size={15} /></span></div>
-      </div>
-      <p className="prayer-disclaimer">সময়সূচি ইসলামিক হিসাব অনুযায়ী আনুমানিক। স্থানীয় মসজিদের ঘোষণাকে অগ্রাধিকার দিন।</p>
-    </div>
-  </section>;
+const navItems = [{ href: "#top", label: "Home" }, { href: "#shop", label: "All Products" }, { href: "#story", label: "Collection" }, { href: "#blogs", label: "Blogs" }];
+
+function NavLinks({ onNavigate }: { onNavigate: () => void }) {
+  const [active, setActive] = useState(0);
+  const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  useEffect(() => {
+    const place = () => {
+      const link = linkRefs.current[active];
+      if (link) setPill({ left: link.offsetLeft, width: link.offsetWidth });
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [active]);
+  return <div className="nav-track">
+    {pill && <span className="nav-pill" style={{ transform: `translateX(${pill.left}px)`, width: pill.width }} aria-hidden="true" />}
+    {navItems.map((item, index) => <a key={item.label} href={item.href} ref={(element) => { linkRefs.current[index] = element; }} className={index === active ? "active" : ""} aria-current={index === active ? "page" : undefined} onClick={() => { setActive(index); onNavigate(); }}>{item.label}</a>)}
+  </div>;
 }
 
 function Drawer({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
@@ -204,7 +215,7 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
   </div>;
 }
 
-function NewsletterForm({ placeholder, buttonLabel, onSubscribe, className }: { placeholder: string; buttonLabel: React.ReactNode; onSubscribe: (email: string) => void; className: string }) {
+function NewsletterForm({ placeholder, buttonLabel, buttonClassName, onSubscribe, className }: { placeholder: string; buttonLabel: React.ReactNode; buttonClassName?: string; onSubscribe: (email: string) => void; className: string }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState(false);
   const submit = (event: React.FormEvent) => {
@@ -216,9 +227,44 @@ function NewsletterForm({ placeholder, buttonLabel, onSubscribe, className }: { 
   };
   return <form className={error ? `${className} has-error` : className} onSubmit={submit} noValidate>
     <input type="email" placeholder={placeholder} value={email} onChange={(event) => { setEmail(event.target.value); setError(false); }} />
-    <button type="submit">{buttonLabel}</button>
+    <button type="submit" className={buttonClassName}>{buttonLabel}</button>
     {error && <small className="form-error">Enter a valid email address</small>}
   </form>;
+}
+
+const NEWSLETTER_CODE = "WELCOME10";
+
+function NewsletterBanner({ notify }: { notify: (message: string) => void }) {
+  const [unlocked, setUnlocked] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(NEWSLETTER_CODE);
+      setCopied(true);
+      notify(`Code ${NEWSLETTER_CODE} copied`);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      notify(`Your code: ${NEWSLETTER_CODE}`);
+    }
+  };
+  return <section className="newsletter page-width" id="newsletter"><div className="nl-card">
+    <div className="nl-copy">
+      <span className="nl-pill"><Mail size={12} /> Newsletter · নিউজলেটার</span>
+      <h2>Join the family, <em>get 10% off</em> your first order</h2>
+      <p>Weekly deals, fresh arrivals and traditional recipes from across Bangladesh, straight to your inbox.</p>
+      <NewsletterForm className="nl-form" placeholder="Enter your email address" buttonClassName="cta cta-sm" buttonLabel={<><span>Subscribe</span><i className="cta-icon"><Send size={13} /></i></>} onSubscribe={() => { setUnlocked(true); notify("Subscribed! Your 10% off code is unlocked."); }} />
+      <ul className="nl-perks"><li><Check size={14} /> Weekly deals</li><li><Check size={14} /> New arrivals first</li><li><Check size={14} /> No spam, ever</li></ul>
+    </div>
+    <div className="nl-visual">
+      <div className="nl-ticket-wrap"><div className={unlocked ? "nl-ticket unlocked" : "nl-ticket"}>
+        <div className="nl-ticket-top"><small>Welcome offer</small><strong>10<span>%</span></strong><b>OFF</b></div>
+        <div className="nl-ticket-bottom">
+          <small>{unlocked ? "Tap to copy your code" : "Subscribe to unlock your code"}</small>
+          <button className="nl-code" onClick={copyCode} disabled={!unlocked} aria-label={unlocked ? `Copy code ${NEWSLETTER_CODE}` : "Code locked until you subscribe"}><span>{NEWSLETTER_CODE}</span>{!unlocked ? <Lock size={15} /> : copied ? <Check size={15} /> : <Copy size={15} />}</button>
+        </div>
+      </div></div>
+    </div>
+  </div></section>;
 }
 
 function SignInForm({ onSubmit }: { onSubmit: (name: string) => void }) {
@@ -232,7 +278,7 @@ function SignInForm({ onSubmit }: { onSubmit: (name: string) => void }) {
   return <form className="auth-form" onSubmit={submit}>
     <label>Name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" required /></label>
     <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" required /></label>
-    <button className="primary-button" type="submit">Sign In</button>
+    <button className="cta cta-block" type="submit"><span>Sign In</span><i className="cta-icon"><LogIn size={15} /></i></button>
   </form>;
 }
 
@@ -246,7 +292,7 @@ function TrackOrderForm() {
   };
   return <form className="auth-form" onSubmit={submit}>
     <label>Order ID<input value={orderId} onChange={(event) => setOrderId(event.target.value)} placeholder="e.g. AF10234" required /></label>
-    <button className="primary-button" type="submit">Track Order</button>
+    <button className="cta cta-block" type="submit"><span>Track Order</span><i className="cta-icon"><PackageSearch size={15} /></i></button>
     {result && <p className="track-result">{result}</p>}
   </form>;
 }
@@ -257,6 +303,15 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (event.key === "/" && !["INPUT", "TEXTAREA"].includes(target.tagName)) { event.preventDefault(); searchRef.current?.focus(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const [cart, setCart] = useState<CartItem[]>([]);
   useEffect(() => { setCart(loadCart()); }, []);
   useEffect(() => { saveCart(cart); }, [cart]);
@@ -311,15 +366,18 @@ export default function Home() {
   const add = () => addToCart({ name: "Sundarbans Raw Honey", price: 350, image: "/amzad-food-website/honey-bg.png" });
   return <main id="top">
     <div className="announcement"><div className="announcement-inner page-width"><span className="announcement-contacts-group"><span className="announcement-cta">প্রয়োজনে কল করুন</span><span className="announcement-contacts"><a className="announcement-contact" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={14} /> 01327406605</a><span className="announcement-divider" /><a className="announcement-contact" href="tel:+8809613824071"><Phone size={13} /> 09613824071</a></span></span><span className="announcement-links"><a className="announcement-link" href="#" onClick={(event) => { event.preventDefault(); handleAccountClick(); }}><LogIn size={13} /> {user ? `Hi, ${user.name}` : "Sign In"}</a><span className="announcement-divider" /><a className="announcement-link" href="#" onClick={(event) => { event.preventDefault(); setTrackOpen(true); }}><PackageSearch size={13} /> Track Order</a></span></div></div>
-    <nav className="navbar page-width"><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button><a className="brand amzad-brand" href="#top"><span className="brand-wordmark"><b>amzad</b> <strong>food</strong><small>বিশ্বাসের সাথে, স্বাদের ঠিকানা</small></span></a><div className={menuOpen ? "nav-links open" : "nav-links"}><a href="#top" onClick={() => setMenuOpen(false)}>Home</a><a href="#shop" onClick={() => setMenuOpen(false)}>All Products</a><a href="#collection" onClick={() => setMenuOpen(false)}>Collection</a><a href="#blogs" onClick={() => setMenuOpen(false)}>Blogs</a><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><div className="nav-search"><Search size={13} /><input placeholder="Search for food, brand..." value={query} onChange={(event) => setQuery(event.target.value)} /></div><button className="nav-account" onClick={handleAccountClick}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account" onClick={() => setCartOpen(true)}><ShoppingCart size={16} /><small>Cart</small><b>{cartCount}</b></button><button className="nav-account wishlist" onClick={() => setWishlistOpen(true)}><Heart size={16} /><small>Wishlist</small>{wishlist.length > 0 && <b>{wishlist.length}</b>}</button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen}><Menu size={14} /> Menu <ChevronDown size={12} /></button></div>{megaMenuOpen && <button className="mega-menu-backdrop" onClick={() => setMegaMenuOpen(false)} aria-label="Close menu" />}<div className={megaMenuOpen ? "mega-menu open" : "mega-menu"}><div className="mega-menu-inner"><div><p className="mega-menu-title">Shop by Category</p><div className="mega-category-grid">{shopCategories.map((category) => <a href="#collection" key={category.label} onClick={() => setMegaMenuOpen(false)}><span><img src={category.icon} alt="" aria-hidden="true" /></span>{category.label}</a>)}</div></div><div className="mega-promo"><span className="mega-promo-icon"><Gift size={20} /></span><strong>Gift Boxes</strong><p>Curated hampers perfect for festivals, weddings or a thoughtful everyday surprise.</p><a href="#shop" className="primary-button" onClick={() => setMegaMenuOpen(false)}>Explore Gifts <ArrowRight size={13} /></a></div></div></div></nav>
+    <nav className="navbar page-width"><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button><a className="brand amzad-brand" href="#top"><span className="brand-wordmark"><b>amzad</b> <strong>food</strong><small>বিশ্বাসের সাথে, স্বাদের ঠিকানা</small></span></a><div className={menuOpen ? "nav-links open" : "nav-links"}><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><label className="nav-search"><Search size={15} /><input ref={searchRef} placeholder="Search honey, ghee, dates..." value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") scrollToShop(); if (event.key === "Escape") event.currentTarget.blur(); }} aria-label="Search products" />{query ? <button type="button" className="nav-search-clear" onClick={() => setQuery("")} aria-label="Clear search"><X size={13} /></button> : <kbd>/</kbd>}</label><div className="nav-icons"><button className="nav-icon" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={17} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><small>My Cart</small><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div>{megaMenuOpen && <button className="mega-menu-backdrop" onClick={() => setMegaMenuOpen(false)} aria-label="Close menu" />}<div className={megaMenuOpen ? "mega-menu open" : "mega-menu"}><div className="mega-menu-inner"><div><p className="mega-menu-title">Shop by Category</p><div className="mega-category-grid">{shopCategories.map((category) => <a href="#shop" key={category.label} onClick={() => setMegaMenuOpen(false)}><span><img src={category.icon} alt="" aria-hidden="true" /></span>{category.label}</a>)}</div></div><div className="mega-promo"><span className="mega-promo-icon"><Gift size={20} /></span><strong>Gift Boxes</strong><p>Curated hampers perfect for festivals, weddings or a thoughtful everyday surprise.</p><a href="#shop" className="cta cta-sm" onClick={() => setMegaMenuOpen(false)}><span>Explore Gifts</span><i className="cta-icon"><Gift size={14} /></i></a></div></div></div></nav>
+    <CategoryRail onAdd={addToCart} onBrowse={(label) => { scrollToShop(); notify(label === "All" ? "Showing all products" : `Browsing ${label}`); }} />
     <HeroSlider />
-    <section className="category-strip page-width" id="collection"><div className="category-intro"><strong>Shop by<br />Category</strong><ArrowRight size={15} /></div>{shopCategories.map((category) => <button className="quick-category" key={category.label} onClick={scrollToShop}><span><img src={category.icon} alt="" aria-hidden="true" /></span><small>{category.label}</small></button>)}<button className="gift-box" onClick={scrollToShop}><span><Gift size={19} /></span><strong>Gift Boxes<small>Perfect for<br />every occasion</small></strong></button></section>
-    <section className="promise-strip"><div className="page-width promises"><div className="source-label"><strong>From Source<br />to Your Table</strong><small>A journey of Trust &amp; Quality</small></div>{[[faArrowsRotate,"Sourced","from Trusted Farmers"],[faMagnifyingGlass,"Quality Checked","for Your Safety"],[faBoxOpen,"Premium Packaging","for Freshness"],[faTruckFast,"Delivered","Across Bangladesh"]].map(([icon, title, subtitle], index) => <div key={title as string}><span className="promise-icon"><FontAwesomeIcon icon={icon as typeof faArrowsRotate} fontSize={15} /></span><p><strong>{title as string}</strong><br />{subtitle as string}</p>{index < 3 && <ArrowRight size={13} />}</div>)}</div></section>
-    <section className="feature-band page-width" id="story"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br />Our Origin <span>🍃</span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="primary-button" onClick={() => setOriginOpen(true)}>Explore Origin Stories <ArrowRight size={14} /></button></div><div className="origin-map"><img src="/amzad-food-website/bangladesh-map.png" alt="Bangladesh sourcing map" />{originStories.map((story) => <span className={`origin-pin ${story.className}`} key={story.key}><i><story.icon size={13} /></i><b>{story.place}<small>{story.product}</small></b></span>)}</div></article><article className="honey-card"><img className="honey-bg" src="/amzad-food-website/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="primary-button" onClick={add}>Add to Cart <ShoppingCart size={14} /></button></div></article></section>
+    <section className="journey page-width" aria-label="From source to your table"><div className="journey-card">
+      <div className="journey-intro"><span className="journey-pill"><Leaf size={12} /> Our Promise</span><h2>From Source<br /><em>to Your Table</em></h2><p>A journey of trust &amp; quality, in four careful steps.</p></div>
+      <ol className="journey-steps">{journeySteps.map((step, index) => <li key={step.title} style={{ "--step-hue": step.hue } as React.CSSProperties}><span className="journey-node"><FontAwesomeIcon icon={step.icon} fontSize={17} /></span><small>Step {String(index + 1).padStart(2, "0")}</small><strong>{step.title}</strong><p>{step.subtitle}</p></li>)}</ol>
+    </div></section>
+    <section className="feature-band page-width" id="story"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br />Our Origin <span>🍃</span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="cta" onClick={() => setOriginOpen(true)}><span>Explore Origin Stories</span><i className="cta-icon"><MapPin size={15} /></i></button></div><div className="origin-map"><img src="/amzad-food-website/bangladesh-map.png" alt="Bangladesh sourcing map" />{originStories.map((story) => <span className={`origin-pin ${story.className}`} key={story.key}><i><story.icon size={13} /></i><b>{story.place}<small>{story.product}</small></b></span>)}</div></article><article className="honey-card"><img className="honey-bg" src="/amzad-food-website/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="cta" onClick={add}><span>Add to Cart</span><i className="cta-icon"><ShoppingCart size={15} /></i></button></div></article></section>
     <ProductSection title="Our Best Selling Products" eyebrow="Best Sellers" products={visibleProducts.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
-    <section className="subscribe page-width"><div className="subscribe-content"><h2>Subscribe</h2><strong className="subscribe-discount">10% OFF</strong><p>Delve into the vibrant world of Bangladeshi flavors, showcasing carefully selected ingredients.</p></div><NewsletterForm className="subscribe-form" placeholder="Enter your email address" buttonLabel="Subscribe" onSubscribe={() => notify("Subscribed! Your 10% off code is on its way.")} /></section>
+    <NewsletterBanner notify={notify} />
     <ProductSection title="Combo Packages" eyebrow="Value Packs" products={products.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
-    <PrayerTimesCard notify={notify} />
+    <PrayerTimes notify={notify} />
     <section className="trust-section"><span className="trust-badge"><Star size={11} fill="currentColor" /> Why Choose Amzad Food</span><h2>Quality You Can Trust</h2><p>Trust is our most important ingredient</p><div className="trust-grid">{trustPoints.map((point) => <div key={point.title}><span className="trust-icon"><img src={point.icon} alt="" aria-hidden="true" /></span><strong>{point.title}</strong><small>{point.subtitle}</small></div>)}</div></section>
     <section className="review-section"><h2>Customer Reviews And Ratings</h2><ReviewCarousel /></section>
     <ProductSection title="All Products" eyebrow="Explore our full collection" products={exploreProducts.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
@@ -339,7 +397,7 @@ export default function Home() {
           <p>Trusted food products for everyday Bangladesh.</p>
           <div className="footer-newsletter"><strong>The Newsletter</strong><NewsletterForm className="footer-newsletter-form" placeholder="Your email address" buttonLabel={<ArrowRight size={14} />} onSubscribe={() => notify("Subscribed to the newsletter!")} /></div>
         </div>
-        <div className="footer-column"><strong>Quick Links</strong><a href="#shop">Browse Products</a><a href="#collection">Collections</a><a href="#story">About us</a></div>
+        <div className="footer-column"><strong>Quick Links</strong><a href="#shop">Browse Products</a><a href="#shop">Collections</a><a href="#story">About us</a></div>
         <div className="footer-column"><strong>About</strong><a href="#story">Our Story</a><a href="#story">Mission</a><a href="#footer-contact">Contact</a></div>
         <div className="footer-contact" id="footer-contact">
           <strong>Contact</strong>
@@ -372,7 +430,7 @@ export default function Home() {
           <button className="drawer-remove" aria-label={`Remove ${item.name}`} onClick={() => removeFromCart(item.name)}><X size={14} /></button>
         </li>)}</ul>
         <div className="drawer-total"><span>Subtotal</span><strong>৳{cartTotal}</strong></div>
-        <button className="primary-button drawer-checkout" onClick={() => goToCheckout()}>Checkout <ArrowRight size={14} /></button>
+        <button className="cta cta-block drawer-checkout" onClick={() => goToCheckout()}><span>Checkout · ৳{cartTotal}</span><i className="cta-icon cta-arrow"><ArrowRight size={15} /></i></button>
       </>}
     </Drawer>
 

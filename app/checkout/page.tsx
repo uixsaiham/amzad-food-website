@@ -217,7 +217,7 @@ export default function CheckoutPage() {
                 </dl>
                 <div className="co-eta"><Truck size={18} /><div><small>Estimated delivery</small><strong>{order.eta}</strong></div></div>
               </section>
-              <a className="co-whatsapp" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`} target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={18} /> Send order details on WhatsApp</a>
+              <a className="co-whatsapp cta cta-whatsapp" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Send order details on WhatsApp</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={17} /></i></a>
               <Link className="co-secondary" href="/">Continue Shopping <ArrowRight size={14} /></Link>
             </div>
           </div>
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
         <span><ShoppingBag size={34} /></span>
         <h2>Your cart is empty</h2>
         <p>Add some products to your cart and they will show up here.</p>
-        <Link className="primary-button" href="/">Browse products <ArrowRight size={14} /></Link>
+        <Link className="cta" href="/"><span>Browse products</span><i className="cta-icon"><ShoppingBag size={15} /></i></Link>
       </div> : <div className="co-grid">
         <form className="co-form" id="checkout-form" onSubmit={submit} noValidate>
           <section className="co-card">
@@ -303,7 +303,7 @@ export default function CheckoutPage() {
             </div>
           </section>
 
-          <button className="co-place co-place-desktop" type="submit"><Lock size={16} /> Place Order · ৳{total}</button>
+          <button className="co-place co-place-desktop cta cta-lg cta-block" type="submit"><span>Place Order · ৳{total}</span><i className="cta-icon"><Lock size={16} /></i></button>
           <p className="co-legal">By placing your order, you agree to be contacted by our team to confirm delivery.</p>
         </form>
 
@@ -381,7 +381,7 @@ export default function CheckoutPage() {
 
     {cart.length > 0 && <div className="co-mobilebar">
       <div><small>Total to pay</small><strong>৳{total}</strong></div>
-      <button className="co-place" type="submit" form="checkout-form"><Lock size={15} /> Place Order</button>
+      <button className="co-place cta" type="submit" form="checkout-form"><span>Place Order</span><i className="cta-icon"><Lock size={15} /></i></button>
     </div>}
   </>;
 }
