@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
 
-type QuickViewProduct = { name: string; category: string; price: number; image: string; tag?: string };
+type QuickViewProduct = { name: string; bn?: string; category: string; price: number; oldPrice?: number; image: string; tag?: string };
 type Details = { bn: string; blurb: string; highlights: string[]; usage: string[]; origin: string; shelfLife: string; storage: string; sold: number };
 type Tab = "info" | "usage" | "delivery";
 
@@ -44,7 +44,7 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
   onOrderNow: (item: CartLine, qty: number) => void;
   onClose: () => void;
 }) {
-  const info = details[product.name] ?? fallbackDetails;
+  const info = details[product.name] ?? { ...fallbackDetails, bn: product.bn ?? fallbackDetails.bn };
   const [sizeIndex, setSizeIndex] = useState(1);
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<Tab>("info");
@@ -60,7 +60,7 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
 
   const size = sizes[sizeIndex];
   const price = roundTo5(product.price * size.factor);
-  const saving = roundTo5(50 * size.factor);
+  const saving = roundTo5((product.oldPrice ? product.oldPrice - product.price : 50) * size.factor);
   const line: CartLine = { name: size.factor === 1 ? product.name : `${product.name} (${size.label})`, price, image: product.image };
   const sku = `AF-${product.name.split(/\W+/).filter(Boolean).map((word) => word[0]).join("").toUpperCase()}${product.price}`;
   const whatsappText = encodeURIComponent(`Hello Amzad Food, I would like to order ${qty} × ${line.name} (৳${price * qty}).`);

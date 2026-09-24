@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import MegaMenu, { MenuLink } from "../components/MegaMenu";
 import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, ChevronDown, Clock, CreditCard, Lock, MapPin, Minus, PackageCheck, Phone, Plus, ShieldCheck, ShoppingBag, Smartphone, Tag, Trash2, Truck, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartItem, loadCart, saveCart } from "../lib/cart";
+import { saveOrder } from "../lib/orders";
 
 type Fields = { name: string; phone: string; email: string; address: string; area: string; district: string; notes: string };
 type Errors = Partial<Record<keyof Fields, string>>;
@@ -89,9 +92,22 @@ function Steps({ current }: { current: 2 | 3 }) {
 }
 
 function Header() {
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const onLink = (event: React.MouseEvent, link: MenuLink) => {
+    setMenuOpen(false);
+    if (link.href) return;
+    event.preventDefault();
+    if (link.action === "track") router.push("/track-order/");
+    else if (link.action === "account") router.push("/");
+  };
   return <header className="co-header"><div className="co-header-inner page-width">
-    <Link className="brand amzad-brand" href="/"><span className="brand-wordmark"><b>amzad</b> <strong>food</strong></span></Link>
-    <span className="co-secure"><Lock size={13} /> Secure checkout</span>
+    <Link className="brand amzad-brand" href="/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></Link>
+    <div className="co-header-actions">
+      <span className="co-secure"><Lock size={13} /> Secure checkout</span>
+      <button className={menuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMenuOpen(!menuOpen)} aria-haspopup="true" aria-expanded={menuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button>
+    </div>
+    <MegaMenu open={menuOpen} onClose={() => setMenuOpen(false)} onCategory={() => { setMenuOpen(false); router.push("/#shop"); }} onLink={onLink} />
   </div></header>;
 }
 
@@ -151,13 +167,16 @@ export default function CheckoutPage() {
       element?.focus({ preventScroll: true });
       return;
     }
-    setOrder({
+    const placed: Order = {
       id: `AF${String(Date.now()).slice(-6)}`,
       items: cart, subtotal, discount, deliveryFee, total,
       details: { ...fields, name: fields.name.trim(), phone: fields.phone.trim(), email: fields.email.trim(), address: fields.address.trim(), area: fields.area.trim(), notes: fields.notes.trim() },
       addressType, promoCode: promoActive ? appliedCode : null, eta,
       placedAt: new Date().toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
-    });
+    };
+    setOrder(placed);
+    const { details } = placed;
+    saveOrder({ id: placed.id, items: cart, total, deliveryFee, name: details.name, phone: details.phone, address: `${details.address}, ${details.area}, ${details.district}`, eta, placedAt: Date.now() });
     updateCart([]);
     window.scrollTo({ top: 0 });
   };
@@ -218,6 +237,7 @@ export default function CheckoutPage() {
                 <div className="co-eta"><Truck size={18} /><div><small>Estimated delivery</small><strong>{order.eta}</strong></div></div>
               </section>
               <a className="co-whatsapp cta cta-whatsapp" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Send order details on WhatsApp</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={17} /></i></a>
+              <Link className="co-secondary" href={`/track-order/?id=${order.id}`}>Track this order <ArrowRight size={14} /></Link>
               <Link className="co-secondary" href="/">Continue Shopping <ArrowRight size={14} /></Link>
             </div>
           </div>
