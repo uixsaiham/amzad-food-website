@@ -10,7 +10,7 @@ import CategoryRail, { railCategories } from "./CategoryRail";
 import PrayerTimes from "./PrayerTimes";
 import Reviews from "./Reviews";
 import ImpactStats from "./ImpactStats";
-import { ArrowDownLeft, ArrowRight, ArrowUp, Check, Cherry, ChevronDown, Copy, ChevronLeft, ChevronRight, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, LogIn, Mail, MapPin, Menu, PackageSearch, Phone, Play, Search, Send, ShoppingCart, Star, UserRound, X, Youtube } from "lucide-react";
+import { ArrowDownLeft, ArrowRight, ArrowUp, Check, Cherry, ChevronDown, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, LogIn, Mail, MapPin, Menu, PackageSearch, Phone, Play, Search, Send, ShoppingCart, Star, UserRound, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
@@ -92,8 +92,6 @@ function HeroSlider() {
     return () => clearInterval(timer);
   }, [paused, active]);
   const slide = heroSlides[active];
-  const goPrev = () => setActive((value) => (value - 1 + heroSlides.length) % heroSlides.length);
-  const goNext = () => setActive((value) => (value + 1) % heroSlides.length);
   return <section className="hero hero-modern page-width" aria-label="Featured collections" aria-roledescription="carousel" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }}>
     <div className="hero-stage">
     <div className="hero-copy" key={`copy-${active}`}>
@@ -113,7 +111,7 @@ function HeroSlider() {
     </div>
     <div className="hero-slider-bar">
       <div className="hero-slide-tabs">{heroSlides.map((item, index) => <button key={item.image} className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`Show ${item.cta}`} aria-pressed={index === active}><span>0{index + 1}</span><b>{item.cta}</b><i /></button>)}</div>
-      <div className="hero-slider-actions"><span className="hero-slide-count">0{active + 1}<small> / 0{heroSlides.length}</small></span><button onClick={goPrev} aria-label="Previous slide"><ChevronLeft size={18} /></button><button onClick={goNext} aria-label="Next slide"><ChevronRight size={18} /></button></div>
+      <div className="hero-slider-actions"><span className="hero-slide-count">0{active + 1}<small> / 0{heroSlides.length}</small></span></div>
     </div>
   </section>;
 }
