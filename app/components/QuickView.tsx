@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Clock, Heart, Minus, Plus, ShoppingCart, Star, Truck, X, Zap } from "lucide-react";
+import { Check, Clock, Heart, Minus, Plus, ShoppingCart, Star, Truck, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
@@ -35,7 +35,8 @@ const fallbackDetails: Details = { bn: "আমজাদ ফুড", blurb: "A tr
 
 const roundTo5 = (value: number) => Math.round(value / 5) * 5;
 
-export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd, onOrderNow, onClose }: {
+export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd, onOrderNow, onClose, embedded = false }: {
+  embedded?: boolean;
   product: QuickViewProduct;
   wishlisted: boolean;
   onToggleWishlist: () => void;
@@ -49,12 +50,13 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
   const [tab, setTab] = useState<Tab>("info");
 
   useEffect(() => {
+    if (embedded) return;
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
     const previousOverflow = document.body.style.overflow;
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = previousOverflow; };
-  }, [onClose]);
+  }, [onClose, embedded]);
 
   const size = sizes[sizeIndex];
   const price = roundTo5(product.price * size.factor);
@@ -64,10 +66,10 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
   const whatsappText = encodeURIComponent(`Hello Amzad Food, I would like to order ${qty} × ${line.name} (৳${price * qty}).`);
   const infoRows: [string, string][] = [["Category", product.category], ["Net weight", size.label], ["Origin", info.origin], ["Shelf life", info.shelfLife], ["Storage", info.storage], ["SKU", sku]];
 
-  return createPortal(
-    <div className="qv-backdrop" onClick={onClose} role="presentation">
-      <div className="qv" role="dialog" aria-modal="true" aria-label={`Quick view ${product.name}`} onClick={(event) => event.stopPropagation()}>
-        <button className="qv-close" onClick={onClose} aria-label="Close quick view"><X size={18} /></button>
+  const content = (
+    <div className={embedded ? "pd-product" : "qv-backdrop"} onClick={onClose} role="presentation">
+      <div className="qv" role={embedded ? undefined : "dialog"} aria-modal={embedded ? undefined : true} aria-label={`Quick view ${product.name}`} onClick={(event) => event.stopPropagation()}>
+        {!embedded && <button className="qv-close" onClick={onClose} aria-label="Close quick view"><X size={18} /></button>}
 
         <div className="qv-scroll">
         <div className="qv-media">
@@ -100,11 +102,11 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
           <div className="qv-buy">
             <div className="qv-qty"><button onClick={() => setQty((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" disabled={qty === 1}><Minus size={14} /></button><b aria-live="polite">{qty}</b><button onClick={() => setQty((value) => Math.min(20, value + 1))} aria-label="Increase quantity" disabled={qty === 20}><Plus size={14} /></button></div>
             <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }}><span>Add to Cart · ৳{price * qty}</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
-            <button className="qv-order cta cta-dark" onClick={() => { onOrderNow(line, qty); onClose(); }}><span>Order Now</span><i className="cta-icon"><Zap size={15} /></i></button>
+            <button className="qv-order cta cta-dark" onClick={() => { onOrderNow(line, qty); onClose(); }}><span>Order Now</span></button>
           </div>
           <a className="qv-whatsapp cta cta-whatsapp cta-outline cta-block" href={`https://wa.me/8801327406605?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Order via WhatsApp · 01327406605</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={16} /></i></a>
 
-          <div className="qv-tabs" role="tablist">{tabs.map((item) => <button key={item.key} role="tab" aria-selected={tab === item.key} className={tab === item.key ? "active" : ""} onClick={() => setTab(item.key)}>{item.label}</button>)}</div>
+          <div className="qv-tabs" role="tablist" aria-label="Product details">{tabs.map((item) => <button key={item.key} role="tab" aria-selected={tab === item.key} className={tab === item.key ? "active" : ""} onClick={() => setTab(item.key)}>{item.label}</button>)}</div>
           <div className="qv-panel" role="tabpanel">
             {tab === "info" && <dl className="qv-info">{infoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}
             {tab === "usage" && <ol className="qv-usage">{info.usage.map((step) => <li key={step}>{step}</li>)}</ol>}
@@ -118,7 +120,7 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
         </div>
         </div>
       </div>
-    </div>,
-    document.body,
+    </div>
   );
+  return embedded ? content : createPortal(content, document.body);
 }

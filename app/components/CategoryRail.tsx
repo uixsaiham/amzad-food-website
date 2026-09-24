@@ -13,7 +13,7 @@ type RailCategory = {
 const img = (name: string) => `/amzad-food-website/icons/${name}.png`;
 const productImage = "/amzad-food-website/product-honey.png";
 
-const railCategories: RailCategory[] = [
+export const railCategories: RailCategory[] = [
   { key: "honey", label: "Honey", bn: "মধু", count: 18, accent: "#e59a12", tint: "#fff4dc", icon: img("category-honey"), tagline: "Raw, unheated honey from the Sundarbans and mustard fields.", tags: ["Sundarbans", "Black Seed", "Mustard Flower", "Litchi Flower", "Comb Honey"], deal: "Up to 20% off on honey jars", top: [
     { name: "Sundarbans Raw Honey", bn: "সুন্দরবনের মধু", price: 550, old: 650, unit: "500 gm", rating: 4.9 },
     { name: "Wildflower Honey & Black Seed", bn: "কালোজিরা মধু", price: 350, unit: "500 gm", rating: 4.8 },
@@ -124,7 +124,7 @@ export default function CategoryRail({ onAdd, onBrowse }: { onAdd: (item: CartLi
         <span><b>Offer Zone</b><small>Up to 30% off</small></span>
       </button>
       <div className="cat-rail-scroller">
-        {canScroll.left && <button className="cat-rail-arrow left" onClick={() => scrollBy(-1)} aria-label="Scroll categories left"><ChevronLeft size={15} /></button>}
+        <button disabled={!canScroll.left} className="cat-rail-arrow left" onClick={() => scrollBy(-1)} aria-label="Scroll categories left"><ChevronLeft size={15} /></button>
         <div className="cat-rail-track" ref={trackRef} onScroll={updateScroll} role="menubar" aria-label="Shop categories">
           {railCategories.map((category) => <button
             key={category.key}
@@ -138,10 +138,10 @@ export default function CategoryRail({ onAdd, onBrowse }: { onAdd: (item: CartLi
             aria-expanded={active === category.key}
           >
             <span className="cat-chip-icon"><CategoryIcon icon={category.icon} size={17} /></span>
-            <span className="cat-chip-text"><b>{category.label}</b><small>{category.bn} · {category.count}</small></span>
+            <span className="cat-chip-text"><b>{category.label}</b><small>{category.bn}</small></span>
           </button>)}
         </div>
-        {canScroll.right && <button className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button>}
+        <button disabled={!canScroll.right} className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button>
       </div>
       <button className="cat-rail-all" onClick={() => browse("All")} onMouseEnter={scheduleClose}><LayoutGrid size={15} /><span>All</span></button>
     </div>

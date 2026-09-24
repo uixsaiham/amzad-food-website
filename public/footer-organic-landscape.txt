@@ -1,0 +1,2 @@
+Source: User-provided Footter.png.
+Used as the footer background, with a dark green overlay applied separately in CSS for text readability.
