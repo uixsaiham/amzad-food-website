@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CartItem, CartLine, loadCart, saveCart } from "../lib/cart";
 import Link from "next/link";
-import { Product, products, comboProducts, exploreProducts, productSlug, catalog } from "../lib/products";
+import { Product, products, comboProducts, exploreProducts, productSlug, catalog, storeProducts, productCategories } from "../lib/products";
 import QuickView from "./QuickView";
 import AuthModal from "./AuthModal";
 import MegaMenu, { MenuContact, MenuIcon, MenuLink, menuCategories, menuHelp, menuPages } from "./MegaMenu";
-import CategoryRail, { railCategories } from "./CategoryRail";
-import PrayerTimes from "./PrayerTimes";
+import CategoryRail from "./CategoryRail";
+import PrayerTimes, { PrayerDock } from "./PrayerTimes";
 import Reviews from "./Reviews";
 import ImpactStats from "./ImpactStats";
 import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Play, Search, Send, ShoppingCart, Star, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
@@ -18,7 +18,7 @@ import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fort
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
 type WishItem = { name: string; price: number; image: string };
-const categories = ["All", ...railCategories.map(category => category.label)];
+const categories = ["All", ...productCategories];
 const shopCategories = [
   { icon: "/amzad-food-website/icons/category-salt.png", label: "Pink Salt" },
   { icon: "/amzad-food-website/icons/category-spices.png", label: "Mosla" },
@@ -129,10 +129,11 @@ function HeroSlider() {
   </section>;
 }
 
-const navItems = [{ href: "#top", label: "Home" }, { href: "#shop", label: "All Products" }, { href: "#story", label: "Collection" }, { href: "#blogs", label: "Blogs" }];
+const navItems = [{ href: "#top", label: "Home" }, { href: "products/", label: "All Products" }, { href: "#story", label: "Collection" }, { href: "#blogs", label: "Blogs" }];
 
 function NavLinks({ onNavigate }: { onNavigate: () => void }) {
-  const [active, setActive] = useState(0);
+  const pathname = usePathname();
+  const [active, setActive] = useState(pathname === "/products/" || pathname === "/products" ? 1 : 0);
   const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   useEffect(() => {
@@ -303,8 +304,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
   }, [toast]);
   const notify = (message: string) => setToast(message);
   const visibleProducts = useMemo(() => {
-    const category = railCategories.find(item => item.label === activeCategory);
-    const source = activeCategory === "All" ? [...products.slice(0, 8), ...exploreProducts.slice(0, 3)] : catalog.filter(item => category?.top.some(pick => pick.name === item.name));
+    const source = activeCategory === "All" ? [...products.slice(0, 8), ...exploreProducts.slice(0, 3)] : storeProducts.filter(item => item.category === activeCategory);
     return source.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
   }, [activeCategory, query]);
   const addToCart = (product: CartLine, qty = 1) => {
@@ -368,8 +368,9 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
     <section className="feature-band page-width" id="story"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br /><span className="origin-title-line">Our Origin <span>🍃</span></span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="cta" onClick={() => setOriginOpen(true)}><span>Explore Origin Stories</span><i className="cta-icon"><MapPin size={15} /></i></button></div><div className="origin-map"><div className="bd-map" role="img" aria-label="Map of Bangladesh showing where our products are sourced"><span className="bd-shadow" aria-hidden="true" /><span className="bd-shape" aria-hidden="true" /><span className="bd-texture" aria-hidden="true" />{originStories.map((story) => <span className={`bd-spot ${story.className}`} key={`spot-${story.key}`} aria-hidden="true" />)}{originStories.map((story) => <span className={`origin-pin ${story.className}`} key={story.key}><i><story.icon size={13} /></i><b>{story.place}<small>{story.product}</small></b></span>)}</div></div></article><article className="honey-card"><img className="honey-bg" src="/amzad-food-website/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="cta" onClick={add}><span>Add to Cart</span><i className="cta-icon"><ShoppingCart size={15} /></i></button></div></article></section>
     <ProductSection title="Our Best Selling Products" eyebrow="Best Sellers" products={visibleProducts} cardPromotion={activeCategory === "All" && !query.trim()} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
     <NewsletterBanner notify={notify} />
-    <ProductSection promotion title="Combo Packages" eyebrow="Value Packs" products={comboProducts} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
+    <ProductSection promotion viewAllHref="/products/?category=Combo%20Packs" title="Combo Packages" eyebrow="Value Packs" products={comboProducts} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
     <PrayerTimes notify={notify} />
+    <PrayerDock />
     <section className="trust-section"><div className="tr page-width">
       <div className="tr-intro">
         <span className="tr-kicker"><Star size={11} fill="currentColor" /> Why Choose Amzad Food</span>
@@ -512,16 +513,10 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
   </main>;
 }
 
-function ProductSection({ cardPromotion = false, promotion = false, title, eyebrow, products, onAdd, onOrderNow, id, tabs, isWishlisted, onToggleWishlist }: { cardPromotion?: boolean; promotion?: boolean; title: string; eyebrow: string; products: Product[]; onAdd: (product: CartLine, qty?: number) => void; onOrderNow: (product: CartLine, qty?: number) => void; id?: string; tabs?: { categories: string[]; activeCategory: string; setActiveCategory: (value: string) => void }; isWishlisted: (name: string) => boolean; onToggleWishlist: (product: Product) => void }) {
-  const [sortKey, setSortKey] = useState<"featured" | "price-asc" | "price-desc">("featured");
-  const [sortOpen, setSortOpen] = useState(false);
-  const sortLabels: Record<string, string> = { featured: "Featured", "price-asc": "Price: Low to High", "price-desc": "Price: High to Low" };
-  const sortedProducts = useMemo(() => {
-    if (sortKey === "price-asc") return [...products].sort((a, b) => a.price - b.price);
-    if (sortKey === "price-desc") return [...products].sort((a, b) => b.price - a.price);
-    return products;
-  }, [products, sortKey]);
-  return <section className="shop-section page-width" id={id}><div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2><p>Discover our handpicked collection of natural and delicious products.</p></div><a className="text-link" href="/amzad-food-website/#shop">View all products <ArrowRight size={14} /></a></div>{tabs && <>{sortOpen && <button className="panel-backdrop transparent" onClick={() => setSortOpen(false)} aria-label="Close sort menu" />}<div className="category-tabs">{tabs.categories.map((category) => <button className={tabs.activeCategory === category ? "active" : ""} key={category} aria-pressed={tabs.activeCategory === category} onClick={() => tabs.setActiveCategory(category)}>{category}</button>)}<div className="sort-dropdown"><button className="sort-button" onClick={() => setSortOpen((value) => !value)} aria-haspopup="true" aria-expanded={sortOpen}>{sortLabels[sortKey]} <ChevronDown size={13} className={sortOpen ? "flip" : ""} /></button>{sortOpen && <div className="sort-menu">{Object.entries(sortLabels).map(([key, label]) => <button key={key} className={sortKey === key ? "active" : ""} onClick={() => { setSortKey(key as "featured" | "price-asc" | "price-desc"); setSortOpen(false); }}>{label}</button>)}</div>}</div></div></>}{sortedProducts.length === 0 && <p className="shop-empty" role="status">No products available in this category yet. Explore another category.</p>}{promotion && <aside className="shop-promotion" aria-label="Featured honey collection">
+function ProductSection({ cardPromotion = false, promotion = false, viewAllHref = "/products/", title, eyebrow, products, onAdd, onOrderNow, id, tabs, isWishlisted, onToggleWishlist }: { cardPromotion?: boolean; promotion?: boolean; viewAllHref?: string; title: string; eyebrow: string; products: Product[]; onAdd: (product: CartLine, qty?: number) => void; onOrderNow: (product: CartLine, qty?: number) => void; id?: string; tabs?: { categories: string[]; activeCategory: string; setActiveCategory: (value: string) => void }; isWishlisted: (name: string) => boolean; onToggleWishlist: (product: Product) => void }) {
+  const [sortKey, setSortKey] = useState<SortKey>("featured");
+  const sortedProducts = useMemo(() => sortProducts(products, sortKey), [products, sortKey]);
+  return <section className="shop-section page-width" id={id}><div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2><p>Discover our handpicked collection of natural and delicious products.</p></div><ViewAllLink href={viewAllHref} /></div>{tabs ? <div className="shop-toolbar"><PillTabs label="Product categories" items={tabs.categories.map(category => ({ key: category, label: category }))} active={tabs.activeCategory} onChange={tabs.setActiveCategory} /><SortMenu value={sortKey} onChange={setSortKey} /></div> : null}{sortedProducts.length === 0 && <p className="shop-empty" role="status">No products available in this category yet. Explore another category.</p>}{promotion && <aside className="shop-promotion" aria-label="Featured honey collection">
       <div className="shop-promo-copy"><span className="shop-promo-kicker"><Leaf size={12} /> FROM NATURE, WITH CARE</span><h3>A little sweetness.<br /><em>A lot of goodness.</em></h3><p>খাঁটি স্বাদ, প্রতিদিনের ভরসা</p></div>
       <div className="shop-promo-art"><span aria-hidden="true" /><img src="/amzad-food-website/hero-slide-3.png" alt="Amzad Food honey and ghee collection" loading="lazy" /></div>
       <div className="shop-promo-bottom"><span className="shop-promo-label">THE PANTRY EDIT</span><p>Bring home our Sundarbans raw honey, sourced with care.</p><Link className="shop-promo-link" href="/products/sundarbans-raw-honey/"><span>Discover our honey</span><ArrowRight size={17} /></Link><small>Explore a favourite from Amzad Food</small></div>
@@ -533,4 +528,79 @@ function ProductSection({ cardPromotion = false, promotion = false, title, eyebr
       <p>Discover sweets, snacks and pantry favourites for every occasion.</p>
       <a href="#all-products">Explore the collection <ArrowRight size={15} /></a>
     </aside>}</div></section>;
+}
+
+type SortKey = "featured" | "price-asc" | "price-desc";
+const sortLabels: Record<SortKey, string> = { featured: "Featured", "price-asc": "Price: Low to High", "price-desc": "Price: High to Low" };
+const sortProducts = (items: Product[], key: SortKey) => key === "price-asc" ? [...items].sort((a, b) => a.price - b.price) : key === "price-desc" ? [...items].sort((a, b) => b.price - a.price) : items;
+
+function ViewAllLink({ href }: { href: string }) {
+  return <Link className="view-all" href={href}><span>View all</span><i><ArrowRight size={14} /></i></Link>;
+}
+
+// Segmented tabs styled like the navbar: a soft track with a white pill that slides to the active tab.
+// On narrow screens the track scrolls sideways and keeps the active tab in view.
+function PillTabs({ items, active, onChange, label }: { items: { key: string; label: string; count?: number }[]; active: string; onChange: (key: string) => void; label: string }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
+  useEffect(() => {
+    const place = () => {
+      const tab = tabRefs.current[active];
+      const track = trackRef.current;
+      if (!tab || !track) return;
+      setPill({ left: tab.offsetLeft, width: tab.offsetWidth });
+      if (track.scrollWidth > track.clientWidth) track.scrollTo({ left: tab.offsetLeft - (track.clientWidth - tab.offsetWidth) / 2, behavior: "smooth" });
+    };
+    place();
+    document.fonts?.ready.then(place);
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [active, items.length]);
+  return <div className="pill-tabs" ref={trackRef} role="tablist" aria-label={label}>
+    {pill && <span className="pill-tabs-pill" style={{ transform: `translateX(${pill.left}px)`, width: pill.width }} aria-hidden="true" />}
+    {items.map(item => <button key={item.key} ref={(element) => { tabRefs.current[item.key] = element; }} role="tab" aria-selected={item.key === active} className={item.key === active ? "active" : ""} onClick={() => onChange(item.key)}>
+      {item.label}{item.count !== undefined && <small>{item.count}</small>}
+    </button>)}
+  </div>;
+}
+
+function SortMenu({ value, onChange }: { value: SortKey; onChange: (value: SortKey) => void }) {
+  const [open, setOpen] = useState(false);
+  return <div className="sort-dropdown">
+    {open && <button className="panel-backdrop transparent" onClick={() => setOpen(false)} aria-label="Close sort menu" />}
+    <button className="sort-button" onClick={() => setOpen(!open)} aria-haspopup="true" aria-expanded={open}>{sortLabels[value]} <ChevronDown size={13} className={open ? "flip" : ""} /></button>
+    {open && <div className="sort-menu">{(Object.keys(sortLabels) as SortKey[]).map(key => <button key={key} className={value === key ? "active" : ""} onClick={() => { onChange(key); setOpen(false); }}>{sortLabels[key]}</button>)}</div>}
+  </div>;
+}
+
+// Full catalogue for the dedicated All Products page.
+export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWishlist }: StoreActions) {
+  const [category, setCategory] = useState("All");
+  const [sortKey, setSortKey] = useState<SortKey>("featured");
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("category");
+    if (wanted && productCategories.includes(wanted)) setCategory(wanted);
+  }, []);
+  const pick = (value: string) => {
+    setCategory(value);
+    const url = new URL(window.location.href);
+    if (value === "All") url.searchParams.delete("category"); else url.searchParams.set("category", value);
+    window.history.replaceState(null, "", url);
+  };
+  const tabs = [{ key: "All", label: "All", count: storeProducts.length }, ...productCategories.map(name => ({ key: name, label: name, count: storeProducts.filter(item => item.category === name).length }))];
+  const shown = useMemo(() => sortProducts(category === "All" ? storeProducts : storeProducts.filter(item => item.category === category), sortKey), [category, sortKey]);
+  return <section className="catalog page-width" id="catalog">
+    <nav className="pd-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span><span>All Products</span></nav>
+    <header className="catalog-head">
+      <div><p className="eyebrow">Our shop</p><h1>All <em>Products</em></h1></div>
+      <p>Natural, traditional Bangladeshi foods, sourced with care and delivered to your door.</p>
+    </header>
+    <div className="shop-toolbar">
+      <PillTabs label="Product categories" items={tabs} active={category} onChange={pick} />
+      <SortMenu value={sortKey} onChange={setSortKey} />
+    </div>
+    <p className="catalog-count" role="status">Showing {shown.length} {shown.length === 1 ? "product" : "products"}{category !== "All" && <> in <b>{category}</b></>}</p>
+    <div className="product-grid">{shown.map(product => <ProductCard key={product.name} product={product} onAdd={(item, qty) => addToCart(item ?? product, qty)} onOrderNow={(item, qty) => goToCheckout(item ?? product, qty)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} />)}</div>
+  </section>;
 }

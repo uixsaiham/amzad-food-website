@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, Clock, MapPin, Moon, Sun, Sunrise, Sunset } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Clock, MapPin, Moon, Sun, Sunrise, Sunset } from "lucide-react";
 
 type Phase = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
 type Prayer = { key: Phase; name: string; at: string; icon: typeof Sun };
@@ -44,13 +44,68 @@ function schedule(now: Date) {
   return { current, next, left, progress };
 }
 
-export default function PrayerTimes({ notify }: { notify: (message: string) => void }) {
+function useNow() {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     setNow(new Date());
     const timer = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(timer);
   }, []);
+  return now;
+}
+
+
+// Compact prayer card pinned to the right edge; hides while the full prayer section is on screen.
+export function PrayerDock() {
+  const now = useNow();
+  const [sectionVisible, setSectionVisible] = useState(false);
+  useEffect(() => {
+    const section = document.getElementById("prayer-times");
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => setSectionVisible(entry.isIntersecting), { threshold: 0.25 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+  // Remember whether this visitor collapsed the card; on smaller laptops it starts collapsed so it doesn't cover the hero.
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    let stored: string | null = null;
+    try { stored = localStorage.getItem("pdock-collapsed"); } catch {}
+    setCollapsed(stored ? stored === "1" : window.innerWidth < 1280);
+  }, []);
+  const toggle = (value: boolean) => { setCollapsed(value); try { localStorage.setItem("pdock-collapsed", value ? "1" : "0"); } catch {} };
+
+  if (!now) return null;
+  const state = schedule(now);
+  const current = prayers[state.current];
+  const next = prayers[state.next];
+
+  if (collapsed) return <button className={sectionVisible ? "pdock-mini is-hidden" : "pdock-mini"} lang="bn" onClick={() => toggle(false)} aria-label="নামাজের সময় দেখুন">
+    <ChevronLeft size={14} />
+    <span><b>{current.name}</b><small>{formatTime(current.at)}</small></span>
+  </button>;
+
+  return <aside className={sectionVisible ? "pdock is-hidden" : "pdock"} lang="bn" aria-label="নামাজের সময়">
+    <div className="pdock-head">
+      <span><Moon size={12} fill="currentColor" /> নামাজের সময়</span>
+      <em><MapPin size={11} /> ঢাকা</em>
+      <button className="pdock-collapse" onClick={() => toggle(true)} aria-label="ছোট করুন"><ChevronRight size={14} /></button>
+    </div>
+    <div className="pdock-next">
+      <small>পরবর্তী · {next.name} {formatTime(next.at)}</small>
+      <strong>{formatLeft(state.left)} বাকি</strong>
+    </div>
+    <ul>
+      {prayers.map((prayer, index) => <li key={prayer.key} className={index === state.current ? "current" : index === state.next ? "next" : ""}>
+        <span>{prayer.name}</span><b>{formatTime(prayer.at)}</b>
+      </li>)}
+    </ul>
+    <a href="#prayer-times">বিস্তারিত দেখুন <Clock size={12} /></a>
+  </aside>;
+}
+
+export default function PrayerTimes({ notify }: { notify: (message: string) => void }) {
+  const now = useNow();
 
   const state = now ? schedule(now) : { current: prayers.length - 1, next: 0, left: 0, progress: 1 };
   const current = prayers[state.current];

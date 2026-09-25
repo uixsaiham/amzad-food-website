@@ -34,7 +34,11 @@ export const comboProducts: Product[] = [store.delightNaru, store.deliSpice, sto
 // "All Products" grid; the first 3 also top up the best sellers grid.
 export const exploreProducts: Product[] = [store.delightNaru, store.slimKey, store.winterGift, store.akherPatali, store.narkelNaru, store.khejurerDana, store.akherDana, store.hazmiJuice, store.deliSpice, store.ketoCure, store.hazmiSeeds, store.chiaSeeds];
 
-export const productSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+// Every store product (with photo), and their categories in first-seen order, for the shop tabs.
+export const storeProducts: Product[] = Object.values(store);
+export const productCategories: string[] = Array.from(new Set(storeProducts.map(product => product.category)));
+
+export const productSlug =(name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // Earlier placeholder items still linked from the hero (honey, ghee) and the category rail.
 const legacyImage = "/amzad-food-website/product-honey.png";
