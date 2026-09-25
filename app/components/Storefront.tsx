@@ -230,6 +230,25 @@ type StoreActions = {
   toggleWishlist: (product: CartLine) => void;
 };
 
+function BlogSection({ notify, withStats = false }: { notify: (message: string) => void; withStats?: boolean }) {
+  return <section className="video-reviews" id="blogs">
+    <div className="video-review-heading">
+      <div><span className="video-eyebrow"><Play size={11} fill="currentColor" /> THE AMZAD JOURNAL</span><h2>Good food.<br /><em>Stories worth sharing.</em></h2></div>
+      <div className="video-heading-note"><p>Discover our products, everyday inspiration and the stories behind better food.</p><span>Customer product reviews <i /> Video series</span></div>
+    </div>
+    <div className="blog-grid">{blogReviews.map((item, index) => <article className="blog-card" key={item.image}>
+      <button className="video-preview" aria-label={`Preview ${item.alt} — video coming soon`} onClick={() => notify("This video is coming soon")}>
+        <img src={item.image} alt={item.alt} loading="lazy" />
+        <span className="video-number">0{index + 1}</span>
+        <span className="blog-play"><Play size={18} fill="currentColor" /></span>
+        <span className="video-status">Video coming soon</span>
+      </button>
+      <div className="video-card-copy"><span className="video-card-category">{["Everyday wellness", "Natural goodness", "Better food habits"][index]}</span><h3>{item.alt}</h3><div className="video-card-bottom"><span>Amzad Food · Product stories</span><ArrowUp size={16} /></div></div>
+    </article>)}</div>
+    {withStats && <ImpactStats />}
+  </section>;
+}
+
 export default function Storefront({ children }: { children?: (actions: StoreActions) => React.ReactNode }) {
   const router = useRouter();
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -359,7 +378,11 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
     <div className={hasScrolled ? "announcement is-hidden" : "announcement"}><div className="announcement-inner page-width"><span className="announcement-contacts-group"><span className="announcement-cta">প্রয়োজনে কল করুন</span><span className="announcement-contacts"><a className="announcement-contact" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={14} /> 01327406605</a><span className="announcement-divider" /><a className="announcement-contact" href="tel:+8809613824071"><Phone size={13} /> 09613824071</a></span></span><span className="announcement-links"><a className="announcement-link" href="/amzad-food-website/track-order/"><PackageSearch size={13} /> Track Order</a></span></div></div>
     <nav ref={navRef} className="navbar page-width site-nav"><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><label className="nav-search"><Search size={15} /><input ref={searchRef} placeholder="Search honey, ghee, dates..." value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") scrollToShop(); if (event.key === "Escape") event.currentTarget.blur(); }} aria-label="Search products" />{query ? <button type="button" className="nav-search-clear" onClick={() => setQuery("")} aria-label="Clear search"><X size={13} /></button> : <kbd>/</kbd>}</label><div className="nav-icons"><button className="nav-icon" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={17} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><small>My Cart</small><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
     <CategoryRail onAdd={addToCart} onBrowse={(label) => { if (categories.includes(label)) setActiveCategory(label); scrollToShop(); notify(label === "All" ? "Showing all products" : `Browsing ${label}`); }} />
-    {children ? children({ addToCart, goToCheckout, isWishlisted, toggleWishlist }) : <>
+    {children ? <>
+    {children({ addToCart, goToCheckout, isWishlisted, toggleWishlist })}
+    <Reviews />
+    <BlogSection notify={notify} />
+    </> : <>
     <HeroSlider />
     <section className="journey page-width" aria-label="From source to your table"><div className="journey-card">
       <div className="journey-intro"><span className="journey-pill"><Leaf size={12} /> Our Promise</span><h2>From Source<br /><em>to Your Table</em></h2><p>A journey of trust &amp; quality, in four careful steps.</p></div>
@@ -396,22 +419,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
       </div>
     </section>
     <ProductSection id="all-products" title="All Products" eyebrow="Explore our full collection" products={exploreProducts.slice(0, 8)} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
-    <section className="video-reviews" id="blogs">
-      <div className="video-review-heading">
-        <div><span className="video-eyebrow"><Play size={11} fill="currentColor" /> THE AMZAD JOURNAL</span><h2>Good food.<br /><em>Stories worth sharing.</em></h2></div>
-        <div className="video-heading-note"><p>Discover our products, everyday inspiration and the stories behind better food.</p><span>Customer product reviews <i /> Video series</span></div>
-      </div>
-      <div className="blog-grid">{blogReviews.map((item, index) => <article className="blog-card" key={item.image}>
-        <button className="video-preview" aria-label={`Preview ${item.alt} — video coming soon`} onClick={() => notify("This video is coming soon")}>
-          <img src={item.image} alt={item.alt} loading="lazy" />
-          <span className="video-number">0{index + 1}</span>
-          <span className="blog-play"><Play size={18} fill="currentColor" /></span>
-          <span className="video-status">Video coming soon</span>
-        </button>
-        <div className="video-card-copy"><span className="video-card-category">{["Everyday wellness", "Natural goodness", "Better food habits"][index]}</span><h3>{item.alt}</h3><div className="video-card-bottom"><span>Amzad Food · Product stories</span><ArrowUp size={16} /></div></div>
-      </article>)}</div>
-      <ImpactStats />
-    </section>
+    <BlogSection notify={notify} withStats />
     </>}
     <footer className="ft">
       <div className="ft-cta page-width">
