@@ -6,8 +6,9 @@ import { Check, Clock, Heart, Minus, Plus, ShoppingCart, Star, Truck, X } from "
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
+import { Product, getProductBrand } from "../lib/products";
 
-type QuickViewProduct = { name: string; bn?: string; category: string; price: number; oldPrice?: number; image: string; tag?: string };
+type QuickViewProduct = Product;
 type Details = { bn: string; blurb: string; highlights: string[]; usage: string[]; origin: string; shelfLife: string; storage: string; sold: number };
 type Tab = "info" | "usage" | "delivery";
 
@@ -64,7 +65,7 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
   const line: CartLine = { name: size.factor === 1 ? product.name : `${product.name} (${size.label})`, price, image: product.image };
   const sku = `AF-${product.name.split(/\W+/).filter(Boolean).map((word) => word[0]).join("").toUpperCase()}${product.price}`;
   const whatsappText = encodeURIComponent(`Hello Amzad Food, I would like to order ${qty} × ${line.name} (৳${price * qty}).`);
-  const infoRows: [string, string][] = [["Category", product.category], ["Net weight", size.label], ["Origin", info.origin], ["Shelf life", info.shelfLife], ["Storage", info.storage], ["SKU", sku]];
+  const infoRows: [string, string][] = [["Brand", getProductBrand(product)], ["Category", product.category], ["Net weight", size.label], ["Origin", info.origin], ["Shelf life", info.shelfLife], ["Storage", info.storage], ["SKU", sku]];
 
   const content = (
     <div className={embedded ? "pd-product" : "qv-backdrop"} onClick={onClose} role="presentation">

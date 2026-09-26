@@ -1,8 +1,12 @@
-export type Product = { name: string; bn?: string; category: string; price: number; oldPrice?: number; unit?: string; image: string; tag?: string };
+export const productBrands = ["Amzad", "Maza", "Slifit"] as const;
+export type ProductBrand = typeof productBrands[number];
+export const getProductBrand = (product: { brand?: ProductBrand }): ProductBrand => product.brand ?? "Amzad";
+
+export type Product = { brand?: ProductBrand; name: string; bn?: string; category: string; price: number; oldPrice?: number; unit?: string; image: string; tag?: string };
 
 const shot = (slug: string) => `/amzad-food-website/products/${slug}.png`;
 const p = (name: string, bn: string, category: string, price: number, oldPrice: number | undefined, unit: string, slug: string, tag?: string): Product =>
-  ({ name, bn, category, price, oldPrice, unit, image: shot(slug), tag });
+  ({ name, bn, category, price, oldPrice, unit, image: shot(slug), tag, brand: "Amzad" });
 
 // Store products shown on the product cards.
 const store = {

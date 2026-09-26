@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Coffee, Flame, Gift, LayoutGrid, Plus, Sparkles, Star, Wheat } from "lucide-react";
 import { CartLine } from "../lib/cart";
+import { Product, catalog } from "../lib/products";
 
 type RailProduct = { name: string; bn: string; price: number; old?: number; unit: string; rating: number };
 type RailCategory = {
@@ -77,7 +78,7 @@ function CategoryIcon({ icon, size = 20 }: { icon: RailCategory["icon"]; size?: 
   return <Icon size={size} strokeWidth={2} />;
 }
 
-export default function CategoryRail({ onAdd, onBrowse }: { onAdd: (item: CartLine) => void; onBrowse: (label: string) => void }) {
+export default function CategoryRail({ onAdd, onBrowse, onView }: { onView: (product: Product) => void; onAdd: (item: CartLine) => void; onBrowse: (label: string) => void }) {
   const [active, setActive] = useState<string | null>(null);
   const [canScroll, setCanScroll] = useState({ left: false, right: false });
   const trackRef = useRef<HTMLDivElement>(null);
@@ -115,6 +116,13 @@ export default function CategoryRail({ onAdd, onBrowse }: { onAdd: (item: CartLi
   };
   const keepOpen = () => clearTimeout(closeTimer.current);
   const scrollBy = (direction: number) => trackRef.current?.scrollBy({ left: direction * 320, behavior: "smooth" });
+  const resolveProduct = (product: RailProduct): Product => catalog.find(item => item.name === product.name) ?? { name: product.name, bn: product.bn, category: current?.label ?? "Pantry", price: product.price, oldPrice: product.old, unit: product.unit, image: productImage };
+  const viewProduct = (product: RailProduct) => {
+    clearTimeout(openTimer.current);
+    clearTimeout(closeTimer.current);
+    setActive(null);
+    onView(resolveProduct(product));
+  };
   const browse = (label: string) => { setActive(null); onBrowse(label); };
 
   return <div className="cat-rail-wrap page-width" onMouseLeave={scheduleClose}>
@@ -157,15 +165,15 @@ export default function CategoryRail({ onAdd, onBrowse }: { onAdd: (item: CartLi
         </div>
         <div className="cat-flyout-products">
           <p className="cat-flyout-label"><Star size={12} fill="currentColor" /> Top picks in {current.label}</p>
-          <ol>{current.top.map((product, index) => <li key={product.name}>
-            <span className="cat-rank">{String(index + 1).padStart(2, "0")}</span>
-            <span className="cat-thumb"><img src={productImage} alt="" /></span>
+          <ol>{current.top.map((product) => <li key={product.name}>
+            <button type="button" className="cat-product-open" onClick={() => viewProduct(product)} aria-label={`View ${product.name} details`} />
+            <span className="cat-thumb"><img src={resolveProduct(product).image} alt="" /></span>
             <div className="cat-product-info">
               <strong>{product.name}</strong>
               <small>{product.bn} · {product.unit}</small>
               <span className="cat-product-price"><b>৳{product.price}</b>{product.old && <del>৳{product.old}</del>}<i><Star size={10} fill="currentColor" /> {product.rating}</i></span>
             </div>
-            <button className="cat-add" onClick={() => onAdd({ name: product.name, price: product.price, image: productImage })} aria-label={`Add ${product.name} to cart`}><Plus size={15} /></button>
+            <button className="cat-add" onClick={() => onAdd(resolveProduct(product))} aria-label={`Add ${product.name} to cart`}><Plus size={15} /></button>
           </li>)}</ol>
         </div>
         <div className="cat-flyout-deal">

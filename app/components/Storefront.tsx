@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { CartItem, CartLine, loadCart, saveCart } from "../lib/cart";
 import Link from "next/link";
-import { Product, products, comboProducts, exploreProducts, productSlug, catalog, storeProducts, productCategories } from "../lib/products";
+import { Product, products, comboProducts, exploreProducts, productSlug, catalog, storeProducts, productCategories, productBrands, getProductBrand } from "../lib/products";
 import QuickView from "./QuickView";
 import AuthModal from "./AuthModal";
 import MegaMenu, { MenuContact, MenuIcon, MenuLink, menuCategories, menuHelp, menuPages } from "./MegaMenu";
@@ -251,6 +251,8 @@ function BlogSection({ notify, withStats = false }: { notify: (message: string) 
 
 export default function Storefront({ children }: { children?: (actions: StoreActions) => React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
   const [hasScrolled, setHasScrolled] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -289,6 +291,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
     window.addEventListener("resize", onScroll);
     return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); window.cancelAnimationFrame(frame); };
   }, []);
+  const [menuProduct, setMenuProduct] = useState<Product | null>(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
@@ -324,7 +327,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
   const notify = (message: string) => setToast(message);
   const visibleProducts = useMemo(() => {
     const source = activeCategory === "All" ? [...products.slice(0, 8), ...exploreProducts.slice(0, 3)] : storeProducts.filter(item => item.category === activeCategory);
-    return source.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
+    return source.filter(item => `${item.name} ${getProductBrand(item)}`.toLowerCase().includes(query.toLowerCase()));
   }, [activeCategory, query]);
   const addToCart = (product: CartLine, qty = 1) => {
     setCart((items) => {
@@ -377,7 +380,8 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
   return <main id="top" className={children ? "storefront" : "storefront storefront-home"}>
     <div className={hasScrolled ? "announcement is-hidden" : "announcement"}><div className="announcement-inner page-width"><span className="announcement-contacts-group"><span className="announcement-cta">প্রয়োজনে কল করুন</span><span className="announcement-contacts"><a className="announcement-contact" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={14} /> 01327406605</a><span className="announcement-divider" /><a className="announcement-contact" href="tel:+8809613824071"><Phone size={13} /> 09613824071</a></span></span><span className="announcement-links"><a className="announcement-link" href="/amzad-food-website/track-order/"><PackageSearch size={13} /> Track Order</a></span></div></div>
     <nav ref={navRef} className="navbar page-width site-nav"><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><label className="nav-search"><Search size={15} /><input ref={searchRef} placeholder="Search honey, ghee, dates..." value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") scrollToShop(); if (event.key === "Escape") event.currentTarget.blur(); }} aria-label="Search products" />{query ? <button type="button" className="nav-search-clear" onClick={() => setQuery("")} aria-label="Clear search"><X size={13} /></button> : <kbd>/</kbd>}</label><div className="nav-icons"><button className="nav-icon" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={17} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><small>My Cart</small><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
-    <CategoryRail onAdd={addToCart} onBrowse={(label) => { if (categories.includes(label)) setActiveCategory(label); scrollToShop(); notify(label === "All" ? "Showing all products" : `Browsing ${label}`); }} />
+    {menuProduct && <QuickView product={menuProduct} wishlisted={wishlist.some(item => item.name === menuProduct.name)} onToggleWishlist={() => toggleWishlist(menuProduct)} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => setMenuProduct(null)} />}
+    {isHomePage && <CategoryRail onView={setMenuProduct} onAdd={addToCart} onBrowse={(label) => { if (categories.includes(label)) setActiveCategory(label); scrollToShop(); notify(label === "All" ? "Showing all products" : `Browsing ${label}`); }} />}
     {children ? <>
     {children({ addToCart, goToCheckout, isWishlisted, toggleWishlist })}
     <Reviews />
@@ -582,33 +586,166 @@ function SortMenu({ value, onChange }: { value: SortKey; onChange: (value: SortK
   </div>;
 }
 
+type PriceFilter = "all" | "under-500" | "500-1000" | "1000-2000" | "2000-plus";
+
+const priceFilterLabels: Record<PriceFilter, string> = {
+  all: "All prices",
+  "under-500": "Under ৳500",
+  "500-1000": "৳500–৳1,000",
+  "1000-2000": "৳1,000–৳2,000",
+  "2000-plus": "৳2,000+",
+};
+
+const matchesPriceRange = (price: number, range: PriceFilter) => {
+  switch (range) {
+    case "under-500": return price < 500;
+    case "500-1000": return price >= 500 && price <= 1000;
+    case "1000-2000": return price > 1000 && price <= 2000;
+    case "2000-plus": return price > 2000;
+    default: return true;
+  }
+};
+
 // Full catalogue for the dedicated All Products page.
 export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWishlist }: StoreActions) {
   const [category, setCategory] = useState("All");
   const [sortKey, setSortKey] = useState<SortKey>("featured");
+  const [query, setQuery] = useState("");
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
+  const [brand, setBrand] = useState("all");
+  const [productType, setProductType] = useState("all");
+  const [page, setPage] = useState(1);
+  const resultsRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    setPage(1);
+  }, [category, priceFilter, query, sortKey, brand, productType]);
+
   useEffect(() => {
     const wanted = new URLSearchParams(window.location.search).get("category");
     if (wanted && productCategories.includes(wanted)) setCategory(wanted);
   }, []);
+
   const pick = (value: string) => {
     setCategory(value);
     const url = new URL(window.location.href);
     if (value === "All") url.searchParams.delete("category"); else url.searchParams.set("category", value);
     window.history.replaceState(null, "", url);
   };
+
   const tabs = [{ key: "All", label: "All", count: storeProducts.length }, ...productCategories.map(name => ({ key: name, label: name, count: storeProducts.filter(item => item.category === name).length }))];
-  const shown = useMemo(() => sortProducts(category === "All" ? storeProducts : storeProducts.filter(item => item.category === category), sortKey), [category, sortKey]);
+
+  const activeFilters = useMemo(() => {
+    const items: string[] = [];
+    if (category !== "All") items.push(category);
+    if (priceFilter !== "all") items.push(priceFilterLabels[priceFilter]);
+    if (brand !== "all") items.push(brand);
+    if (productType !== "all") items.push(productType === "combo" ? "Combo packs" : "Single products");
+    if (query.trim()) items.push(`“${query.trim()}”`);
+    return items;
+  }, [category, priceFilter, query, brand, productType]);
+
+  const shown = useMemo(() => {
+    const base = category === "All" ? storeProducts : storeProducts.filter(item => item.category === category);
+    const withQuery = query.trim() ? base.filter((item) => {
+      const target = `${item.name} ${item.bn ?? ""} ${item.category} ${getProductBrand(item)}`.toLowerCase();
+      return target.includes(query.trim().toLowerCase());
+    }) : base;
+    const withPrice = withQuery.filter((item) => matchesPriceRange(item.price, priceFilter));
+    const withType = withPrice.filter(item => (brand === "all" || getProductBrand(item) === brand) && (productType === "all" || (productType === "combo" ? item.category === "Combo Packs" : item.category !== "Combo Packs")));
+    return sortProducts(withType, sortKey);
+  }, [category, priceFilter, query, sortKey, brand, productType]);
+
+  const pageSize = 12;
+  const pageCount = Math.max(1, Math.ceil(shown.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageStart = (currentPage - 1) * pageSize;
+  const pageProducts = shown.slice(pageStart, pageStart + pageSize);
+  const changePage = (nextPage: number) => {
+    setPage(Math.max(1, Math.min(nextPage, pageCount)));
+    resultsRef.current?.focus({ preventScroll: true });
+    resultsRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
+  };
+
+  const resetFilters = () => {
+    setCategory("All");
+    setPriceFilter("all");
+    setBrand("all");
+    setProductType("all");
+    setQuery("");
+    setSortKey("featured");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("category");
+    window.history.replaceState(null, "", url);
+  };
+
   return <section className="catalog page-width" id="catalog">
-    <nav className="pd-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span><span>All Products</span></nav>
-    <header className="catalog-head">
-      <div><p className="eyebrow">Our shop</p><h1>All <em>Products</em></h1></div>
-      <p>Natural, traditional Bangladeshi foods, sourced with care and delivered to your door.</p>
-    </header>
-    <div className="shop-toolbar">
-      <PillTabs label="Product categories" items={tabs} active={category} onChange={pick} />
-      <SortMenu value={sortKey} onChange={setSortKey} />
+    <header className="catalog-heading"><h1>All Products</h1></header>
+
+    <div className="catalog-toolbar" role="group" aria-label="Product filters">
+      <div className="catalog-field">
+        <label htmlFor="price-filter">Price Range</label>
+        <select id="price-filter" value={priceFilter} onChange={(event) => setPriceFilter(event.target.value as PriceFilter)}>
+          {(Object.keys(priceFilterLabels) as PriceFilter[]).map(value => <option key={value} value={value}>{priceFilterLabels[value]}</option>)}
+        </select>
+      </div>
+      <div className="catalog-field">
+        <label htmlFor="category-filter">Category</label>
+        <select id="category-filter" value={category} onChange={(event) => pick(event.target.value)}>
+          {tabs.map(tab => <option key={tab.key} value={tab.key}>{tab.key === "All" ? "All categories" : tab.label} ({tab.count})</option>)}
+        </select>
+      </div>
+      <div className="catalog-field">
+        <label htmlFor="brand-filter">Brand</label>
+        <select id="brand-filter" value={brand} onChange={(event) => setBrand(event.target.value)}>
+          <option value="all">All brands</option>{productBrands.map(name => <option key={name} value={name}>{name}</option>)}
+        </select>
+      </div>
+      <div className="catalog-field">
+        <label htmlFor="type-filter">Product Type</label>
+        <select id="type-filter" value={productType} onChange={(event) => setProductType(event.target.value)}>
+          <option value="all">All types</option><option value="single">Single products</option><option value="combo">Combo packs</option>
+        </select>
+      </div>
+      <div className="catalog-field catalog-search-field">
+        <label htmlFor="catalog-search">Search</label>
+        <div className="catalog-search"><Search size={17} aria-hidden="true" /><input id="catalog-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products…" /></div>
+      </div>
     </div>
-    <p className="catalog-count" role="status">Showing {shown.length} {shown.length === 1 ? "product" : "products"}{category !== "All" && <> in <b>{category}</b></>}</p>
-    <div className="product-grid">{shown.map(product => <ProductCard key={product.name} product={product} onAdd={(item, qty) => addToCart(item ?? product, qty)} onOrderNow={(item, qty) => goToCheckout(item ?? product, qty)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} />)}</div>
+
+    <div className="catalog-results">
+      {activeFilters.length > 0 && <div className="active-filter-bar" aria-live="polite">
+        {activeFilters.map((filter) => <span key={filter} className="active-filter-pill">{filter}</span>)}
+        <button type="button" className="filter-reset" onClick={resetFilters}>Clear all</button>
+      </div>}
+
+
+    <div className="catalog-summary-row">
+      <p ref={resultsRef} tabIndex={-1} className="catalog-count" role="status">Showing {shown.length > 0 ? `${pageStart + 1}–${pageStart + pageProducts.length} of ${shown.length}` : "0"} {shown.length === 1 ? "product" : "products"}{category !== "All" && <> in <b>{category}</b></>}</p>
+      <div className="catalog-field catalog-sort-field">
+        <label htmlFor="catalog-sort">Sort By</label>
+        <select id="catalog-sort" value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)}>
+          {(Object.keys(sortLabels) as SortKey[]).map(key => <option key={key} value={key}>{sortLabels[key]}</option>)}
+        </select>
+      </div>
+    </div>
+
+      {shown.length === 0 ? (
+        <div className="shop-empty" role="status">
+          <strong>No products match your filters.</strong>
+          <p>Try clearing a filter or browsing another category.</p>
+          <button type="button" className="cta cta-sm" onClick={resetFilters}><span>Clear filters</span></button>
+        </div>
+      ) : (
+        <div className="product-grid">{pageProducts.map(product => <ProductCard key={product.name} product={product} onAdd={(item, qty) => addToCart(item ?? product, qty)} onOrderNow={(item, qty) => goToCheckout(item ?? product, qty)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} />)}</div>
+      )}
+      {pageCount > 1 && <nav className="catalog-pagination" aria-label="Product pagination">
+        <button type="button" disabled={currentPage === 1} onClick={() => changePage(currentPage - 1)}>← Previous</button>
+        <div className="catalog-page-numbers">
+          {Array.from({ length: pageCount }, (_, index) => index + 1).map(number => <button key={number} type="button" aria-label={`Page ${number}`} aria-current={currentPage === number ? "page" : undefined} onClick={() => changePage(number)}>{number}</button>)}
+        </div>
+        <button type="button" disabled={currentPage === pageCount} onClick={() => changePage(currentPage + 1)}>Next →</button>
+      </nav>}
+    </div>
   </section>;
 }
