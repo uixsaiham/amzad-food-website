@@ -2405,9 +2405,11 @@ html body .to-support p { color: #7c6a55; margin: 0 0 6px; }
 @media (prefers-reduced-motion: reduce) { .pill-tabs-pill { transition: none; } }
 
 /* All Products page */
-.catalog { padding-bottom: 64px; padding-top: 6px; }
+.catalog { padding-bottom: 64px; padding-top: 26px; }
+@media (max-width: 600px) { .catalog { padding-top: 18px; } }
 .catalog-heading { margin-bottom: 16px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; min-width: 0; }
-.catalog-heading h1 { color: var(--deep); font-family: inherit; font-size: 24px; font-weight: 600; letter-spacing: -.035em; line-height: 1.2; margin: 0; }
+.catalog-heading h1 { color: var(--deep); font-family: 'Gelasio', 'Anek Bangla', serif; font-size: 49px; font-weight: 500; letter-spacing: -.06em; line-height: 1; margin: 0; }
+@media (max-width: 800px) { .catalog-heading h1 { font-size: clamp(27px, 6vw, 38px); line-height: 1.12; } }
 .catalog-toolbar { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(140px, 1.15fr) minmax(120px, 1fr) minmax(130px, 1fr) minmax(220px, 1.5fr); align-items: end; gap: 12px; margin-bottom: 22px; padding: 0; background: transparent; }
 .catalog-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .catalog-field > label { color: var(--deep); font-size: 12px; font-weight: 600; }
@@ -2433,7 +2435,6 @@ html body .to-support p { color: #7c6a55; margin: 0 0 6px; }
 .shop-empty p { margin: 0; }
 @media (max-width: 640px) {
   .catalog-heading { flex-direction: column; gap: 4px; }
-  .catalog-heading h1 { font-size: 20px; }
 
   .catalog-search { width: 100%; }
   .filter-row { grid-template-columns: 1fr; }
