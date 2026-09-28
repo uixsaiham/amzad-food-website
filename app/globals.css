@@ -220,13 +220,20 @@ h1 em { color: #e9430c; font-size: 1.02em; text-decoration: underline; text-deco
 	h1 { font-size: 54px; }
 	.hero-art { height: 310px; margin-right: 0; width: 100%; }
 	.hero-leaf { font-size: 45px; }
-	.feature-band { grid-template-columns: 1fr; padding: 25px 20px 45px; }
-	.origin-card, .honey-card { min-height: 430px; }
-	.origin-card { grid-template-columns: 1fr; }
-	.origin-copy { padding-bottom: 10px; }
-	.origin-map { min-height: 220px; }
+	.feature-band { grid-template-columns: 1fr; grid-auto-rows: 1fr; gap: 16px; padding: 16px 16px 30px; }
+	.origin-card, .honey-card { min-height: clamp(420px, 60vw, 500px); height: auto; }
+	.origin-card { display: flex; flex-direction: column; grid-template-columns: 1fr; }
+	.origin-copy { padding: 20px 18px 8px; }
+	.origin-copy h2 { font-size: 30px; margin-bottom: 12px; }
+	.origin-copy > p:not(.eyebrow) { max-width: none; font-size: 12px; }
+	.origin-map { min-height: 180px; flex: 1; }
+	.honey-card { display: flex; flex-direction: column; justify-content: flex-start; }
 	.honey-bg { object-position: 70% center; }
-	.honey-copy { max-width: none; padding: 30px 20px; }
+	.honey-copy { max-width: none; padding: 22px 18px 20px; }
+	.honey-copy h2 { font-size: 30px; margin-bottom: 10px; }
+	.honey-badges { gap: 8px; margin: 12px 0 18px; }
+	.honey-badges span { padding: 8px 10px; }
+	.honey-price { flex-wrap: wrap; gap: 8px 10px; margin-bottom: 14px; }
 	.honey-callout { display: none; }
 }
 
@@ -2652,13 +2659,16 @@ html body .jn-article p { font-size: 16px; line-height: 1.9; color: #526353; mar
 
 /* Mobile storefront: compact content and visible shopping controls. */
 @media (max-width: 800px) {
-  .navbar.site-nav { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px 44px; height: auto; gap: 6px; padding-top: 8px; padding-bottom: 10px; }
+  .navbar.site-nav { display: grid; grid-template-columns: 44px minmax(0, 1fr) 40px 40px 40px; height: auto; gap: 6px; padding-top: 8px; padding-bottom: 10px; }
   .navbar > .brand { min-width: 0; }
   .navbar .brand-logo { width: min(100%, 138px); height: auto; }
   .navbar .nav-actions, .navbar .nav-icons { display: contents; }
-  .navbar .nav-icons > .nav-icon:not(.nav-wishlist) { display: none; }
-  .navbar .nav-wishlist { display: flex; grid-column: 3; grid-row: 1; }
-  .navbar .nav-cart { grid-column: 4; grid-row: 1; }
+  .navbar .nav-icons > .nav-icon:not(.nav-user):not(.nav-wishlist) { display: none; }
+  .navbar .nav-user, .navbar .nav-wishlist, .navbar .nav-cart { justify-self: end; }
+  .navbar .nav-user { display: flex; grid-column: 3; grid-row: 1; }
+  .navbar .nav-wishlist { display: flex; grid-column: 4; grid-row: 1; }
+  .navbar .nav-cart { grid-column: 5; grid-row: 1; margin-left: 0; }
+  .navbar .mega-menu-trigger { display: none; }
   .navbar .nav-search { display: flex; grid-column: 1 / -1; grid-row: 2; width: 100%; height: 44px; padding: 0 12px; border-radius: 12px; box-sizing: border-box; }
   .navbar .nav-search input { font-size: 16px; }
   .navbar .nav-search kbd, .navbar .mobile-nav-search { display: none; }
