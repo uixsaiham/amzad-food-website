@@ -12,6 +12,7 @@ import CategoryRail from "./CategoryRail";
 import PrayerTimes, { PrayerDock } from "./PrayerTimes";
 import Reviews from "./Reviews";
 import ImpactStats from "./ImpactStats";
+import BlogCarousel from "./BlogCards";
 import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Play, Search, Send, ShoppingCart, Star, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
@@ -245,6 +246,15 @@ function BlogSection({ notify, withStats = false }: { notify: (message: string) 
       </button>
       <div className="video-card-copy"><span className="video-card-category">{["Everyday wellness", "Natural goodness", "Better food habits"][index]}</span><h3>{item.alt}</h3><div className="video-card-bottom"><span>Amzad Food · Product stories</span><ArrowUp size={16} /></div></div>
     </article>)}</div>
+
+    {/* Written stories carousel */}
+    <div className="blog-section-stories">
+      <div className="blog-stories-header">
+        <span className="blog-stories-label">Written Stories</span>
+      </div>
+      <BlogCarousel />
+    </div>
+
     {withStats && <ImpactStats />}
   </section>;
 }
