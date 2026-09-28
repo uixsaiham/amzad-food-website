@@ -29,73 +29,54 @@ export function BlogCard({ post }: { post: BlogPost }) {
 /* ── Scrollable carousel with prev/next arrows ────────────────── */
 export default function BlogCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [edges, setEdges] = useState({ start: true, end: false });
+  const [scroll, setScroll] = useState({ progress: 0, start: true, end: false });
 
-  const updateEdges = useCallback(() => {
+  const update = useCallback(() => {
     const el = trackRef.current;
-    if (el) setEdges({ start: el.scrollLeft < 2, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScroll({ progress: max > 0 ? el.scrollLeft / max : 1, start: el.scrollLeft < 4, end: el.scrollLeft > max - 4 });
   }, []);
 
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
-    updateEdges();
-    const observer = new ResizeObserver(updateEdges);
+    update();
+    const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [updateEdges]);
+  }, [update]);
 
-  const scroll = (dir: number) => {
+  // Advance by one card so the arrows feel like the reviews carousel.
+  const step = (dir: number) => {
     const el = trackRef.current;
-    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    const card = el?.firstElementChild as HTMLElement | null;
+    if (el && card) el.scrollBy({ left: dir * (card.offsetWidth + (parseFloat(getComputedStyle(el).columnGap) || 0)), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   };
 
   return (
     <div className="jn-carousel-wrap">
-      {/* Arrow + track row */}
-      <div className="jn-carousel">
-        <button
-          className="best-sellers-arrow best-sellers-prev"
-          disabled={edges.start}
-          onClick={() => scroll(-1)}
-          aria-label="Previous blog posts"
-          aria-controls="blog-carousel-track"
-        >
-          <ChevronLeft size={20} />
-        </button>
-
-        <div
-          id="blog-carousel-track"
-          className="jn-track"
-          ref={trackRef}
-          onScroll={updateEdges}
-          tabIndex={0}
-          role="region"
-          aria-label="Blog stories"
-        >
-          {blogPosts.map((post) => (
-            <BlogCard key={post.slug} post={post} />
-          ))}
+      <div className="jn-carousel-head">
+        <div className="jn-carousel-title"><h2>From Our Blog</h2><p>Fresh ideas for your kitchen and everyday table.</p></div>
+        <div className="jn-carousel-nav">
+          <Link className="view-all" href="/blogs/"><span>View all blogs</span><i><ArrowRight size={14} /></i></Link>
         </div>
-
-        <button
-          className="best-sellers-arrow best-sellers-next"
-          disabled={edges.end}
-          onClick={() => scroll(1)}
-          aria-label="Next blog posts"
-          aria-controls="blog-carousel-track"
-        >
-          <ChevronRight size={20} />
-        </button>
       </div>
 
-      {/* Footer row: story count + view-all CTA */}
-      <div className="jn-carousel-footer">
-        <span className="jn-carousel-count">{blogPosts.length} stories</span>
-        <Link className="cta cta-ghost cta-sm" href="/blogs/">
-          <span>View all blogs</span>
-          <i className="cta-icon cta-arrow"><ArrowRight size={14} /></i>
-        </Link>
+      <div className="best-sellers-carousel">
+        <button type="button" className="best-sellers-arrow best-sellers-prev" onClick={() => step(-1)} disabled={scroll.start} aria-label="Previous blog posts" aria-controls="blog-carousel-track"><ChevronLeft size={20} /></button>
+      <div
+        id="blog-carousel-track"
+        className="jn-track"
+        ref={trackRef}
+        onScroll={update}
+        tabIndex={0}
+        role="region"
+        aria-label="Blog stories"
+      >
+        {blogPosts.map((post) => <BlogCard key={post.slug} post={post} />)}
+      </div>
+        <button type="button" className="best-sellers-arrow best-sellers-next" onClick={() => step(1)} disabled={scroll.end} aria-label="Next blog posts" aria-controls="blog-carousel-track"><ChevronRight size={20} /></button>
       </div>
     </div>
   );

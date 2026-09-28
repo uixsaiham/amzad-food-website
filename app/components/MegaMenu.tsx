@@ -21,7 +21,7 @@ export const menuCategories: { label: string; bn: string; icon: string | typeof 
   { label: "Dessert", bn: "ডেজার্ট", icon: CakeSlice },
 ];
 export type MenuLink = { label: string; href?: string; action?: "account" | "track" | "soon" };
-export const menuPages: MenuLink[] = [{ label: "Home", href: "#top" }, { label: "Products", href: "#shop" }, { label: "Blogs", href: "#blogs" }, { label: "About Us", href: "#story" }, { label: "Track Order", action: "track" }, { label: "My Account", action: "account" }];
+export const menuPages: MenuLink[] = [{ label: "Home", href: "#top" }, { label: "Products", href: "#shop" }, { label: "Blogs", href: "blogs/" }, { label: "About Us", href: "#story" }, { label: "Track Order", action: "track" }, { label: "My Account", action: "account" }];
 export const menuHelp: MenuLink[] = [{ label: "Terms and Conditions", action: "soon" }, { label: "Return Policy", action: "soon" }, { label: "Privacy Policy", action: "soon" }];
 export const MenuContact = () => <div className="menu-contact"><p><b>Need help ordering?</b><span>We reply every day until 11pm.</span></p><div className="menu-contact-actions"><a className="cta cta-whatsapp" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><span>Chat on WhatsApp</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={16} /></i></a><a className="cta cta-light" href="tel:+8809613824071"><span>Call 09613824071</span><i className="cta-icon"><Phone size={15} /></i></a></div></div>;
 export const MenuIcon = ({ icon }: { icon: string | typeof Leaf }) => typeof icon === "string" ? <img src={icon} alt="" aria-hidden="true" /> : (() => { const Icon = icon; return <Icon size={18} aria-hidden="true" />; })();

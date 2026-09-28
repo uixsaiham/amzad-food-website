@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Coffee, Flame, Gift, LayoutGrid, Plus, Sparkles, Star, Wheat } from "lucide-react";
 import { CartLine } from "../lib/cart";
-import { Product, catalog } from "../lib/products";
+import { Product, catalog, resolveProductCategory } from "../lib/products";
 
 type RailProduct = { name: string; bn: string; price: number; old?: number; unit: string; rating: number };
 type RailCategory = {
@@ -78,7 +78,7 @@ function CategoryIcon({ icon, size = 20 }: { icon: RailCategory["icon"]; size?: 
   return <Icon size={size} strokeWidth={2} />;
 }
 
-export default function CategoryRail({ onAdd, onBrowse, onView }: { onView: (product: Product) => void; onAdd: (item: CartLine) => void; onBrowse: (label: string) => void }) {
+export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView }: { selectedCategory: string; onView: (product: Product) => void; onAdd: (item: CartLine) => void; onBrowse: (label: string) => void }) {
   const [active, setActive] = useState<string | null>(null);
   const [canScroll, setCanScroll] = useState({ left: false, right: false });
   const trackRef = useRef<HTMLDivElement>(null);
@@ -137,7 +137,8 @@ export default function CategoryRail({ onAdd, onBrowse, onView }: { onView: (pro
           {railCategories.map((category) => <button
             key={category.key}
             role="menuitem"
-            className={active === category.key ? "cat-chip active" : "cat-chip"}
+            className={active === category.key || selectedCategory === resolveProductCategory(category.label) ? "cat-chip active" : "cat-chip"}
+            aria-current={selectedCategory === resolveProductCategory(category.label) ? "true" : undefined}
             style={{ "--accent": category.accent, "--tint": category.tint } as React.CSSProperties}
             onMouseEnter={() => preview(category.key)}
             onFocus={() => hoverable() && setActive(category.key)}
