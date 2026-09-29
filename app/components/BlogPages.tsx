@@ -2,9 +2,11 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Storefront from "./Storefront";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFacebookF, faXTwitter, faLinkedinIn, faPinterestP, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { BlogCard } from "./BlogCards";
 import { BlogPost, blogPosts, blogTags } from "../lib/blogs";
-import { ArrowRight, BookOpen, Clock } from "lucide-react";
+import { ArrowRight, BookOpen, Clock, Check, Link2, ChevronDown, ArrowUpRight, Mail } from "lucide-react";
 
 /* ═══════════════════════════════════════════════════════════════
    ALL BLOGS PAGE
@@ -85,6 +87,23 @@ export function BlogsPage() {
 export function BlogDetails({ post }: { post: BlogPost }) {
   const [activeId, setActiveId] = useState(post.sections[0]?.id ?? "");
   const [progress, setProgress] = useState(0);
+  const [tocOpen, setTocOpen] = useState(true);
+  const [shareStatus, setShareStatus] = useState("");
+  const [shareUrl, setShareUrl] = useState("");
+  useEffect(() => { setShareUrl(window.location.origin + window.location.pathname); setShareStatus(""); }, [post.slug]);
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const encodedTitle = encodeURIComponent(post.title);
+  const sharePlatforms = [
+    { name: "Facebook", icon: faFacebookF, href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, color: "#4267a9" },
+    { name: "X", icon: faXTwitter, href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`, color: "#202722" },
+    { name: "LinkedIn", icon: faLinkedinIn, href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, color: "#087da5" },
+    { name: "Pinterest", icon: faPinterestP, href: `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedTitle}&media=${encodeURIComponent(shareUrl ? new URL(post.image, shareUrl).href : "")}`, color: "#bf2030" },
+    { name: "WhatsApp", icon: faWhatsapp, href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`, color: "#218447" },
+  ];
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(shareUrl || window.location.href); setShareStatus("Link copied"); }
+    catch { setShareStatus("Copy the page address from your browser to share this story."); }
+  };
   const articleRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -105,15 +124,16 @@ export function BlogDetails({ post }: { post: BlogPost }) {
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
   }, [post]);
 
-  const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 6);
 
   return (
     <Storefront>
       {() => (
-        <div className="jn-page page-width">
+        <div className="jn-page jn-detail-page page-width">
           {/* Reading progress bar — fixed at top of viewport */}
           <div
             className="jn-progress-bar"
@@ -129,10 +149,12 @@ export function BlogDetails({ post }: { post: BlogPost }) {
           </nav>
 
           {/* Article header */}
-          <header className="jn-article-header">
+          <header className="jn-article-header" lang={post.language ?? "en"}>
+            <div className="jn-article-kicker"><span /> THE AMZAD JOURNAL <span className="jn-kicker-divider">/</span> {post.tag}</div>
             <span className="jn-tag jn-tag-inline">{post.tag}</span>
             <h1>{post.title}</h1>
             <p className="jn-article-desc">{post.description}</p>
+            <div className="jn-article-meta-row">
             <div className="jn-byline">
               <span className="jn-byline-avatar">AF</span>
               <div>
@@ -140,16 +162,32 @@ export function BlogDetails({ post }: { post: BlogPost }) {
                 <span><Clock size={12} />&thinsp;{post.readMin} min read · {post.date}</span>
               </div>
             </div>
+            <div className="jn-share-row" lang="en">
+              <span className="jn-share-label">Share</span>
+              <div className="jn-share-platforms">
+                {sharePlatforms.map(platform => <a key={platform.name} href={platform.href} target="_blank" rel="noopener noreferrer" aria-label={`Share on ${platform.name}`} title={`Share on ${platform.name}`} style={{ "--share-color": platform.color } as React.CSSProperties}><FontAwesomeIcon icon={platform.icon} /></a>)}
+                <a href={`mailto:?subject=${encodedTitle}&body=${encodedUrl}`} aria-label="Share by email" title="Share by email" style={{ "--share-color": "#748075" } as React.CSSProperties}><Mail size={16} /></a>
+                <button type="button" onClick={copyLink} aria-label="Copy story link" title="Copy story link">{shareStatus === "Link copied" ? <Check size={16} /> : <Link2 size={16} />}</button>
+              </div>
+              <span className="jn-share-status" role="status">{shareStatus}</span>
+            </div>
+            </div>
           </header>
 
           {/* Cover image */}
-          <img className="jn-cover" src={post.image} alt={post.imageAlt ?? post.title} />
+          <figure className="jn-cover-wrap"><img className="jn-cover" src={post.image} alt={post.imageAlt ?? post.title} fetchPriority="high" />
+            <figcaption><span>AMZAD FOOD JOURNAL</span><span>{post.tag} <span aria-hidden="true"> / </span> {post.readMin} min read</span></figcaption>
+          </figure>
 
           {/* Two-column: article body + sticky sidebar */}
           <div className="jn-detail-grid">
 
             {/* Article body */}
-            <article className="jn-article" ref={articleRef}>
+            <article className="jn-article" ref={articleRef} lang={post.language ?? "en"}>
+              <div className="jn-takeaways">
+                <span className="jn-summary-label"><BookOpen size={15} /> AT A GLANCE</span>
+                {post.takeaways ? <ul>{post.takeaways.map(item => <li key={item}><Check size={16} /><span>{item}</span></li>)}</ul> : <p>{post.description}</p>}
+              </div>
               {post.sections.map((section, idx) => (
                 <section id={section.id} key={section.id} className="jn-section">
                   <div className="jn-section-label">
@@ -158,9 +196,13 @@ export function BlogDetails({ post }: { post: BlogPost }) {
                   </div>
                   <h2>{section.title}</h2>
                   {section.paragraphs.map((para) => <p key={para}>{para}</p>)}
+                  {section.bullets && <ul className="jn-body-list">{section.bullets.map(item => <li key={item}>{item}</li>)}</ul>}
+                  {section.steps && <ol className="jn-body-steps">{section.steps.map(item => <li key={item}>{item}</li>)}</ol>}
+                  {section.note && <aside className="jn-note"><BookOpen size={18} /><p>{section.note}</p></aside>}
                 </section>
               ))}
 
+              {post.sources && <section className="jn-sources" aria-label="Sources"><h2>Sources &amp; further reading</h2><ul>{post.sources.map(source => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<ArrowUpRight size={14} /></a></li>)}</ul></section>}
               <div className="jn-article-foot">
                 <Link className="cta cta-ghost" href="/blogs/">
                   <span>Back to all stories</span>
@@ -172,9 +214,9 @@ export function BlogDetails({ post }: { post: BlogPost }) {
             {/* Sticky sidebar */}
             <aside className="jn-sidebar">
               {/* Table of contents */}
-              <nav className="jn-toc" aria-label="Table of contents">
-                <h2>In this story</h2>
-                <ol>
+              <nav className={`jn-toc${tocOpen ? "" : " is-collapsed"}`} aria-label="Table of contents">
+                <div className="jn-toc-heading"><h2>In this story</h2><button className="jn-toc-toggle" type="button" onClick={() => setTocOpen(!tocOpen)} aria-expanded={tocOpen} aria-controls="story-contents" aria-label="Toggle story contents"><ChevronDown size={18} /></button></div>
+                <ol id="story-contents">
                   {post.sections.map((section, idx) => (
                     <li key={section.id}>
                       <a
@@ -197,6 +239,7 @@ export function BlogDetails({ post }: { post: BlogPost }) {
                 </div>
               </nav>
 
+              {post.featuredProduct && <Link href={post.featuredProduct.href} className="jn-product-pick"><span>FROM OUR PANTRY</span><img src={post.featuredProduct.image} alt={post.featuredProduct.name} loading="lazy" /><h3 lang={post.language}>{post.featuredProduct.name}</h3><p>Explore ingredients, sizes and product details.</p><b>Explore product <ArrowRight size={15} /></b></Link>}
               {/* Tag / browse card */}
               <div className="jn-sidebar-card">
                 <span className="jn-tag jn-tag-inline">{post.tag}</span>

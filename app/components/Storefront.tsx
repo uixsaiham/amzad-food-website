@@ -102,19 +102,14 @@ function HeroSlider() {
   return <section className="hero hero-modern page-width" aria-label="Featured collections" aria-roledescription="carousel" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }}>
     <div className="hero-stage">
     <div className="hero-copy" key={`copy-${active}`}>
-      <p className="eyebrow"><span />{slide.eyebrow}</p>
       <h1><span>{slide.title[0]}</span><em>{slide.title[1]}</em></h1>
       <p className="hero-description">{slide.desc}</p>
-      <div className="hero-actions">
-        <a href="/amzad-food-website/#shop" className="cta cta-lg"><span>{slide.cta}</span><i className="cta-icon cta-arrow"><ArrowRight size={15} /></i></a>
-        <span className="hero-note"><span className="avatar-stack"><i>F</i><i>A</i><i>M</i></span><span className="hero-note-text"><b><Star size={11} fill="currentColor" /> 4.9 rating</b><small>Loved by 10,000+ families</small></span></span>
-      </div>
+
 
     </div>
     <div className="hero-art" key={`art-${active}`}>
       <div className="hero-image">
         <div className="hero-bn" lang="bn" style={{ ["--bn-top" as any]: slide.bangla.top }}>
-          <span className="hero-bn-kicker">{slide.bangla.kicker}</span>
           <strong className="hero-bn-title">{slide.bangla.title}</strong>
         </div>
         <span className="hero-bn-seal" lang="bn" aria-hidden="true"><b>১০০%</b>খাঁটি</span>
@@ -125,6 +120,10 @@ function HeroSlider() {
       </div>
       <span className="hero-stage-ring" aria-hidden="true" />
     </div>
+      <div className="hero-actions">
+        <a href="/amzad-food-website/#shop" className="cta cta-lg"><span>{slide.cta}</span><i className="cta-icon cta-arrow"><ArrowRight size={15} /></i></a>
+        <span className="hero-note"><span className="avatar-stack"><i>F</i><i>A</i><i>M</i></span><span className="hero-note-text"><b><Star size={11} fill="currentColor" /> 4.9 rating</b><small>Loved by 10,000+ families</small></span></span>
+      </div>
     <div className="hero-slider-bar">
       <div className="hero-slide-tabs">{heroSlides.map((item, index) => <button key={item.image} className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`Show ${item.cta}`} aria-pressed={index === active}><span>0{index + 1}</span><b>{item.cta}</b><i /></button>)}</div>    </div>
     </div>
