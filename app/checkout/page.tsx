@@ -123,7 +123,14 @@ export default function CheckoutPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [summaryOpen, setSummaryOpen] = useState(false);
 
-  useEffect(() => { setCart(loadCart()); setEta(deliveryWindow()); }, []);
+  useEffect(() => {
+    setCart(loadCart());
+    setEta(deliveryWindow());
+    try {
+      const saved = localStorage.getItem("af_checkout_fields");
+      if (saved) setFields({ ...emptyFields, ...JSON.parse(saved) });
+    } catch {}
+  }, []);
 
   const updateField = (field: keyof Fields, value: string) => {
     setFields((current) => ({ ...current, [field]: value }));
@@ -178,6 +185,7 @@ export default function CheckoutPage() {
     const { details } = placed;
     saveOrder({ id: placed.id, items: cart, total, deliveryFee, name: details.name, phone: details.phone, address: `${details.address}, ${details.area}, ${details.district}`, eta, placedAt: Date.now() });
     updateCart([]);
+    try { localStorage.setItem("af_checkout_fields", JSON.stringify(details)); } catch {}
     window.scrollTo({ top: 0 });
   };
 
