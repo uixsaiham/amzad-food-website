@@ -1651,10 +1651,11 @@ body { overflow-x: hidden; }
 @media (max-width: 800px) {
  .hero.hero-modern { padding-top: 14px; padding-bottom: 24px; }
  .hero-stage { grid-template-columns: 1fr; gap: 12px; padding: 26px 24px 12px; border-radius: 22px 22px 0 0; min-height: 0; }
- .hero-modern h1 { font-size: clamp(34px,7vw,48px); max-width: 540px; }
- .hero-modern .eyebrow { margin-bottom: 14px; }
- .hero-modern .hero-description { margin-top: 16px; max-width: 500px; }
- .hero-modern .hero-actions { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 18px; }
+ .hero-modern .hero-copy { text-align: center; }
+ .hero-modern h1 { font-size: clamp(34px,7vw,48px); max-width: 540px; margin-left: auto; margin-right: auto; }
+ .hero-modern .eyebrow { margin-bottom: 14px; justify-content: center; }
+ .hero-modern .hero-description { margin-top: 16px; max-width: 500px; margin-left: auto; margin-right: auto; }
+ .hero-modern .hero-actions { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 18px; justify-content: center; }
  .hero-modern .hero-note { border: 0; padding-left: 0; }
  .hero-modern .hero-art { height: clamp(280px,68vw,430px); }
  .hero-slider-bar { flex-wrap: wrap; gap: 0; padding: 0 16px 12px; }
