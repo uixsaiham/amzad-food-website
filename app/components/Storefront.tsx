@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { CartItem, CartLine, loadCart, saveCart } from "../lib/cart";
 import Link from "next/link";
+import BrandStrip from "./BrandStrip";
 import { Product, products, comboProducts, exploreProducts, productSlug, catalog, storeProducts, productCategories, productBrands, getProductBrand, resolveProductCategory, productsForCategory } from "../lib/products";
 import QuickView from "./QuickView";
 import AuthModal from "./AuthModal";
@@ -39,9 +40,9 @@ const trustPoints = [
   { icon: "/amzad-food-website/icons/trust-support.png", title: "Customer Support", subtitle: "Always here to help" },
 ];
 const blogReviews = [
-  { image: "/amzad-food-website/blog-review-1.png", alt: "মেদ ঝরানো এখন আরও সহজ" },
-  { image: "/amzad-food-website/blog-review-2.png", alt: "অতিরিক্ত ওজন কমান প্রাকৃতিক উপায়ে" },
-  { image: "/amzad-food-website/blog-review-3.png", alt: "ছোট বড় অভ্যাসেই স্বাস্থ্যকর জীবন" },
+  { videoId: "7ufrbw4XUv", image: "/amzad-food-website/blog-review-1.png", alt: "মেদ ঝরানো এখন আরও সহজ" },
+  { videoId: "ApFoP_xcJSE", image: "/amzad-food-website/blog-review-2.png", alt: "অতিরিক্ত ওজন কমান প্রাকৃতিক উপায়ে" },
+  { videoId: "hu5xopcyCdI", image: "/amzad-food-website/blog-review-3.png", alt: "ছোট বড় অভ্যাসেই স্বাস্থ্যকর জীবন" },
 ];
 const journeySteps = [
   { icon: faArrowsRotate, title: "Sourced", subtitle: "Direct from trusted farmers", hue: "#3f9a5c" },
@@ -130,25 +131,50 @@ function HeroSlider() {
   </section>;
 }
 
-const navItems = [{ href: "#top", label: "Home" }, { href: "products/", label: "All Products" }, { href: "#story", label: "Collection" }, { href: "blogs/", label: "Blogs" }];
+const navItems = [{ href: "#top", label: "Home" }, { href: "products/", label: "All Products" }, { href: "#combo", label: "Combo" }, { href: "blogs/", label: "Blogs" }];
 
 function NavLinks({ onNavigate }: { onNavigate: () => void }) {
   const pathname = usePathname();
-  const [active, setActive] = useState(pathname === "/products/" || pathname === "/products" ? 1 : 0);
+  const pageIndex = /(?:^|\/)blogs(?:\/|$)/.test(pathname) ? 3 : /(?:^|\/)products(?:\/|$)/.test(pathname) ? 1 : 0;
+  const [active, setActive] = useState(pageIndex);
+  useEffect(() => {
+    const syncActive = () => setActive(pageIndex === 0 && window.location.hash === "#combo" ? 2 : pageIndex);
+    syncActive();
+    window.addEventListener("hashchange", syncActive);
+    return () => window.removeEventListener("hashchange", syncActive);
+  }, [pageIndex]);
   const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const link = linkRefs.current[active];
+    const track = link?.parentElement;
+    if (!link || !track) return;
     const place = () => {
-      const link = linkRefs.current[active];
-      if (link) setPill({ left: link.offsetLeft, width: link.offsetWidth });
+      const next = { left: link.offsetLeft, width: link.offsetWidth };
+      setPill(previous => previous?.left === next.left && previous.width === next.width ? previous : next);
     };
     place();
-    window.addEventListener("resize", place);
-    return () => window.removeEventListener("resize", place);
+    const observer = new ResizeObserver(place);
+    observer.observe(track);
+    linkRefs.current.forEach(item => { if (item) observer.observe(item); });
+    document.fonts.addEventListener("loadingdone", place);
+    return () => { observer.disconnect(); document.fonts.removeEventListener("loadingdone", place); };
   }, [active]);
   return <div className="nav-track">
     {pill && <span className="nav-pill" style={{ transform: `translateX(${pill.left}px)`, width: pill.width }} aria-hidden="true" />}
-    {navItems.map((item, index) => <a key={item.label} href={`/amzad-food-website/${item.href}`} ref={(element) => { linkRefs.current[index] = element; }} className={index === active ? "active" : ""} aria-current={index === active ? "page" : undefined} onClick={() => { setActive(index); onNavigate(); }}>{item.label}</a>)}
+    {navItems.map((item, index) => <Link key={item.label} href={`/${item.href}`} ref={(element) => { linkRefs.current[index] = element; }} className={index === active ? "active" : ""} aria-current={index === active ? "page" : undefined} onClick={(event) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      setActive(index);
+      onNavigate();
+      if (item.href.startsWith("#") && pageIndex === 0) {
+        const target = document.getElementById(item.href.slice(1));
+        if (target) {
+          event.preventDefault();
+          if (window.location.hash !== item.href) window.history.pushState(null, "", item.href);
+          target.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+        }
+      }
+    }}>{item.label}</Link>)}
   </div>;
 }
 
@@ -231,19 +257,24 @@ type StoreActions = {
   toggleWishlist: (product: CartLine) => void;
 };
 
-function BlogSection({ notify, withStats = false }: { notify: (message: string) => void; withStats?: boolean }) {
+function BlogSection({ withStats = false }: { withStats?: boolean }) {
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   return <section className="video-reviews" id="blogs">
     <div className="video-review-heading">
       <div><span className="video-eyebrow"><Play size={11} fill="currentColor" /> THE AMZAD JOURNAL</span><h2>Good food.<br /><em>Stories worth sharing.</em></h2></div>
       <div className="video-heading-note"><p>Discover our products, everyday inspiration and the stories behind better food.</p><span>Customer product reviews <i /> Video series</span></div>
     </div>
     <div className="blog-grid">{blogReviews.map((item, index) => <article className="blog-card" key={item.image}>
-      <button className="video-preview" aria-label={`Preview ${item.alt} — video coming soon`} onClick={() => notify("This video is coming soon")}>
+      {playingVideo === item.videoId ? <div className="video-inline-player">
+        <iframe src={`https://www.youtube-nocookie.com/embed/${item.videoId}?autoplay=1&playsinline=1&rel=0`}
+          title={item.alt} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen
+          referrerPolicy="strict-origin-when-cross-origin" />
+      </div> : <button type="button" className="video-preview" aria-label={`Play ${item.alt}`} onClick={() => setPlayingVideo(item.videoId)}>
         <img src={item.image} alt={item.alt} loading="lazy" />
         <span className="video-number">0{index + 1}</span>
         <span className="blog-play"><Play size={18} fill="currentColor" /></span>
-        <span className="video-status">Video coming soon</span>
-      </button>
+        <span className="video-status">Watch video</span>
+      </button>}
       <div className="video-card-copy"><span className="video-card-category">{["Everyday wellness", "Natural goodness", "Better food habits"][index]}</span><h3>{item.alt}</h3><div className="video-card-bottom"><span>Amzad Food · Product stories</span><ArrowUp size={16} /></div></div>
     </article>)}</div>
 
@@ -403,9 +434,10 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
     {children ? <>
     {children({ addToCart, goToCheckout, isWishlisted, toggleWishlist })}
     <Reviews />
-    <BlogSection notify={notify} />
+    <BlogSection />
     </> : <>
     <HeroSlider />
+    <BrandStrip />
     <section className="journey page-width" aria-label="From source to your table"><div className="journey-card">
       <div className="journey-intro"><span className="journey-pill"><Leaf size={12} /> Our Promise</span><h2>From Source<br /><em>to Your Table</em></h2><p>A journey of trust &amp; quality, in four careful steps.</p></div>
       <ol className="journey-steps">{journeySteps.map(step => <li key={step.title} style={{ "--step-hue": step.hue } as React.CSSProperties}><span className="journey-node"><FontAwesomeIcon icon={step.icon} fontSize={17} /></span><strong>{step.title}</strong><p>{step.subtitle}</p></li>)}</ol>
@@ -414,7 +446,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
     <section className="feature-band page-width" id="story"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br /><span className="origin-title-line">Our Origin <span>🍃</span></span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="cta" onClick={() => setOriginOpen(true)}><span>Explore Origin Stories</span><i className="cta-icon"><MapPin size={15} /></i></button></div><div className="origin-map"><div className="bd-map" role="img" aria-label="Map of Bangladesh showing where our products are sourced"><span className="bd-shadow" aria-hidden="true" /><span className="bd-shape" aria-hidden="true" /><span className="bd-texture" aria-hidden="true" />{originStories.map((story) => <span className={`bd-spot ${story.className}`} key={`spot-${story.key}`} aria-hidden="true" />)}{originStories.map((story) => <span className={`origin-pin ${story.className}`} key={story.key}><i><story.icon size={13} /></i><b>{story.place}<small>{story.product}</small></b></span>)}</div></div></article><article className="honey-card"><img className="honey-bg" src="/amzad-food-website/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="cta" onClick={add}><span>Add to Cart</span><i className="cta-icon"><ShoppingCart size={15} /></i></button></div></article></section>
     <ProductSection viewAllHref={activeCategory === "All" || activeCategory === "Offer Zone" ? "/products/" : `/products/?category=${encodeURIComponent(activeCategory)}`} title={activeCategory === "All" ? "All Products" : activeCategory === "Oil" ? "Ghee & Oil" : activeCategory} eyebrow="Best Sellers" products={visibleProducts} maxRows={8} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
     <NewsletterBanner notify={notify} />
-    <ProductSection promotion viewAllHref="/products/?category=Combo%20Packs" title="Combo Packages" eyebrow="Value Packs" products={comboProducts} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
+    <ProductSection id="combo" promotion viewAllHref="/products/?category=Combo%20Packs" title="Combo Packages" eyebrow="Value Packs" products={comboProducts} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
     <PrayerTimes notify={notify} />
     <PrayerDock />
     <section className="trust-section"><div className="tr page-width">
@@ -434,7 +466,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
       </li>)}</ul>
     </div></section>
     <Reviews />
-    <BlogSection notify={notify} withStats />
+    <BlogSection withStats />
     </>}
     <footer className="ft">
       <div className="ft-cta page-width">
@@ -466,7 +498,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
             {[[Facebook, "Facebook"], [Instagram, "Instagram"], [Youtube, "YouTube"]].map(([Icon, label]) => { const SocialIcon = Icon as typeof Facebook; return <a key={label as string} href="#" aria-label={label as string} onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}><SocialIcon size={15} /></a>; })}
           </div>
         </div>
-        <nav className="ft-col" aria-label="Shop"><strong>Shop</strong><a href="/amzad-food-website/#shop">Honey</a><a href="/amzad-food-website/#shop">Ghee &amp; Oil</a><a href="/amzad-food-website/#shop">Khejur</a><a href="/amzad-food-website/#shop">Mosla</a><a href="/amzad-food-website/#shop">Combo &amp; Gifts</a></nav>
+        <nav className="ft-col" aria-label="Shop"><strong>Shop</strong><a href="/amzad-food-website/#shop">Honey</a><a href="/amzad-food-website/#shop">Ghee &amp; Oil</a><a href="/amzad-food-website/#shop">Khejur</a><a href="/amzad-food-website/#shop">Mosla</a><a href="/amzad-food-website/#combo">Combo &amp; Gifts</a></nav>
         <nav className="ft-col" aria-label="Company"><strong>Company</strong><a href="/amzad-food-website/#story">Our Story</a><a href="/amzad-food-website/blogs/">Blogs</a><a href="/amzad-food-website/#reviews">Reviews</a><a href="/amzad-food-website/#prayer-times">Prayer Times</a></nav>
         <nav className="ft-col" aria-label="Help"><strong>Help</strong><a href="/amzad-food-website/track-order/">Track Order</a><a href="/amzad-food-website/checkout/">Checkout</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>FAQ</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Returns</a></nav>
         <div className="ft-news">

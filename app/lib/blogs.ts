@@ -4,6 +4,7 @@ export type BlogPost = {
   title: string;
   description: string;
   image: string;
+  imageAlt?: string;
   tag: string;
   date: string;
   readMin: number;
@@ -23,6 +24,7 @@ const article = (
   return {
     slug, title, description,
     image: `/amzad-food-website/${image}`,
+    imageAlt: slug === "everyday-pantry" ? "Rice, lentils, cooking oil and spices arranged on a sunlit kitchen counter" : title,
     tag, date,
     readMin: Math.max(2, Math.ceil(wordCount / 180)),
     sections: sections.map(([id, t, paragraphs]) => ({ id, title: t, paragraphs })),
@@ -32,9 +34,9 @@ const article = (
 export const blogPosts: BlogPost[] = [
   article(
     "everyday-pantry",
-    "A thoughtful pantry for everyday cooking",
+    "Everyday pantry essentials for a Bangladeshi kitchen",
     "Small choices that make cooking at home simpler, more varied and more enjoyable.",
-    "hero-slide-3.png", "Everyday Wellness", "Sep 20, 2026",
+    "blogs/everyday-pantry.jpg", "Everyday Wellness", "Sep 20, 2026",
     [
       ["start-small", "Start with the meals you love", [
         "A useful pantry begins with your own kitchen. Write down three meals you enjoy making and list the ingredients they share. Rice, a cooking oil, a few spices and a favourite accompaniment can be a practical starting point.",
@@ -58,7 +60,7 @@ export const blogPosts: BlogPost[] = [
     "spice-pairings",
     "Bring familiar flavours to your table",
     "Explore simple ways to use turmeric, cumin and coriander in everyday meals.",
-    "hero-slide-1.png", "Natural Goodness", "Sep 15, 2026",
+    "products/deli-spice-combo-pack.png", "Natural Goodness", "Sep 15, 2026",
     [
       ["choose-a-base", "Choose a familiar base", [
         "Start with a dish you already know, such as dal, a vegetable curry or a simple rice dish. Changing one spice at a time helps you notice how it affects the finished meal.",
@@ -80,7 +82,7 @@ export const blogPosts: BlogPost[] = [
     "tea-time",
     "Make a little room for tea time",
     "A few thoughtful touches for a relaxed afternoon with family and friends.",
-    "hero-slide-2.png", "Better Food Habits", "Sep 10, 2026",
+    "products/pera-sondesh.png", "Better Food Habits", "Sep 10, 2026",
     [
       ["set-the-table", "Keep the table simple", [
         "A pot of tea, a few cups and a small plate of treats can turn an ordinary afternoon into a shared pause. You do not need a formal occasion or an elaborate spread.",

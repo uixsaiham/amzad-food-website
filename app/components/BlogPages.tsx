@@ -13,7 +13,7 @@ export function BlogsPage() {
   const [activeTag, setActiveTag] = useState("All");
   const featured = blogPosts[0];
   const grid = (activeTag === "All" ? blogPosts : blogPosts.filter((p) => p.tag === activeTag))
-    .filter((p) => p.slug !== featured.slug);
+    .filter((p) => activeTag !== "All" || p.slug !== featured.slug);
 
   return (
     <Storefront>
@@ -26,14 +26,15 @@ export function BlogsPage() {
 
           {/* Page header */}
           <header className="jn-page-header">
-            <h1>Good food.<br /><em>Stories worth sharing.</em></h1>
-            <p>Everyday inspiration, thoughtful ingredients and moments around the table.</p>
+            <p className="eyebrow">From our kitchen to yours</p>
+            <h1>Amzad Food <em>Blog</em></h1>
+            <p>Pantry tips, ingredient guides and food stories for your everyday table.</p>
           </header>
 
           {/* Featured hero post */}
-          <Link className="jn-featured" href={`/blogs/${featured.slug}/`} aria-label={featured.title}>
+          {activeTag === "All" && <Link className="jn-featured" href={`/blogs/${featured.slug}/`} aria-label={featured.title}>
             <div className="jn-featured-img">
-              <img src={featured.image} alt={featured.title} />
+              <img src={featured.image} alt={featured.imageAlt ?? featured.title} width={1536} height={1024} fetchPriority="high" />
               <span className="jn-tag">{featured.tag}</span>
             </div>
             <div className="jn-featured-body">
@@ -46,9 +47,10 @@ export function BlogsPage() {
               <p>{featured.description}</p>
               <span className="jn-featured-cta">Read story <ArrowRight size={15} /></span>
             </div>
-          </Link>
+          </Link>}
 
           {/* Tag filter chips */}
+          <h2 className="jn-browse-title">Explore blog topics</h2>
           <div className="jn-tag-bar" role="group" aria-label="Filter by topic">
             {blogTags.map((tag) => (
               <button
@@ -57,7 +59,7 @@ export function BlogsPage() {
                 aria-pressed={tag === activeTag}
                 onClick={() => setActiveTag(tag)}
               >
-                {tag}
+                {tag === "All" ? "All blogs" : tag}
                 {tag !== "All" && <small>{blogPosts.filter((p) => p.tag === tag).length}</small>}
               </button>
             ))}
@@ -141,7 +143,7 @@ export function BlogDetails({ post }: { post: BlogPost }) {
           </header>
 
           {/* Cover image */}
-          <img className="jn-cover" src={post.image} alt={post.title} />
+          <img className="jn-cover" src={post.image} alt={post.imageAlt ?? post.title} />
 
           {/* Two-column: article body + sticky sidebar */}
           <div className="jn-detail-grid">

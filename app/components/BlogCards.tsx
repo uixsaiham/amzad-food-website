@@ -9,7 +9,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
   return (
     <Link className="jn-card" href={`/blogs/${post.slug}/`}>
       <div className="jn-card-img">
-        <img src={post.image} alt={post.title} loading="lazy" />
+        <img src={post.image} alt={post.imageAlt ?? post.title} loading="lazy" />
         <span className="jn-tag">{post.tag}</span>
       </div>
       <div className="jn-card-body">

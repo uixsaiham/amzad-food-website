@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
 import { Product, getProductBrand } from "../lib/products";
+import ProductGallery from "./ProductGallery";
 
 type QuickViewProduct = Product;
 type Details = { bn: string; blurb: string; highlights: string[]; usage: string[]; origin: string; shelfLife: string; storage: string; sold: number };
@@ -77,8 +78,9 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
           <span className="qv-save">Save ৳{saving}</span>
           {product.tag && <span className="qv-tag">{product.tag}</span>}
           <button className={wishlisted ? "qv-wish active" : "qv-wish"} onClick={onToggleWishlist} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}><Heart size={18} fill={wishlisted ? "currentColor" : "none"} /></button>
-          <img src={product.image} alt={product.name} />
-          <ul className="qv-assure">{assurances.map((item) => <li key={item.label}><img src={item.icon} alt="" aria-hidden="true" />{item.label}</li>)}</ul>
+          <ProductGallery key={product.name} product={product}>
+            <ul className="qv-assure">{assurances.map((item) => <li key={item.label}><img src={item.icon} alt="" aria-hidden="true" />{item.label}</li>)}</ul>
+          </ProductGallery>
         </div>
 
         <div className="qv-body">

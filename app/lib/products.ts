@@ -2,11 +2,33 @@ export const productBrands = ["Amzad", "Maza", "Slifit"] as const;
 export type ProductBrand = typeof productBrands[number];
 export const getProductBrand = (product: { brand?: ProductBrand }): ProductBrand => product.brand ?? "Amzad";
 
-export type Product = { brand?: ProductBrand; name: string; bn?: string; category: string; price: number; oldPrice?: number; unit?: string; image: string; tag?: string };
+export type ProductImage = { src: string; label: string; scale?: number; x?: number; y?: number };
+export type Product = { brand?: ProductBrand; name: string; bn?: string; category: string; price: number; oldPrice?: number; unit?: string; image: string; images?: ProductImage[]; tag?: string };
+
+export const getProductImages = (product: Product): ProductImage[] => [
+  { src: product.image, label: "Full product" },
+  ...(product.images ?? [
+    { src: product.image, label: "Centre close-up", scale: 1.6, x: 50, y: 50 },
+    { src: product.image, label: "Upper detail", scale: 1.7, x: 50, y: 25 },
+    { src: product.image, label: "Lower detail", scale: 1.7, x: 50, y: 75 },
+  ]).filter(image => image.src && !(image.src === product.image && !image.scale)),
+];
 
 const shot = (slug: string) => `/amzad-food-website/products/${slug}.png`;
+// Close-ups use the actual product photo; these are not alternate-angle photos.
+// Each combo has its own focus points. Real extra photos can replace these entries.
+const comboViews: Record<string, [string, number, number, number][]> = {
+  "delight-naru-combo": [["Jar close-up", 1.8, 68, 54], ["Box detail", 1.7, 18, 45], ["Naru detail", 2, 70, 75]],
+  "deli-spice-combo-pack": [["Spice jars close-up", 1.5, 74, 46], ["Spice bowls detail", 1.8, 59, 87], ["Box detail", 1.8, 18, 45]],
+  "hazmi-juice-combo": [["Hazmi jar close-up", 1.8, 62, 54], ["Side jars detail", 1.7, 88, 53], ["Box detail", 1.8, 15, 45]],
+  "keto-cure-combo": [["Bottle close-up", 1.8, 45, 54], ["Honey jar detail", 1.8, 76, 55], ["Box detail", 1.8, 23, 47]],
+  "slim-key-multi-seeds-combo": [["Seed jars close-up", 1.6, 76, 43], ["Seed mix detail", 1.9, 63, 78], ["Box detail", 1.8, 18, 43]],
+  "winter-gift-khejur-gur-combo": [["Gur jars close-up", 1.6, 31, 43], ["Patali gur detail", 1.8, 56, 80], ["Gift packaging detail", 1.7, 82, 48]],
+  "hazmi-seeds-combo": [["Seed jar close-up", 1.9, 61, 55], ["Honey jar detail", 1.8, 85, 54], ["Seed mix detail", 1.9, 60, 83]],
+  "chia-seeds-combo": [["Chia jar close-up", 1.8, 26, 47], ["Honey jar detail", 1.8, 55, 46], ["Chia seeds detail", 1.9, 49, 83]],
+};
 const p = (name: string, bn: string, category: string, price: number, oldPrice: number | undefined, unit: string, slug: string, tag?: string): Product =>
-  ({ name, bn, category, price, oldPrice, unit, image: shot(slug), tag, brand: "Amzad" });
+  ({ name, bn, category, price, oldPrice, unit, image: shot(slug), images: comboViews[slug]?.map(([label, scale, x, y]) => ({ src: shot(slug), label, scale, x, y })), tag, brand: "Amzad" });
 
 // Store products shown on the product cards.
 const store = {
