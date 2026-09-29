@@ -2736,11 +2736,18 @@ html body .shop-promo-label, html body .video-card-category, html body .jn-tag-i
   .navbar .nav-search:focus-within { width: 230px; }
 }
 @media (max-width: 800px) {
-  .navbar.site-nav { grid-template-columns: 44px minmax(0, 1fr) 44px 44px 44px; }
+  .navbar.site-nav { grid-template-columns: 44px minmax(0, 1fr) repeat(4, 44px); }
+  .navbar .nav-user { display: flex; grid-column: 4; grid-row: 1; }
+  .navbar .mobile-menu { grid-column: 1; grid-row: 1; }
+  .navbar > .brand { grid-column: 2; grid-row: 1; }
   .navbar .nav-search-toggle { grid-column: 3; grid-row: 1; }
-  .navbar .nav-wishlist { grid-column: 4; }
-  .navbar .nav-cart { grid-column: 5; }
+  .navbar .nav-wishlist { grid-column: 5; }
+  .navbar .nav-cart { grid-column: 6; }
   .navbar .nav-search:not([hidden]) { width: 100%; grid-column: 1 / -1; grid-row: 2; }
+}
+@media (max-width: 480px) {
+  .navbar.site-nav { grid-template-columns: 44px minmax(0, 1fr) repeat(4, 44px); column-gap: 0; padding-left: 6px; padding-right: 6px; }
+  .navbar .brand-logo { width: min(100%, 112px); max-width: 100%; height: auto; }
 }
 @media (prefers-reduced-motion: reduce) { .navbar .nav-search:not([hidden]) { animation: none; } }
 .desktop-search-clear { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 22px; height: 22px; border: 0; border-radius: 50%; background: #e6ece3; color: #4c6356; cursor: pointer; }
@@ -2755,3 +2762,30 @@ html body .shop-promo-label, html body .video-card-category, html body .jn-tag-i
 .jn-card:hover .jn-thumbnail-arrow, .jn-card:focus-visible .jn-thumbnail-arrow { background: var(--deep); color: #fff; transform: translate(2px, -2px); }
 @media (max-width: 600px) { .jn-carousel-head { align-items: flex-start; gap: 18px; } .jn-carousel-title { width: 100%; } .jn-carousel-nav { width: 100%; justify-content: flex-end; } .jn-thumbnail-arrow { bottom: 12px; right: 12px; } }
 @media (prefers-reduced-motion: reduce) { .jn-thumbnail-arrow { transition: none; } .jn-card:hover .jn-thumbnail-arrow, .jn-card:focus-visible .jn-thumbnail-arrow { transform: none; } }
+
+/* Mobile features: two compact banners occupy about one former card's height. */
+@media (max-width: 800px) {
+  .feature-band { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; gap: 12px; padding-top: 0; padding-bottom: 32px; }
+  .feature-band .origin-card, .feature-band .honey-card { min-height: 208px; border-radius: 20px; }
+  .feature-band .origin-card { display: grid; grid-template-columns: minmax(0, 1fr) 36%; align-items: center; }
+  .feature-band .origin-copy, .feature-band .honey-copy { padding: 20px 16px; }
+  .feature-band .origin-copy .eyebrow, .feature-band .origin-copy > p:not(.eyebrow), .feature-band .honey-badges, .feature-band .honey-callout { display: none; }
+  .feature-band .origin-copy h2, .feature-band .honey-copy h2 { font-size: clamp(25px, 6.5vw, 32px); line-height: 1.08; margin-bottom: 14px; }
+  .feature-band .origin-map { align-self: stretch; padding: 14px 12px 14px 0; min-height: 0; }
+  .feature-band .bd-map { height: 174px; width: auto; max-width: 100%; }
+  .feature-band .origin-pin { display: none; }
+  .feature-band .bd-spot { height: 8px; width: 8px; }
+  .feature-band .cta { min-height: 44px; padding: 6px 6px 6px 12px; gap: 6px; font-size: 11px; }
+  .feature-band .cta-icon { height: 30px; width: 30px; }
+  .feature-band .honey-card { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; }
+  .feature-band .honey-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #fceccb 0%, #fceccb 40%, rgba(252, 236, 203, .85) 53%, rgba(252, 236, 203, 0) 72%); z-index: 1; pointer-events: none; }
+  .feature-band .honey-bg { top: 0; bottom: auto; height: 100%; width: 100%; object-position: right center; transform: none; }
+  .feature-band .honey-copy { max-width: 75%; z-index: 2; }
+  .feature-band .honey-copy h2 { margin-bottom: 7px; }
+  html body .feature-band .honey-subtitle { font-size: 11px; line-height: 1.4; margin-bottom: 8px; }
+  .feature-band .honey-subtitle span { padding: 0 2px; }
+  .feature-band .honey-price { gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .feature-band .honey-price strong { font-size: 21px; }
+  .feature-band .honey-price del { font-size: 12px; }
+  .feature-band .honey-price em { font-size: 10px; padding: 4px 6px; }
+}
