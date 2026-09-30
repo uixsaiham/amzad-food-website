@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Storefront from "./Storefront";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faXTwitter, faLinkedinIn, faPinterestP, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import { BlogCard } from "./BlogCards";
+import BlogCarousel, { BlogCard } from "./BlogCards";
 import { BlogPost, blogPosts, blogTags } from "../lib/blogs";
 import { ArrowRight, BookOpen, Clock, Check, Link2, ChevronDown, ArrowUpRight, Mail } from "lucide-react";
 
@@ -261,9 +261,7 @@ export function BlogDetails({ post }: { post: BlogPost }) {
                   View all <ArrowRight size={14} />
                 </Link>
               </div>
-              <div className="jn-grid">
-                {related.map((item) => <BlogCard key={item.slug} post={item} />)}
-              </div>
+              <BlogCarousel posts={related} showHeading={false} />
             </section>
           )}
         </div>

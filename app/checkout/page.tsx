@@ -9,6 +9,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartItem, loadCart, saveCart } from "../lib/cart";
 import { saveOrder } from "../lib/orders";
+import CartOffer from "../components/CartOffer";
+import { DELIVERY_FEE, FREE_DELIVERY_MINIMUM, qualifiesForFreeDelivery } from "../lib/offers";
 
 type Fields = { name: string; phone: string; email: string; address: string; area: string; district: string; notes: string };
 type Errors = Partial<Record<keyof Fields, string>>;
@@ -17,14 +19,13 @@ type Promo = { label: string; note: string; type: "percent" | "flat" | "shipping
 type Order = { id: string; items: CartItem[]; subtotal: number; discount: number; deliveryFee: number; total: number; details: Fields; addressType: AddressType; promoCode: string | null; eta: string; placedAt: string };
 
 const emptyFields: Fields = { name: "", phone: "", email: "", address: "", area: "", district: "", notes: "" };
-const DELIVERY_FEE = 60;
 const MAX_QTY = 20;
 const WHATSAPP_NUMBER = "8801327406605";
 
 const promoCodes: Record<string, Promo> = {
   WELCOME10: { label: "10% off your order", note: "10% off", type: "percent", value: 10 },
   AMZAD50: { label: "৳50 off your order", note: "৳50 off over ৳500", type: "flat", value: 50, min: 500 },
-  FREESHIP: { label: "Free delivery", note: "Free delivery over ৳1000", type: "shipping", value: 0, min: 1000 },
+  FREESHIP: { label: "Free delivery", note: "Automatic on orders ৳1,000+", type: "shipping", value: 0, min: FREE_DELIVERY_MINIMUM },
 };
 
 const districts = ["Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogura", "Brahmanbaria", "Chandpur", "Chapainawabganj", "Chattogram", "Chuadanga", "Cox's Bazar", "Cumilla", "Dhaka", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"];
@@ -146,7 +147,7 @@ export default function CheckoutPage() {
   const promoActive = !!promo && subtotal >= (promo.min ?? 0);
   const discount = promo && promoActive ? (promo.type === "percent" ? Math.round(subtotal * promo.value / 100) : promo.type === "flat" ? Math.min(promo.value, subtotal) : 0) : 0;
   const baseDelivery = cart.length > 0 ? DELIVERY_FEE : 0;
-  const deliveryFee = promo && promoActive && promo.type === "shipping" ? 0 : baseDelivery;
+  const deliveryFee = qualifiesForFreeDelivery(subtotal) || (promo && promoActive && promo.type === "shipping") ? 0 : baseDelivery;
   const total = subtotal - discount + deliveryFee;
   const savings = discount + (baseDelivery - deliveryFee);
 
@@ -361,6 +362,8 @@ export default function CheckoutPage() {
               </div>
             </li>)}</ul>
 
+            <CartOffer subtotal={subtotal} />
+
             <div className="co-promo">
               <h3><Tag size={14} /> Promo code</h3>
               {promo && appliedCode ? <div className={promoActive ? "co-promo-applied" : "co-promo-applied inactive"}>
@@ -373,7 +376,7 @@ export default function CheckoutPage() {
                   <button type="button" onClick={() => applyPromo(promoInput)}>Apply</button>
                 </div>
                 {promoError && <span className="co-error" role="alert">{promoError}</span>}
-                <div className="co-promo-chips">{Object.entries(promoCodes).map(([code, item]) => <button type="button" key={code} onClick={() => applyPromo(code)} title={`Apply ${code}`}><b>{code}</b><small>{item.note}</small></button>)}</div>
+                <div className="co-promo-chips">{Object.entries(promoCodes).filter(([, item]) => item.type !== "shipping").map(([code, item]) => <button type="button" key={code} onClick={() => applyPromo(code)} title={`Apply ${code}`}><b>{code}</b><small>{item.note}</small></button>)}</div>
               </>}
             </div>
 
