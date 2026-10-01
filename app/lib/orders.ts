@@ -51,3 +51,12 @@ export const sampleOrder = (): SavedOrder => ({
     { label: "Order Placed", note: "We received your order.", at: Date.UTC(2026, 8, 28, 10, 15) },
   ],
 });
+
+// Separate processing preview; never added to the customer’s saved orders.
+export const sampleProcessingOrder = (): SavedOrder => ({
+  ...sampleOrder(),
+  id: "AF102346",
+  status: "Processing",
+  placedAt: Date.UTC(2026, 8, 30, 10, 15),
+  updates: [{ label: "Order Placed", note: "We received your order. Awaiting confirmation from our team.", at: Date.UTC(2026, 8, 30, 10, 15) }],
+});

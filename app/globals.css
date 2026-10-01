@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Anek+Bangla:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@600;700;800;900&family=Manrope:wght@500;600;700;800&display=swap');
 
-:root { --ink: #17352a; --muted: #718078; --cream: #f6f5ef; --line: #dfe4dc; --green: #246247; --lime: #e5edc9; --orange: #e56e35; }
+:root { --font-body: 'Plus Jakarta Sans', 'Anek Bangla', sans-serif; --font-heading: 'Gelasio', 'Anek Bangla', serif; --ink: #17352a; --muted: #718078; --cream: #f6f5ef; --line: #dfe4dc; --green: #246247; --lime: #e5edc9; --orange: #e56e35; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 110px; }
-body { margin: 0; color: var(--ink); background: var(--cream); font-family: 'Plus Jakarta Sans', 'Anek Bangla', sans-serif; }
+body { margin: 0; color: var(--ink); background: var(--cream); font-family: var(--font-body); }
 a { color: inherit; text-decoration: none; }
 button { color: inherit; font: inherit; cursor: pointer; }
 .page-width { max-width: 1240px; margin: auto; padding-left: 38px; padding-right: 38px; }
@@ -3179,7 +3179,7 @@ html body .jn-article-kicker, html body .jn-product-pick > span { display: none;
 .orders-breadcrumb a:hover { color: #246247; }
 .orders-title { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
 .orders-eyebrow { font-size: 10px; letter-spacing: .14em; color: #7b8a6b; font-weight: 700; }
-.orders-title h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; letter-spacing: -.8px; margin: 9px 0; font-weight: 700; }
+.orders-title h1 { font-family: var(--font-heading); font-size: 30px; line-height: 1.2; letter-spacing: -.03em; margin: 9px 0; font-weight: 500; }
 .orders-title p { font-size: 13px; color: #7a847e; margin: 0; line-height: 1.7; }
 .orders-outline, .orders-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #dce3d9; background: #fff; transition: background .15s; }
 .orders-primary { background: #286448; border-color: #286448; color: #fff; }
@@ -3233,7 +3233,7 @@ html body .jn-article-kicker, html body .jn-product-pick > span { display: none;
 .order-address svg { color: #97a28f; flex-shrink: 0; margin-top: 2px; }
 .order-address p { margin: 4px 0; color: #7a847e; overflow-wrap: anywhere; }
 .order-support { background: #f1f5e9; border-color: #e0e8d4; }
-.order-support h2 { border: 0; font-family: Gelasio, serif; font-size: 23px; line-height: 1.35; margin: 12px 0; padding: 0; }
+.order-support h2 { border: 0; font-family: var(--font-heading); font-weight: 500; font-size: 23px; line-height: 1.35; margin: 12px 0; padding: 0; }
 .order-support p { font-size: 12px; color: #7a847e; line-height: 1.8; margin-bottom: 20px; }
 .order-support .orders-primary { width: 100%; }
 .order-phone { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; margin-top: 18px; }
@@ -3297,7 +3297,7 @@ html body .jn-article-kicker, html body .jn-product-pick > span { display: none;
 .order-rating-stars { display: flex; gap: 6px; color: #dfa336; margin-top: 3px; }
 .order-review-dialog { width: min(460px, calc(100% - 32px)); max-height: 85dvh; overflow-y: auto; border: 1px solid #dfe4dc; border-radius: 14px; color: #283b32; padding: 30px; box-shadow: 0 20px 80px #17352a33; }
 .order-review-dialog::backdrop { background: #12291ecc; }
-.order-review-dialog h2 { font-size: 23px; margin: 12px 0; }
+.order-review-dialog h2 { font-family: var(--font-heading); font-weight: 500; line-height: 1.25; font-size: 23px; margin: 12px 0; }
 .order-review-dialog p { font-size: 12px; color: #7a847e; line-height: 1.7; }
 .order-review-close { position: absolute; right: 12px; top: 12px; background: transparent; border: 0; padding: 6px; display: flex; }
 .order-review-stars { display: flex; gap: 8px; margin: 24px 0; }
@@ -3318,3 +3318,10 @@ html body .jn-article-kicker, html body .jn-product-pick > span { display: none;
 .orders-filter-arrow.previous { left: -12px; }
 .orders-filter-arrow.next { right: -12px; }
 @media (max-width: 650px) { .orders-filter-wrap .orders-filters > button { min-width: 118px; } .orders-filter-arrow.previous { left: -8px; } .orders-filter-arrow.next { right: -8px; } }
+
+/* Order controls share the same English and Bangla font stack as the storefront. */
+.orders-page, .order-review-dialog { font-family: var(--font-body); }
+.orders-page button, .orders-page input, .order-review-dialog button, .order-review-dialog textarea { font-family: inherit; }
+.orders-page h2:not(.order-support h2), .orders-page h3 { font-family: inherit; }
+.orders-stage-note { margin: 0; padding: 12px 24px; background: #f8faf5; border-bottom: 1px solid #edf0ea; font-size: 12px; line-height: 1.7; color: #718078; }
+@media (max-width: 650px) { .orders-stage-note { padding-inline: 16px; } }
