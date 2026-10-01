@@ -18,13 +18,24 @@ export default function OrderStatusTabs({ selected, onSelect }: { selected: stri
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
+  useEffect(() => {
+    const element = rail.current;
+    const button = element?.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
+    if (!element || !button) return;
+    const container = element.getBoundingClientRect();
+    const target = button.getBoundingClientRect();
+    const gutter = window.matchMedia("(max-width: 650px)").matches ? 24 : 4;
+    if (target.left < container.left + gutter) element.scrollBy({ left: target.left - container.left - gutter, behavior: "auto" });
+    else if (target.right > container.right - gutter) element.scrollBy({ left: target.right - container.right + gutter, behavior: "auto" });
+    updateEdges();
+  }, [selected]);
   const scroll = (direction: number) => {
     const element = rail.current;
     if (element) element.scrollBy({ left: direction * Math.max(150, element.clientWidth * .75), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   };
   return <div className="orders-filter-wrap">
     {!edges.start && <button className="orders-filter-arrow previous" aria-label="Show previous order statuses" onClick={() => scroll(-1)}><ChevronLeft size={22} /></button>}
-    <div ref={rail} className="orders-filters" aria-label="Filter orders by status" onScroll={updateEdges}>{["All Orders", ...orderStatuses].map(status => <button key={status} aria-pressed={selected === status} className={selected === status ? "active" : ""} onClick={event => { onSelect(status); const element = rail.current; const button = event.currentTarget; if (element) { const left = button.offsetLeft - element.offsetLeft; if (left < element.scrollLeft) element.scrollTo({ left, behavior: "auto" }); else if (left + button.offsetWidth > element.scrollLeft + element.clientWidth) element.scrollTo({ left: left + button.offsetWidth - element.clientWidth, behavior: "auto" }); } }}>{status}</button>)}</div>
+    <div ref={rail} className="orders-filters" aria-label="Filter orders by status" onScroll={updateEdges}>{["All Orders", ...orderStatuses].map(status => <button key={status} aria-pressed={selected === status} className={selected === status ? "active" : ""} onClick={() => onSelect(status)}>{status}</button>)}</div>
     {!edges.end && <button className="orders-filter-arrow next" aria-label="Show more order statuses" onClick={() => scroll(1)}><ChevronRight size={22} /></button>}
   </div>;
 }
