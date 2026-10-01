@@ -4,6 +4,9 @@ import { CartItem } from "./cart";
 export type SavedOrder = {
   id: string; items: CartItem[]; total: number; deliveryFee: number;
   name: string; phone: string; address: string; eta: string; placedAt: number;
+  status?: import("./order-status").OrderStatus;
+  updates?: { label: string; note: string; at: number }[];
+  discount?: number;
 };
 
 const ORDERS_KEY = "amzad-orders";
@@ -39,5 +42,12 @@ export const sampleOrder = (): SavedOrder => ({
   ],
   total: 3960, deliveryFee: 60,
   name: "Farhana Akter", phone: "01712345678", address: "House 12, Road 5, Dhanmondi, Dhaka",
-  eta: "2–3 business days", placedAt: Date.now() - 26 * 60 * 60 * 1000,
+  eta: "2–3 business days", placedAt: Date.UTC(2026, 8, 28, 10, 15), status: "Completed",
+  updates: [
+    { label: "Order Delivered", note: "Your parcel has been delivered. Enjoy your Amzad Food favourites!", at: Date.UTC(2026, 8, 30, 6, 30) },
+    { label: "Order Handover to Courier", note: "Your parcel is on its way to your delivery address.", at: Date.UTC(2026, 8, 29, 8, 0) },
+    { label: "Order Ready to Ship", note: "Your items have been quality checked and packed.", at: Date.UTC(2026, 8, 29, 4, 0) },
+    { label: "Order Approved", note: "Your order has been confirmed.", at: Date.UTC(2026, 8, 28, 11, 0) },
+    { label: "Order Placed", note: "We received your order.", at: Date.UTC(2026, 8, 28, 10, 15) },
+  ],
 });

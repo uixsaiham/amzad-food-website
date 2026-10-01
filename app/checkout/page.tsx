@@ -247,6 +247,7 @@ export default function CheckoutPage() {
               </section>
               <a className="co-whatsapp cta cta-whatsapp" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Send order details on WhatsApp</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={17} /></i></a>
               <Link className="co-secondary" href={`/track-order/?id=${order.id}`}>Track this order <ArrowRight size={14} /></Link>
+              <Link className="co-secondary" href="/my-orders/">View my orders <ArrowRight size={14} /></Link>
               <Link className="co-secondary" href="/">Continue Shopping <ArrowRight size={14} /></Link>
             </div>
           </div>
