@@ -85,7 +85,7 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
 
         <div className="qv-body">
           <div className="qv-meta"><span className="qv-cat">{product.category}</span><span className="qv-stock"><i />In stock</span></div>
-          <h2><span>{info.bn}</span>{product.name}</h2>
+          {embedded ? <h1 className="qv-title"><span>{info.bn}</span>{product.name}</h1> : <h2 className="qv-title"><span>{info.bn}</span>{product.name}</h2>}
           <div className="qv-rating">
             <span className="qv-stars">{Array.from({ length: 5 }, (_, index) => <Star key={index} size={14} fill="currentColor" />)}</span>
             <b>4.9</b><span>(46 reviews)</span><em>{info.sold}+ sold</em>

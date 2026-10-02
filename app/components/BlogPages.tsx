@@ -5,6 +5,7 @@ import Storefront from "./Storefront";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faXTwitter, faLinkedinIn, faPinterestP, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import BlogCarousel, { BlogCard } from "./BlogCards";
+import BlogProductPopup from "./BlogProductPopup";
 import { BlogPost, blogPosts, blogTags } from "../lib/blogs";
 import { ArrowRight, BookOpen, Clock, Check, Link2, ChevronDown, ArrowUpRight, Mail } from "lucide-react";
 
@@ -91,6 +92,8 @@ export function BlogDetails({ post }: { post: BlogPost }) {
   const [shareStatus, setShareStatus] = useState("");
   const [shareUrl, setShareUrl] = useState("");
   useEffect(() => { setShareUrl(window.location.origin + window.location.pathname); setShareStatus(""); }, [post.slug]);
+  // On phones the contents list sits above the article, so start it collapsed to reach the story faster.
+  useEffect(() => { if (window.matchMedia("(max-width: 800px)").matches) setTocOpen(false); }, [post.slug]);
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(post.title);
   const sharePlatforms = [
@@ -251,6 +254,8 @@ export function BlogDetails({ post }: { post: BlogPost }) {
               </div>
             </aside>
           </div>
+
+          <BlogProductPopup post={post} articleRef={articleRef} />
 
           {/* Related posts */}
           {related.length > 0 && (

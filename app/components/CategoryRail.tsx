@@ -127,7 +127,7 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
 
   return <div className="cat-rail-wrap page-width" onMouseLeave={scheduleClose}>
     <div className="cat-rail">
-      <button className="cat-rail-offer" onClick={() => browse("Offer Zone")} onMouseEnter={scheduleClose}>
+      <button className={selectedCategory === "Offer Zone" ? "cat-rail-offer active" : "cat-rail-offer"} aria-current={selectedCategory === "Offer Zone" ? "true" : undefined} onClick={() => browse("Offer Zone")} onMouseEnter={scheduleClose}>
         <span className="cat-rail-offer-icon"><Sparkles size={15} /></span>
         <span><b>Offer Zone</b><small>Up to 30% off</small></span>
       </button>
@@ -152,7 +152,7 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
         </div>
         <button disabled={!canScroll.right} className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button>
       </div>
-      <button className="cat-rail-all" onClick={() => browse("All")} onMouseEnter={scheduleClose}><LayoutGrid size={15} /><span>All</span></button>
+      <button className={selectedCategory === "All" ? "cat-rail-all active" : "cat-rail-all"} aria-current={selectedCategory === "All" ? "true" : undefined} onClick={() => browse("All")} onMouseEnter={scheduleClose}><LayoutGrid size={15} /><span>All</span></button>
     </div>
 
     <div className={current ? "cat-flyout open" : "cat-flyout"} onMouseEnter={keepOpen} aria-hidden={!current}>

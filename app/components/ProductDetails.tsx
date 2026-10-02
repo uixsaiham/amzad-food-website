@@ -47,8 +47,7 @@ function ProductTabs({ product }: { product: Product }) {
 export default function ProductDetails({ product, related }: { product: Product; related: Product[] }) {
   return <Storefront>{({ addToCart, goToCheckout, isWishlisted, toggleWishlist }) => <div className="pd-page">
     <div className="page-width">
-      <nav className="pd-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span><Link href="/products/">Shop</Link><span>/</span><span>{product.name}</span></nav>
-      <div className="pd-intro"><h1>{product.name}</h1><a href="#product-reviews">View customer reviews <ArrowRight size={14} /></a></div>
+      <div className="pd-topbar"><nav className="pd-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span><Link href="/products/">All Products</Link><span>/</span><Link href={`/products/?category=${encodeURIComponent(product.category)}`}>{product.category === "Oil" ? "Ghee & Oil" : product.category}</Link><span>/</span><span aria-current="page">{product.name}</span></nav><a href="#product-reviews">View customer reviews <ArrowRight size={14} /></a></div>
       <QuickView key={product.name} product={product} embedded wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => {}} />
       
       <ProductTabs product={product} />

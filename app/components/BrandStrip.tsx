@@ -30,12 +30,8 @@ export default function BrandStrip() {
     return () => window.clearInterval(timer);
   }, [visible]);
 
-  return <section ref={section} className={`brand-strip page-width${visible ? " is-visible" : ""}`} aria-labelledby="our-brands-title">
-    <div className="brand-strip-inner">
-      <div className="brand-strip-heading">
-        <span className="eyebrow">One family. Everyday goodness.</span>
-        <h2 id="our-brands-title">Our brands<span aria-hidden="true">.</span></h2>
-      </div>
+  return <section ref={section} className={`brand-strip page-width${visible ? " is-visible" : ""}`} aria-label="Our brands">
+    <div className="brand-strip-inner brand-strip-logos-only">
       <ul className="brand-strip-logos">
         {brands.map(brand => <li key={`${brand.file}-${animationCycle}`} className={`brand-strip-item brand-strip-${brand.file}`}>
           <img src={`/amzad-food-website/brands/${brand.file}.png`} alt={brand.name} width={brand.width} height={brand.height} loading="lazy" decoding="async" />

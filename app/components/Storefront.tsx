@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { CartItem, CartLine, loadCart, saveCart } from "../lib/cart";
 import CartOffer from "./CartOffer";
 import { useDismissMenu } from "../lib/useDismissMenu";
+import { CATALOG_CATEGORY_EVENT, COMBO_CATEGORY, isCatalogPath, setCatalogCategory } from "../lib/navigation-events";
 import { getDeliveryFee } from "../lib/offers";
 import Link from "next/link";
 import BrandStrip from "./BrandStrip";
@@ -73,7 +74,7 @@ function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist 
     <div className="pc-body">
       <p className="pc-cat">{product.bn}</p>
       <h3 className="pc-name"><Link href={`/products/${productSlug(product.name)}/`}>{product.name}</Link></h3>
-      <div className="pc-meta"><span className="pc-unit">{product.unit}</span><span className="pc-rating"><Star size={12} fill="currentColor" />4.9<i>(46)</i></span></div>
+      <div className="pc-meta">{product.unit ? <span className="pc-unit">{product.unit}</span> : <span className="pc-unit pc-unit-category">{product.category}</span>}<span className="pc-rating"><Star size={12} fill="currentColor" />4.9<i>(46)</i></span></div>
       <div className="pc-price"><strong>৳{product.price.toLocaleString("en-IN")}</strong>{product.oldPrice && <del>৳{product.oldPrice.toLocaleString("en-IN")}</del>}</div>
       <button className="pc-order cta cta-ghost cta-sm cta-block" onClick={() => onOrderNow()}><span>Order Now</span></button>
     </div>
@@ -127,24 +128,32 @@ function HeroSlider() {
   </section>;
 }
 
-const navItems = [{ href: "#top", label: "Home" }, { href: "products/", label: "All Products" }, { href: "#combo", label: "Combo" }, { href: "blogs/", label: "Blogs" }];
+const navItems: { href: string; label: string; category?: string }[] = [{ href: "#top", label: "Home" }, { href: "products/", label: "All Products", category: "All" }, { href: `products/?category=${encodeURIComponent(COMBO_CATEGORY)}`, label: "Combo", category: COMBO_CATEGORY }, { href: "blogs/", label: "Blogs" }];
+
+// Which tab matches the current page; -1 on pages outside the main navigation (orders, checkout).
+function currentNavIndex(pathname: string) {
+  if (/(?:^|\/)blogs(?:\/|$)/.test(pathname)) return 3;
+  if (isCatalogPath(pathname)) return new URLSearchParams(window.location.search).get("category") === COMBO_CATEGORY ? 2 : 1;
+  if (/(?:^|\/)products\//.test(pathname)) return 1;
+  return pathname === "/" ? 0 : -1;
+}
 
 function NavLinks({ onNavigate }: { onNavigate: () => void }) {
   const pathname = usePathname();
-  const pageIndex = /(?:^|\/)blogs(?:\/|$)/.test(pathname) ? 3 : /(?:^|\/)products(?:\/|$)/.test(pathname) ? 1 : 0;
-  const [active, setActive] = useState(pageIndex);
+  const [active, setActive] = useState(-1);
   useEffect(() => {
-    const syncActive = () => setActive(pageIndex === 0 && window.location.hash === "#combo" ? 2 : pageIndex);
+    const syncActive = () => setActive(currentNavIndex(pathname));
     syncActive();
-    window.addEventListener("hashchange", syncActive);
-    return () => window.removeEventListener("hashchange", syncActive);
-  }, [pageIndex]);
+    window.addEventListener(CATALOG_CATEGORY_EVENT, syncActive);
+    window.addEventListener("popstate", syncActive);
+    return () => { window.removeEventListener(CATALOG_CATEGORY_EVENT, syncActive); window.removeEventListener("popstate", syncActive); };
+  }, [pathname]);
   const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   useLayoutEffect(() => {
     const link = linkRefs.current[active];
     const track = link?.parentElement;
-    if (!link || !track) return;
+    if (!link || !track) { setPill(null); return; }
     const place = () => {
       const next = { left: link.offsetLeft, width: link.offsetWidth };
       setPill(previous => previous?.left === next.left && previous.width === next.width ? previous : next);
@@ -162,7 +171,13 @@ function NavLinks({ onNavigate }: { onNavigate: () => void }) {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       setActive(index);
       onNavigate();
-      if (item.href.startsWith("#") && pageIndex === 0) {
+      if (item.category && isCatalogPath(pathname)) {
+        event.preventDefault();
+        setCatalogCategory(item.category, "push");
+        document.getElementById("catalog")?.scrollIntoView({ block: "start" });
+        return;
+      }
+      if (item.href.startsWith("#") && pathname === "/") {
         const target = document.getElementById(item.href.slice(1));
         if (target) {
           event.preventDefault();
@@ -194,20 +209,25 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
   </div>;
 }
 
-function NewsletterForm({ placeholder, buttonLabel, buttonClassName, onSubscribe, className }: { placeholder: string; buttonLabel: React.ReactNode; buttonClassName?: string; onSubscribe: (email: string) => void; className: string }) {
-  const [email, setEmail] = useState("");
+// Bangladeshi mobile number, with or without the +88 country code.
+const isWhatsAppNumber = (value: string) => /^(?:\+?88)?01[3-9]\d{8}$/.test(value.replace(/[\s-]/g, ""));
+
+function NewsletterForm({ placeholder, buttonLabel, buttonClassName, onSubscribe, className, channel = "email" }: { placeholder: string; buttonLabel: React.ReactNode; buttonClassName?: string; onSubscribe: (contact: string) => void; className: string; channel?: "email" | "whatsapp" }) {
+  const [contact, setContact] = useState("");
   const [error, setError] = useState(false);
+  const whatsapp = channel === "whatsapp";
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError(true); return; }
+    if (whatsapp ? !isWhatsAppNumber(contact) : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) { setError(true); return; }
     setError(false);
-    onSubscribe(email);
-    setEmail("");
+    onSubscribe(contact);
+    setContact("");
   };
   return <form className={error ? `${className} has-error` : className} onSubmit={submit} noValidate>
-    <input type="email" placeholder={placeholder} value={email} onChange={(event) => { setEmail(event.target.value); setError(false); }} />
+    {whatsapp && <FontAwesomeIcon className="nl-form-whatsapp" icon={faWhatsapp} fontSize={18} aria-hidden="true" />}
+    <input type={whatsapp ? "tel" : "email"} inputMode={whatsapp ? "tel" : "email"} autoComplete={whatsapp ? "tel" : "email"} aria-label={whatsapp ? "WhatsApp number" : "Email address"} placeholder={placeholder} value={contact} onChange={(event) => { setContact(event.target.value); setError(false); }} />
     <button type="submit" className={buttonClassName}>{buttonLabel}</button>
-    {error && <small className="form-error">Enter a valid email address</small>}
+    {error && <small className="form-error">{whatsapp ? "Enter a valid WhatsApp number, e.g. 01712345678" : "Enter a valid email address"}</small>}
   </form>;
 }
 
@@ -230,8 +250,8 @@ function NewsletterBanner({ notify }: { notify: (message: string) => void }) {
     <div className="nl-copy">
       <span className="nl-pill"><Mail size={12} /> Newsletter · নিউজলেটার</span>
       <h2><span className="nl-intro">Join the family, </span><em>Get 10% off</em> your first order</h2>
-      <p>Fresh deals and recipes, straight to your inbox.</p>
-      <NewsletterForm className="nl-form" placeholder="Enter your email address" buttonClassName="cta cta-sm" buttonLabel={<><span>Subscribe</span><i className="cta-icon"><Send size={13} /></i></>} onSubscribe={() => { setUnlocked(true); notify("Subscribed! Your 10% off code is unlocked."); }} />
+      <p>Fresh deals and recipes, straight to your WhatsApp.</p>
+      <NewsletterForm className="nl-form" channel="whatsapp" placeholder="WhatsApp number" buttonClassName="cta cta-sm" buttonLabel={<><span>Subscribe</span><i className="cta-icon"><Send size={13} /></i></>} onSubscribe={() => { setUnlocked(true); notify("Subscribed! Your 10% off code is unlocked."); }} />
       <ul className="nl-perks"><li><Check size={14} /> Weekly deals</li><li><Check size={14} /> New arrivals first</li><li><Check size={14} /> No spam, ever</li></ul>
     </div>
     <div className="nl-visual">
@@ -413,12 +433,11 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
   const add = () => addToCart({ name: "Sundarbans Raw Honey", price: 350, image: "/amzad-food-website/honey-bg.png" });
   return <main id="top" className={children ? "storefront" : "storefront storefront-home"}>
     <div className={hasScrolled ? "announcement is-hidden" : "announcement"}><div className="announcement-inner page-width"><span className="announcement-contacts-group"><span className="announcement-cta">প্রয়োজনে কল করুন</span><span className="announcement-contacts"><a className="announcement-contact" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={14} /> 01327406605</a><span className="announcement-divider" /><a className="announcement-contact" href="tel:+8809613824071"><Phone size={13} /> 09613824071</a></span></span><span className="announcement-links"><a className="announcement-link" href="/amzad-food-website/my-orders/">My Orders</a><a className="announcement-link" href="/amzad-food-website/track-order/"><PackageSearch size={13} /> Track Order</a></span></div></div>
-    <nav ref={navRef} className={`navbar page-width site-nav${searchOpen ? " search-open" : ""}`}><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div ref={mobileMenuRef} className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><button ref={searchToggleRef} type="button" className="nav-icon nav-search-toggle" aria-label={searchOpen ? "Close product search" : "Open product search"} aria-expanded={searchOpen} aria-controls="top-nav-search" onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}><Search size={19} /></button><form id="top-nav-search" role="search" className="nav-search" hidden={!searchOpen} onSubmit={(event) => { event.preventDefault(); scrollToShop(); }} onKeyDown={(event) => { if (event.key === "Escape") closeSearch(); }}><button className="nav-search-submit" type="submit" aria-label="Search products"><Search size={18} /></button><input ref={searchRef} type="search" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" /><button type="button" className="nav-search-clear" onClick={closeSearch} aria-label="Close search"><X size={16} /></button>{query ? <button type="button" className="desktop-search-clear" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><X size={13} /></button> : <kbd className="desktop-search-shortcut">/</kbd>}</form><div className="nav-icons"><button className="nav-icon nav-user" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={17} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><small>My Cart</small><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
+    <nav ref={navRef} className={`navbar page-width site-nav${searchOpen ? " search-open" : ""}`}><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div ref={mobileMenuRef} className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><a className="mobile-menu-logo" href="/amzad-food-website/" onClick={() => setMenuOpen(false)}><img src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><button ref={searchToggleRef} type="button" className="nav-icon nav-search-toggle" aria-label={searchOpen ? "Close product search" : "Open product search"} aria-expanded={searchOpen} aria-controls="top-nav-search" onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}><Search size={19} /></button><form id="top-nav-search" role="search" className="nav-search" hidden={!searchOpen} onSubmit={(event) => { event.preventDefault(); scrollToShop(); }} onKeyDown={(event) => { if (event.key === "Escape") closeSearch(); }}><button className="nav-search-submit" type="submit" aria-label="Search products"><Search size={18} /></button><input ref={searchRef} type="search" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" /><button type="button" className="nav-search-clear" onClick={closeSearch} aria-label="Close search"><X size={16} /></button>{query && <button type="button" className="desktop-search-clear" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><X size={13} /></button>}</form><div className="nav-icons"><button className="nav-icon nav-user" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={17} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><small>My Cart</small><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
     {menuProduct && <QuickView product={menuProduct} wishlisted={wishlist.some(item => item.name === menuProduct.name)} onToggleWishlist={() => toggleWishlist(menuProduct)} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => setMenuProduct(null)} />}
     {isHomePage && <CategoryRail selectedCategory={activeCategory} onView={setMenuProduct} onAdd={addToCart} onBrowse={(label) => browseMenuCategory({ label })} />}
     {children ? <>
     {children({ addToCart, goToCheckout, isWishlisted, toggleWishlist })}
-    <Reviews />
     </> : <>
     <HeroSlider />
     <BrandStrip />
@@ -678,6 +697,9 @@ const matchesPriceRange = (price: number, range: PriceFilter) => {
   }
 };
 
+const categoryLabel = (category: string) => category === "Oil" ? "Ghee & Oil" : category === "Spices" ? "Mosla & Spices" : category;
+const productTypeLabels: Record<string, string> = { all: "All types", single: "Single products", combo: "Combo packs" };
+
 // Full catalogue for the dedicated All Products page.
 export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWishlist }: StoreActions) {
   const [category, setCategory] = useState("All");
@@ -686,6 +708,7 @@ export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWi
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
   const [brand, setBrand] = useState("all");
   const [productType, setProductType] = useState("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [page, setPage] = useState(1);
   const resultsRef = useRef<HTMLParagraphElement>(null);
 
@@ -693,29 +716,32 @@ export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWi
     setPage(1);
   }, [category, priceFilter, query, sortKey, brand, productType]);
 
+  // Follow the URL, including header links (All Products / Combo) clicked while this page is open.
   useEffect(() => {
-    const wanted = new URLSearchParams(window.location.search).get("category");
-    if (wanted && productCategories.includes(wanted)) setCategory(wanted);
+    const sync = () => {
+      const wanted = resolveProductCategory(new URLSearchParams(window.location.search).get("category") ?? "All");
+      setCategory(productCategories.includes(wanted) ? wanted : "All");
+    };
+    sync();
+    window.addEventListener(CATALOG_CATEGORY_EVENT, sync);
+    window.addEventListener("popstate", sync);
+    return () => { window.removeEventListener(CATALOG_CATEGORY_EVENT, sync); window.removeEventListener("popstate", sync); };
   }, []);
 
-  const pick = (value: string) => {
-    setCategory(value);
-    const url = new URL(window.location.href);
-    if (value === "All") url.searchParams.delete("category"); else url.searchParams.set("category", value);
-    window.history.replaceState(null, "", url);
-  };
+  const pick = (value: string) => setCatalogCategory(value);
 
-  const tabs = [{ key: "All", label: "All", count: storeProducts.length }, ...productCategories.map(name => ({ key: name, label: name, count: storeProducts.filter(item => item.category === name).length }))];
+  const tabs = [{ key: "All", label: "All products", count: storeProducts.length }, ...productCategories.map(name => ({ key: name, label: categoryLabel(name), count: storeProducts.filter(item => item.category === name).length }))];
 
   const activeFilters = useMemo(() => {
-    const items: string[] = [];
-    if (category !== "All") items.push(category);
-    if (priceFilter !== "all") items.push(priceFilterLabels[priceFilter]);
-    if (brand !== "all") items.push(brand);
-    if (productType !== "all") items.push(productType === "combo" ? "Combo packs" : "Single products");
-    if (query.trim()) items.push(`“${query.trim()}”`);
+    const items: { label: string; clear: () => void }[] = [];
+    if (category !== "All") items.push({ label: categoryLabel(category), clear: () => pick("All") });
+    if (priceFilter !== "all") items.push({ label: priceFilterLabels[priceFilter], clear: () => setPriceFilter("all") });
+    if (brand !== "all") items.push({ label: brand, clear: () => setBrand("all") });
+    if (productType !== "all") items.push({ label: productTypeLabels[productType], clear: () => setProductType("all") });
+    if (query.trim()) items.push({ label: `“${query.trim()}”`, clear: () => setQuery("") });
     return items;
   }, [category, priceFilter, query, brand, productType]);
+  const extraFilterCount = [priceFilter !== "all", brand !== "all", productType !== "all"].filter(Boolean).length;
 
   const shown = useMemo(() => {
     const base = category === "All" ? storeProducts : storeProducts.filter(item => item.category === category);
@@ -724,7 +750,7 @@ export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWi
       return target.includes(query.trim().toLowerCase());
     }) : base;
     const withPrice = withQuery.filter((item) => matchesPriceRange(item.price, priceFilter));
-    const withType = withPrice.filter(item => (brand === "all" || getProductBrand(item) === brand) && (productType === "all" || (productType === "combo" ? item.category === "Combo Packs" : item.category !== "Combo Packs")));
+    const withType = withPrice.filter(item => (brand === "all" || getProductBrand(item) === brand) && (productType === "all" || (productType === "combo" ? item.category === COMBO_CATEGORY : item.category !== COMBO_CATEGORY)));
     return sortProducts(withType, sortKey);
   }, [category, priceFilter, query, sortKey, brand, productType]);
 
@@ -740,78 +766,73 @@ export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWi
   };
 
   const resetFilters = () => {
-    setCategory("All");
     setPriceFilter("all");
     setBrand("all");
     setProductType("all");
     setQuery("");
     setSortKey("featured");
-    const url = new URL(window.location.href);
-    url.searchParams.delete("category");
-    window.history.replaceState(null, "", url);
+    pick("All");
   };
 
+  const title = category === "All" ? "All Products" : categoryLabel(category);
+
   return <section className="catalog page-width" id="catalog">
-    <header className="catalog-heading"><h1>All Products</h1></header>
+    <nav className="pd-breadcrumb catalog-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span>{category === "All" ? <span aria-current="page">All Products</span> : <><a href="/amzad-food-website/products/" onClick={(event) => { event.preventDefault(); pick("All"); }}>All Products</a><span>/</span><span aria-current="page">{title}</span></>}</nav>
+    <header className="catalog-heading"><h1>{title}</h1><p>{category === "All" ? `${storeProducts.length} natural foods, sweets and pantry essentials from across Bangladesh.` : `${tabs.find(tab => tab.key === category)?.count ?? 0} products in ${title}.`}</p></header>
 
-    <div className="catalog-toolbar" role="group" aria-label="Product filters">
-      <div className="catalog-field">
-        <label htmlFor="price-filter">Price Range</label>
-        <select id="price-filter" value={priceFilter} onChange={(event) => setPriceFilter(event.target.value as PriceFilter)}>
-          {(Object.keys(priceFilterLabels) as PriceFilter[]).map(value => <option key={value} value={value}>{priceFilterLabels[value]}</option>)}
-        </select>
-      </div>
-      <div className="catalog-field">
-        <label htmlFor="category-filter">Category</label>
-        <select id="category-filter" value={category} onChange={(event) => pick(event.target.value)}>
-          {tabs.map(tab => <option key={tab.key} value={tab.key}>{tab.key === "All" ? "All categories" : tab.label} ({tab.count})</option>)}
-        </select>
-      </div>
-      <div className="catalog-field">
-        <label htmlFor="brand-filter">Brand</label>
-        <select id="brand-filter" value={brand} onChange={(event) => setBrand(event.target.value)}>
-          <option value="all">All brands</option>{productBrands.map(name => <option key={name} value={name}>{name}</option>)}
-        </select>
-      </div>
-      <div className="catalog-field">
-        <label htmlFor="type-filter">Product Type</label>
-        <select id="type-filter" value={productType} onChange={(event) => setProductType(event.target.value)}>
-          <option value="all">All types</option><option value="single">Single products</option><option value="combo">Combo packs</option>
-        </select>
-      </div>
-      <div className="catalog-field catalog-search-field">
-        <label htmlFor="catalog-search">Search</label>
-        <div className="catalog-search"><Search size={17} aria-hidden="true" /><input id="catalog-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products…" /></div>
-      </div>
-    </div>
+    <div className="catalog-layout">
+      <aside className={filtersOpen ? "catalog-sidebar filters-open" : "catalog-sidebar"} aria-label="Product filters">
+        <div className="catalog-search"><Search size={17} aria-hidden="true" /><input id="catalog-search" type="search" aria-label="Search products" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products…" />{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14} /></button>}</div>
 
-    <div className="catalog-results">
-      {activeFilters.length > 0 && <div className="active-filter-bar" aria-live="polite">
-        {activeFilters.map((filter) => <span key={filter} className="active-filter-pill">{filter}</span>)}
-        <button type="button" className="filter-reset" onClick={resetFilters}>Clear all</button>
-      </div>}
-
-
-    <div className="catalog-summary-row">
-      <p ref={resultsRef} tabIndex={-1} className="catalog-count" role="status">Showing {shown.length > 0 ? `${pageStart + 1}–${pageStart + pageProducts.length} of ${shown.length}` : "0"} {shown.length === 1 ? "product" : "products"}{category !== "All" && <> in <b>{category}</b></>}</p>
-      <div className="catalog-field catalog-sort-field">
-        <label htmlFor="catalog-sort">Sort By</label>
-        <select id="catalog-sort" value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)}>
-          {(Object.keys(sortLabels) as SortKey[]).map(key => <option key={key} value={key}>{sortLabels[key]}</option>)}
-        </select>
-      </div>
-    </div>
-
-      {shown.length === 0 ? (
-        <div className="shop-empty" role="status">
-          <strong>No products match your filters.</strong>
-          <p>Try clearing a filter or browsing another category.</p>
-          <button type="button" className="cta cta-sm" onClick={resetFilters}><span>Clear filters</span></button>
+        <div className="catalog-group catalog-group-categories">
+          <h2>Categories</h2>
+          <ul className="catalog-cats">{tabs.map(tab => <li key={tab.key}><button type="button" className={tab.key === category ? "active" : undefined} aria-pressed={tab.key === category} onClick={() => pick(tab.key)}><span>{tab.label}</span><small>{tab.count}</small></button></li>)}</ul>
         </div>
-      ) : (
-        <div className="product-grid">{pageProducts.map(product => <ProductCard key={product.name} product={product} onAdd={(item, qty) => addToCart(item ?? product, qty)} onOrderNow={(item, qty) => goToCheckout(item ?? product, qty)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} />)}</div>
-      )}
-      <Pagination currentPage={currentPage} pageCount={pageCount} onChange={changePage} />
+
+        <button type="button" className="catalog-filters-toggle" aria-expanded={filtersOpen} aria-controls="catalog-more-filters" onClick={() => setFiltersOpen(!filtersOpen)}><span>More filters{extraFilterCount > 0 && <b>{extraFilterCount}</b>}</span><ChevronDown size={16} /></button>
+        <div className="catalog-more-filters" id="catalog-more-filters">
+          <div className="catalog-group">
+            <h2>Price</h2>
+            <div className="catalog-options">{(Object.keys(priceFilterLabels) as PriceFilter[]).map(value => <button key={value} type="button" className={value === priceFilter ? "active" : undefined} aria-pressed={value === priceFilter} onClick={() => setPriceFilter(value)}>{priceFilterLabels[value]}</button>)}</div>
+          </div>
+          <div className="catalog-group">
+            <h2>Brand</h2>
+            <div className="catalog-options">{["all", ...productBrands].map(name => <button key={name} type="button" className={name === brand ? "active" : undefined} aria-pressed={name === brand} onClick={() => setBrand(name)}>{name === "all" ? "All brands" : name}</button>)}</div>
+          </div>
+          <div className="catalog-group">
+            <h2>Product type</h2>
+            <div className="catalog-options">{Object.keys(productTypeLabels).map(value => <button key={value} type="button" className={value === productType ? "active" : undefined} aria-pressed={value === productType} onClick={() => setProductType(value)}>{productTypeLabels[value]}</button>)}</div>
+          </div>
+        </div>
+      </aside>
+
+      <div className="catalog-results">
+        <div className="catalog-summary-row">
+          <p ref={resultsRef} tabIndex={-1} className="catalog-count" role="status">Showing <b>{shown.length > 0 ? `${pageStart + 1}–${pageStart + pageProducts.length}` : "0"}</b> of {shown.length} {shown.length === 1 ? "product" : "products"}</p>
+          <div className="catalog-field catalog-sort-field">
+            <label htmlFor="catalog-sort">Sort by</label>
+            <select id="catalog-sort" value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)}>
+              {(Object.keys(sortLabels) as SortKey[]).map(key => <option key={key} value={key}>{sortLabels[key]}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {activeFilters.length > 0 && <div className="active-filter-bar" aria-label="Active filters">
+          {activeFilters.map((filter) => <button type="button" key={filter.label} className="active-filter-pill" onClick={filter.clear} aria-label={`Remove filter ${filter.label}`}>{filter.label}<X size={12} aria-hidden="true" /></button>)}
+          <button type="button" className="filter-reset" onClick={resetFilters}>Clear all</button>
+        </div>}
+
+        {shown.length === 0 ? (
+          <div className="shop-empty" role="status">
+            <strong>No products match your filters.</strong>
+            <p>Try clearing a filter or browsing another category.</p>
+            <button type="button" className="cta cta-sm" onClick={resetFilters}><span>Clear filters</span></button>
+          </div>
+        ) : (
+          <div className="product-grid">{pageProducts.map(product => <ProductCard key={product.name} product={product} onAdd={(item, qty) => addToCart(item ?? product, qty)} onOrderNow={(item, qty) => goToCheckout(item ?? product, qty)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} />)}</div>
+        )}
+        <Pagination currentPage={currentPage} pageCount={pageCount} onChange={changePage} />
+      </div>
     </div>
   </section>;
 }

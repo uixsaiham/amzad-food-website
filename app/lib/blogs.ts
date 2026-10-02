@@ -180,3 +180,28 @@ export const blogPosts: BlogPost[] = [
 ];
 
 export const blogTags = ["All", ...Array.from(new Set(blogPosts.map((p) => p.tag)))];
+
+// Product suggested once a reader is most of the way through an article.
+// `slug` points at a catalogue product; the copy explains why it fits this story.
+export type RelatedProductPick = { slug: string; topic: string; reason: string; benefit: string; cta: string; kicker: string };
+
+const englishPick = (slug: string, topic: string, reason: string, benefit: string): RelatedProductPick => ({ slug, topic, reason, benefit, cta: "View Product", kicker: "Goes with this article" });
+
+const relatedByPost: Record<string, RelatedProductPick> = {
+  "constipation-and-daily-food-habits": { slug: "hazmi-seeds-combo", topic: "হজম ও পেটের স্বস্তি", reason: "এই লেখায় আঁশযুক্ত খাবার আর সিডস মিক্স বেছে নেওয়ার কথা বলা হয়েছে।", benefit: "বীজের মিশ্রণ—প্রতিদিনের খাবারে সহজে যোগ করা যায়।", cta: "পণ্যটি দেখুন", kicker: "এই লেখার সঙ্গে মানানসই" },
+  "everyday-pantry": englishPick("mustard-oil-5-ltr", "Pantry basics", "Every pantry in this guide starts with a dependable cooking oil.", "A 5-litre pack of mustard oil for everyday cooking."),
+  "spice-pairings": englishPick("deli-spice-combo-pack", "Spices", "You just read about building flavour with everyday spices.", "A ready set of spices to try these pairings tonight."),
+  "tea-time": englishPick("pera-sondesh", "Tea time", "A soft, familiar sweet for the tea table this article describes.", "Traditional pera sondesh, ready to serve with tea."),
+  "seasonal-mango": englishPick("himsagar-mango", "Mango season", "Planning for mango season? Start with a Rajshahi favourite.", "Himsagar mangoes in a 10 kg box for the whole household."),
+  "thoughtful-food-gifts": englishPick("winter-gift-khejur-gur-combo", "Food gifts", "A gift-boxed set that matches the personal food gift ideas above.", "Khejur gur favourites, packed and ready to give."),
+  "shopping-list": englishPick("akher-lal-chini", "Weekly staples", "A kitchen staple worth adding to your weekly list.", "Sugarcane red sugar in a 1 kg pack."),
+};
+
+// Fallback per topic, so new articles get a relevant suggestion without extra setup.
+const relatedByTag: Record<string, RelatedProductPick> = {
+  "Everyday Wellness": englishPick("hazmi-juice-combo", "Everyday wellness", "Related to the wellness habits in this article.", "A simple addition to your daily routine."),
+  "Natural Goodness": englishPick("khejurer-patali-gur", "Natural goodness", "A natural sweetener that fits the ideas in this story.", "Traditional date-palm patali gur, 1 kg."),
+  "Better Food Habits": englishPick("chia-seeds-combo", "Better food habits", "A small, easy step toward the habits in this article.", "A seeds combo that is easy to add to meals."),
+};
+
+export const relatedProductFor = (post: BlogPost): RelatedProductPick | undefined => relatedByPost[post.slug] ?? relatedByTag[post.tag];
