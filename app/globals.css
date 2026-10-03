@@ -3886,3 +3886,12 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
   .video-stories-carousel .best-sellers-prev { left: -12px; }
   .video-stories-carousel .best-sellers-next { right: -12px; }
 }
+
+/* Keep drawer headings and close controls below the persistent mobile contact bar. */
+@media (max-width: 800px) {
+  .side-drawer { top: calc(40px + env(safe-area-inset-top, 0px)); }
+  .side-drawer-head { flex-shrink: 0; gap: 12px; }
+  .side-drawer-head h3 { min-width: 0; overflow-wrap: anywhere; }
+  .side-drawer-head button { flex-shrink: 0; }
+  .side-drawer-body { min-height: 0; }
+}
