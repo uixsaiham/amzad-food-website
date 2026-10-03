@@ -17,6 +17,7 @@ import CategoryRail from "./CategoryRail";
 import PrayerTimes, { PrayerDock } from "./PrayerTimes";
 import Reviews from "./Reviews";
 import BlogSection from "./BlogSection";
+import FooterFeedback from "./FooterFeedback";
 import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, ChevronLeft, ChevronRight, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Search, Send, ShoppingCart, Star, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
@@ -493,9 +494,9 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
           <a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo-light.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a>
           <p>Trusted food products for everyday Bangladesh, sourced with care from farms across the country.</p>
           <ul className="ft-contact">
-            <li><MapPin size={15} /><span>বাড়ি ১২, রোড ৫, ধানমন্ডি, ঢাকা ১২০৯</span></li>
-            <li><Mail size={15} /><a href="mailto:hello@amzadfood.com">hello@amzadfood.com</a></li>
-            <li><Phone size={15} /><a href="tel:+8809613824071">09613824071</a></li>
+            <li><MapPin size={15} /><span>Bosila, West Dhanmondi Housing Society, Block - B, Road - 9, House - 15, Dhaka, Bangladesh</span></li>
+            <li><Mail size={15} /><a href="mailto:help@amzadfood.com">help@amzadfood.com</a></li>
+            <li><Phone size={15} /><a href="tel:+8809613824071">09613-824071</a></li>
           </ul>
           <div className="ft-social">
             {[[Facebook, "Facebook"], [Instagram, "Instagram"], [Youtube, "YouTube"]].map(([Icon, label]) => { const SocialIcon = Icon as typeof Facebook; return <a key={label as string} href="#" aria-label={label as string} onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}><SocialIcon size={15} /></a>; })}
@@ -504,12 +505,9 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
         <nav className="ft-col" aria-label="Shop"><strong>Shop</strong><a href="/amzad-food-website/#shop">Honey</a><a href="/amzad-food-website/#shop">Ghee &amp; Oil</a><a href="/amzad-food-website/#shop">Khejur</a><a href="/amzad-food-website/#shop">Mosla</a><a href="/amzad-food-website/#combo">Combo &amp; Gifts</a></nav>
         <nav className="ft-col" aria-label="Company"><strong>Company</strong><a href="/amzad-food-website/#story">Our Story</a><a href="/amzad-food-website/blogs/">Blogs</a><a href="/amzad-food-website/#reviews">Reviews</a><a href="/amzad-food-website/#prayer-times">Prayer Times</a></nav>
         <nav className="ft-col" aria-label="Help"><strong>Help</strong><a href="/amzad-food-website/track-order/">Track Order</a><a href="/amzad-food-website/checkout/">Checkout</a><Link href="/faq/">FAQ</Link><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Returns</a></nav>
-        <div className="ft-news">
-          <strong>Newsletter</strong>
-          <p>Deals, new arrivals and recipes, once a week.</p>
-          <NewsletterForm className="ft-news-form" placeholder="Your email address" buttonLabel={<ArrowRight size={15} />} onSubscribe={() => notify("Subscribed to the newsletter!")} />
-        </div>
+        <FooterFeedback />
       </div>
+
 
       <div className="ft-pay page-width">
         <span>We accept</span>
