@@ -16,7 +16,7 @@ import MegaMenu, { MenuContact, MenuIcon, MenuLink, menuCategories, menuHelp, me
 import CategoryRail from "./CategoryRail";
 import PrayerTimes, { PrayerDock } from "./PrayerTimes";
 import Reviews from "./Reviews";
-import ImpactStats from "./ImpactStats";
+import BlogSection from "./BlogSection";
 import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, ChevronLeft, ChevronRight, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Search, Send, ShoppingCart, Star, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
@@ -58,7 +58,7 @@ const originStories = [
   { key: "jessore", className: "jessore", icon: TreePalm, place: "Jessore", product: "Khejur Gur", desc: "Winter date-palm sap from Jessore is slow-boiled into rich patali and jhola gur." },
 ];
 
-function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist }: { product: Product; onAdd: (item?: CartLine, qty?: number) => void; onOrderNow: (item?: CartLine, qty?: number) => void; wishlisted: boolean; onToggleWishlist: () => void }) {
+export function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist }: { product: Product; onAdd: (item?: CartLine, qty?: number) => void; onOrderNow: (item?: CartLine, qty?: number) => void; wishlisted: boolean; onToggleWishlist: () => void }) {
   const [quickView, setQuickView] = useState(false);
   const closeQuickView = useCallback(() => setQuickView(false), []);
   return <article className="pc">
@@ -74,7 +74,7 @@ function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist 
     <div className="pc-body">
       <p className="pc-cat">{product.bn}</p>
       <h3 className="pc-name"><Link href={`/products/${productSlug(product.name)}/`}>{product.name}</Link></h3>
-      <div className="pc-meta">{product.unit ? <span className="pc-unit">{product.unit}</span> : <span className="pc-unit pc-unit-category">{product.category}</span>}<span className="pc-rating"><Star size={12} fill="currentColor" />4.9<i>(46)</i></span></div>
+      <div className="pc-meta">{product.unit ? <span className="pc-unit">{product.unit}</span> : <span className="pc-unit pc-unit-category">{product.category}</span>}<span className="pc-mobile-category">{product.category === "Oil" ? "Ghee & Oil" : product.category}</span><span className="pc-rating"><Star size={12} fill="currentColor" />4.9<i>(46)</i></span></div>
       <div className="pc-price"><strong>৳{product.price.toLocaleString("en-IN")}</strong>{product.oldPrice && <del>৳{product.oldPrice.toLocaleString("en-IN")}</del>}</div>
       <button className="pc-order cta cta-ghost cta-sm cta-block" onClick={() => onOrderNow()}><span>Order Now</span></button>
     </div>
@@ -469,7 +469,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
       </li>)}</ul>
     </div></section>
     <Reviews />
-    <ImpactStats />
+    <BlogSection withStats />
     </>}
     <footer className="ft">
       <div className="ft-cta page-width">
@@ -503,7 +503,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
         </div>
         <nav className="ft-col" aria-label="Shop"><strong>Shop</strong><a href="/amzad-food-website/#shop">Honey</a><a href="/amzad-food-website/#shop">Ghee &amp; Oil</a><a href="/amzad-food-website/#shop">Khejur</a><a href="/amzad-food-website/#shop">Mosla</a><a href="/amzad-food-website/#combo">Combo &amp; Gifts</a></nav>
         <nav className="ft-col" aria-label="Company"><strong>Company</strong><a href="/amzad-food-website/#story">Our Story</a><a href="/amzad-food-website/blogs/">Blogs</a><a href="/amzad-food-website/#reviews">Reviews</a><a href="/amzad-food-website/#prayer-times">Prayer Times</a></nav>
-        <nav className="ft-col" aria-label="Help"><strong>Help</strong><a href="/amzad-food-website/track-order/">Track Order</a><a href="/amzad-food-website/checkout/">Checkout</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>FAQ</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Returns</a></nav>
+        <nav className="ft-col" aria-label="Help"><strong>Help</strong><a href="/amzad-food-website/track-order/">Track Order</a><a href="/amzad-food-website/checkout/">Checkout</a><Link href="/faq/">FAQ</Link><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Returns</a></nav>
         <div className="ft-news">
           <strong>Newsletter</strong>
           <p>Deals, new arrivals and recipes, once a week.</p>
@@ -781,6 +781,13 @@ export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWi
     <header className="catalog-heading"><h1>{title}</h1><p>{category === "All" ? `${storeProducts.length} natural foods, sweets and pantry essentials from across Bangladesh.` : `${tabs.find(tab => tab.key === category)?.count ?? 0} products in ${title}.`}</p></header>
 
     <div className="catalog-layout">
+      <div className="catalog-desktop-filters" role="region" aria-label="Product filters">
+        <div className="catalog-field"><label htmlFor="desktop-category">Category</label><select id="desktop-category" value={category} onChange={event => pick(event.target.value)}>{tabs.map(tab => <option key={tab.key} value={tab.key}>{tab.label} ({tab.count})</option>)}</select></div>
+        <div className="catalog-field"><label htmlFor="desktop-price">Price</label><select id="desktop-price" value={priceFilter} onChange={event => setPriceFilter(event.target.value as PriceFilter)}>{(Object.keys(priceFilterLabels) as PriceFilter[]).map(value => <option key={value} value={value}>{priceFilterLabels[value]}</option>)}</select></div>
+        <div className="catalog-field"><label htmlFor="desktop-brand">Brand</label><select id="desktop-brand" value={brand} onChange={event => setBrand(event.target.value)}>{["all", ...productBrands].map(value => <option key={value} value={value}>{value === "all" ? "All brands" : value}</option>)}</select></div>
+        <div className="catalog-field"><label htmlFor="desktop-type">Product type</label><select id="desktop-type" value={productType} onChange={event => setProductType(event.target.value)}>{Object.keys(productTypeLabels).map(value => <option key={value} value={value}>{productTypeLabels[value]}</option>)}</select></div>
+        <div className="catalog-field catalog-desktop-search"><label htmlFor="desktop-search">Search products</label><div className="catalog-search"><Search size={17} aria-hidden="true" /><input id="desktop-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search products…" />{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14} /></button>}</div></div>
+      </div>
       <aside className={filtersOpen ? "catalog-sidebar filters-open" : "catalog-sidebar"} aria-label="Product filters">
         <div className="catalog-search"><Search size={17} aria-hidden="true" /><input id="catalog-search" type="search" aria-label="Search products" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products…" />{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14} /></button>}</div>
 

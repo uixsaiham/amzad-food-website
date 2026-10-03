@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, MessageSquare, Info, ShieldCheck, Leaf, Truck } from "lucide-react";
+import { ArrowRight, Info, ShieldCheck, Leaf, Truck } from "lucide-react";
 import QuickView from "./QuickView";
-import Reviews from "./Reviews";
-import { Product, productSlug } from "../lib/products";
-import Storefront from "./Storefront";
+import { Product } from "../lib/products";
+import Storefront, { ProductCard } from "./Storefront";
+import ProductReview from "./ProductReview";
 
 function ProductTabs({ product }: { product: Product }) {
   const [activeTab, setActiveTab] = useState<"description" | "nutrition" | "shipping">("description");
@@ -47,14 +47,13 @@ function ProductTabs({ product }: { product: Product }) {
 export default function ProductDetails({ product, related }: { product: Product; related: Product[] }) {
   return <Storefront>{({ addToCart, goToCheckout, isWishlisted, toggleWishlist }) => <div className="pd-page">
     <div className="page-width">
-      <div className="pd-topbar"><nav className="pd-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span><Link href="/products/">All Products</Link><span>/</span><Link href={`/products/?category=${encodeURIComponent(product.category)}`}>{product.category === "Oil" ? "Ghee & Oil" : product.category}</Link><span>/</span><span aria-current="page">{product.name}</span></nav><a href="#product-reviews">View customer reviews <ArrowRight size={14} /></a></div>
+      <div className="pd-topbar"><nav className="pd-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span><Link href="/products/">All Products</Link><span>/</span><Link href={`/products/?category=${encodeURIComponent(product.category)}`}>{product.category === "Oil" ? "Ghee & Oil" : product.category}</Link><span>/</span><span aria-current="page">{product.name}</span></nav></div>
       <QuickView key={product.name} product={product} embedded wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => {}} />
       
       <ProductTabs product={product} />
+      <ProductReview key={product.name} product={product.name} />
 
-      <section className="pd-reviews" id="product-reviews"><div><span className="pd-eyebrow">CUSTOMER VOICES</span><h2>Product reviews</h2><p>Feedback for {product.name}</p></div><div className="pd-review-empty"><MessageSquare size={26} /><strong>No product-specific reviews yet</strong><p>Explore what customers say about shopping with Amzad Food below.</p></div></section>
     </div>
-    <div className="pd-store-reviews"><div className="page-width"><p className="pd-eyebrow">REVIEWS OF AMZAD FOOD · STORE-WIDE EXPERIENCES</p></div><Reviews /></div>
-    <section className="pd-related page-width"><div className="pd-section-heading"><div><span className="pd-eyebrow">A LITTLE MORE TO LOVE</span><h2>Explore related products</h2></div><Link href="/products/">Shop all <ArrowRight size={16} /></Link></div><div className="pd-related-grid">{related.map(item => <Link className="pd-related-card" href={`/products/${productSlug(item.name)}/`} key={item.name}><div><img src={item.image} alt={item.name} /><span><ArrowRight size={18} /></span></div><small>{item.category}</small><h3>{item.name}</h3><p>৳{item.price} {item.oldPrice && <del>৳{item.oldPrice}</del>}</p></Link>)}</div></section>
+    <section className="pd-related page-width"><div className="pd-section-heading"><div><span className="pd-eyebrow">A LITTLE MORE TO LOVE</span><h2>Explore related products</h2></div><Link href="/products/">Shop all <ArrowRight size={16} /></Link></div><div className="pd-related-grid">{related.map(item => <ProductCard key={item.name} product={item} onAdd={(line, qty) => addToCart(line ?? item, qty)} onOrderNow={(line, qty) => goToCheckout(line ?? item, qty)} wishlisted={isWishlisted(item.name)} onToggleWishlist={() => toggleWishlist(item)} />)}</div></section>
   </div>}</Storefront>;
 }

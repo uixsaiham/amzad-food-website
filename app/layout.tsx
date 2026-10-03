@@ -3,6 +3,7 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
 import ChatWidget from "./components/ChatWidget";
+import MobileContactBar from "./components/MobileContactBar";
 
 config.autoAddCss = false;
 
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}<ChatWidget /></body>
+      <body><MobileContactBar />{children}<ChatWidget /></body>
     </html>
   );
 }

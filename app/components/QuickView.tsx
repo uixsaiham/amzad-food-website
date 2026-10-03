@@ -77,7 +77,7 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
         <div className="qv-media">
           <span className="qv-save">Save ৳{saving}</span>
           {product.tag && <span className="qv-tag">{product.tag}</span>}
-          <button className={wishlisted ? "qv-wish active" : "qv-wish"} onClick={onToggleWishlist} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}><Heart size={18} fill={wishlisted ? "currentColor" : "none"} /></button>
+          <button className={wishlisted ? "qv-wish active" : "qv-wish"} onClick={onToggleWishlist} aria-pressed={wishlisted} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}><Heart size={18} fill={wishlisted ? "currentColor" : "none"} /></button>
           <ProductGallery key={product.name} product={product}>
             <ul className="qv-assure">{assurances.map((item) => <li key={item.label}><img src={item.icon} alt="" aria-hidden="true" />{item.label}</li>)}</ul>
           </ProductGallery>
