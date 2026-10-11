@@ -117,7 +117,12 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
     closeTimer.current = setTimeout(() => setActive(null), 180);
   };
   const keepOpen = () => clearTimeout(closeTimer.current);
-  const scrollBy = (direction: number) => trackRef.current?.scrollBy({ left: direction * 320, behavior: "smooth" });
+  const scrollBy = (direction: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const end = Math.max(0, track.scrollWidth - track.clientWidth);
+    track.scrollTo({ left: Math.max(0, Math.min(end, track.scrollLeft + direction * 320)), behavior: "smooth" });
+  };
   const resolveProduct = (product: RailProduct): Product => catalog.find(item => item.name === product.name) ?? { name: product.name, bn: product.bn, category: current?.label ?? "Pantry", price: product.price, oldPrice: product.old, unit: product.unit, image: productImage };
   const viewProduct = (product: RailProduct) => {
     clearTimeout(openTimer.current);
