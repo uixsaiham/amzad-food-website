@@ -4168,3 +4168,21 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
 }
 .site-nav .burger i { transition: top .25s, transform .25s, opacity .2s, width .25s; }
 @media (prefers-reduced-motion: reduce) { .site-nav .burger i { transition: none; } }
+
+/* Larger mobile menu icon without the circular button treatment. */
+@media (max-width: 800px) {
+  .navbar .mobile-menu,
+  .navbar .mobile-menu.open {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: #344b3f;
+  }
+  .navbar .mobile-menu .burger { width: 26px; height: 18px; }
+  .navbar .mobile-menu .burger i { height: 2.5px; }
+  .navbar .mobile-menu .burger i:nth-child(1) { top: 0; }
+  .navbar .mobile-menu .burger i:nth-child(2) { top: 7px; }
+  .navbar .mobile-menu .burger i:nth-child(3) { top: 14px; }
+  .navbar .mobile-menu.open .burger i:nth-child(1),
+  .navbar .mobile-menu.open .burger i:nth-child(3) { top: 7px; }
+}
