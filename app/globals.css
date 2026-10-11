@@ -3999,3 +3999,69 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
 }
 .ft-main .footer-feedback-form button:hover { background: #008529; }
 .ft-main .footer-feedback-form button svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+/* Full-width header stays in place without scroll or menu animations. */
+.storefront > .announcement {
+  position: sticky;
+  top: 0;
+  height: 34px;
+  transition: none;
+}
+.navbar.site-nav,
+.navbar.site-nav:hover {
+  position: sticky;
+  top: 34px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  padding-left: max(32px, calc((100% - 1164px) / 2));
+  padding-right: max(32px, calc((100% - 1164px) / 2));
+  background: #fff;
+  box-shadow: none;
+  transform: none;
+  transition: none;
+}
+.site-nav .nav-pill,
+.site-nav .nav-links,
+.site-nav .nav-search,
+.site-nav .burger i,
+.site-nav .mega-menu,
+.site-nav .nav-backdrop { transition: none; animation: none; }
+.site-nav .nav-cart-icon b { animation: none; }
+@media (max-width: 800px) {
+  .navbar.site-nav,
+  .navbar.site-nav:hover {
+    top: calc(40px + env(safe-area-inset-top, 0px));
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+@media (max-width: 430px) {
+  .navbar.site-nav,
+  .navbar.site-nav:hover { padding-left: 6px; padding-right: 6px; }
+}
+
+/* Reserve one stable end control so reaching the end does not resize the track. */
+.cat-rail-scroller { grid-template-columns: 30px minmax(0, 1fr) 72px; }
+.cat-rail-end { width: 72px; display: flex; align-items: center; justify-content: center; align-self: stretch; }
+.cat-rail-end .cat-rail-all { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 7px; padding: 12px; font-size: 12px; }
+@media (max-width: 800px) {
+  .cat-rail-scroller { display: grid; grid-template-columns: minmax(0, 1fr) 72px; }
+}
+
+/* Compact the category end control on phones without shifting the track at its end. */
+@media (max-width: 800px) {
+  .cat-rail { padding-right: 6px; }
+  .cat-rail-scroller { grid-template-columns: minmax(0, 1fr) 48px; }
+  .cat-rail-end { width: 48px; }
+  .cat-rail-end .cat-rail-all { gap: 4px; padding: 10px 7px; font-size: 10px; }
+  .cat-rail-end .cat-rail-all svg { width: 14px; height: 14px; }
+}
+
+/* Paginated best sellers: eight cards on desktop, four on mobile. */
+#best-selling { scroll-margin-top: 150px; }
+#best-selling .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 800px) {
+  #best-selling .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

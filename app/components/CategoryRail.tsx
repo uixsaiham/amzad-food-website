@@ -93,8 +93,10 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
   };
   useEffect(() => {
     updateScroll();
+    const observer = new ResizeObserver(updateScroll);
+    if (trackRef.current) observer.observe(trackRef.current);
     window.addEventListener("resize", updateScroll);
-    return () => { window.removeEventListener("resize", updateScroll); clearTimeout(openTimer.current); clearTimeout(closeTimer.current); };
+    return () => { observer.disconnect(); window.removeEventListener("resize", updateScroll); clearTimeout(openTimer.current); clearTimeout(closeTimer.current); };
   }, []);
   useEffect(() => {
     if (!active) return;
@@ -150,9 +152,10 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
             <span className="cat-chip-text"><b>{category.label}</b><small>{category.bn}</small></span>
           </button>)}
         </div>
-        <button disabled={!canScroll.right} className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button>
+        <div className="cat-rail-end">
+          {canScroll.right ? <button className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button> : <button className={selectedCategory === "All" ? "cat-rail-all active" : "cat-rail-all"} aria-current={selectedCategory === "All" ? "true" : undefined} onClick={() => browse("All")} onMouseEnter={scheduleClose}><LayoutGrid size={15} /><span>All</span></button>}
+        </div>
       </div>
-      <button className={selectedCategory === "All" ? "cat-rail-all active" : "cat-rail-all"} aria-current={selectedCategory === "All" ? "true" : undefined} onClick={() => browse("All")} onMouseEnter={scheduleClose}><LayoutGrid size={15} /><span>All</span></button>
     </div>
 
     <div className={current ? "cat-flyout open" : "cat-flyout"} onMouseEnter={keepOpen} aria-hidden={!current}>
