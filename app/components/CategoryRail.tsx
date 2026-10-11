@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Coffee, Flame, Gift, LayoutGrid, Plus, Sparkles, Star, Wheat } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Coffee, Flame, Gift, Plus, Sparkles, Star, Wheat } from "lucide-react";
 import { CartLine } from "../lib/cart";
 import { Product, catalog, resolveProductCategory } from "../lib/products";
 
@@ -158,7 +158,7 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
           </button>)}
         </div>
         <div className="cat-rail-end">
-          {canScroll.right ? <button className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button> : <button className={selectedCategory === "All" ? "cat-rail-all active" : "cat-rail-all"} aria-current={selectedCategory === "All" ? "true" : undefined} onClick={() => browse("All")} onMouseEnter={scheduleClose}><LayoutGrid size={15} /><span>All</span></button>}
+          {canScroll.right ? <button className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button> : <button className={selectedCategory === "All" ? "cat-rail-all active" : "cat-rail-all"} aria-current={selectedCategory === "All" ? "true" : undefined} onClick={() => browse("All")} onMouseEnter={scheduleClose}><span>All</span></button>}
         </div>
       </div>
     </div>
