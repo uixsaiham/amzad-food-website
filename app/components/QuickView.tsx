@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Clock, Heart, Minus, Plus, ShoppingCart, Star, Truck, X } from "lucide-react";
+import { Check, Clock, Heart, Minus, Phone, Plus, ShoppingCart, Star, Truck, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
@@ -93,21 +93,24 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
           <div className="qv-price"><strong>৳{price}</strong><del>৳{price + saving}</del><em>You save ৳{saving}</em></div>
           <p className="qv-blurb">{info.blurb}</p>
 
+          <ul className="qv-highlights">{info.highlights.map((item) => <li key={item}><Check size={14} />{item}</li>)}</ul>
+
           <div className="qv-block">
             <h4>Select size <small>{size.label}</small></h4>
             <div className="qv-sizes">{sizes.map((option, index) => <button key={option.label} className={index === sizeIndex ? "active" : ""} onClick={() => setSizeIndex(index)} aria-pressed={index === sizeIndex}><b>{option.label}</b><span>৳{roundTo5(product.price * option.factor)}</span></button>)}</div>
           </div>
 
-          <ul className="qv-highlights">{info.highlights.map((item) => <li key={item}><Check size={14} />{item}</li>)}</ul>
-
           <div className="qv-offer"><Truck size={16} /><span>Cash on Delivery available · Delivered within 2-3 business days</span></div>
 
           <div className="qv-buy">
             <div className="qv-qty"><button onClick={() => setQty((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" disabled={qty === 1}><Minus size={14} /></button><b aria-live="polite">{qty}</b><button onClick={() => setQty((value) => Math.min(20, value + 1))} aria-label="Increase quantity" disabled={qty === 20}><Plus size={14} /></button></div>
-            <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }}><span>Add to Cart · ৳{price * qty}</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
+            <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }} aria-label={`Add to Cart, ৳${price * qty}`}><span>Add to Cart</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
             <button className="qv-order cta cta-dark" onClick={() => { onOrderNow(line, qty); onClose(); }}><span>Order Now</span></button>
           </div>
-          <a className="qv-whatsapp cta cta-whatsapp cta-outline cta-block" href={`https://wa.me/8801327406605?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Order via WhatsApp · 01327406605</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={16} /></i></a>
+          <div className="qv-contact">
+            <a className="qv-whatsapp" href={`https://wa.me/8801327406605?text=${whatsappText}`} target="_blank" rel="noreferrer" aria-label="Order via WhatsApp 01327406605"><FontAwesomeIcon icon={faWhatsapp} fontSize={15} />01327406605</a>
+            <a className="qv-whatsapp qv-call" href="tel:+8809613824071" aria-label="Call 09613824071"><Phone size={14} />09613824071</a>
+          </div>
 
           <div className="qv-tabs" role="tablist" aria-label="Product details">{tabs.map((item) => <button key={item.key} role="tab" aria-selected={tab === item.key} className={tab === item.key ? "active" : ""} onClick={() => setTab(item.key)}>{item.label}</button>)}</div>
           <div className="qv-panel" role="tabpanel">

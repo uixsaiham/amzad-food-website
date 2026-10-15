@@ -3652,7 +3652,6 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
     background: #183f2e;
     color: #e9f0dc;
   }
-  .mobile-contact-label { font-family: 'Anek Bangla', sans-serif; font-size: 11px; font-weight: 600; white-space: nowrap; color: #cdd9cd; }
   .mobile-contact-bar a { display: flex; align-items: center; gap: 7px; font-size: 12px; white-space: nowrap; }
   .mobile-contact-bar a svg { width: 13px; height: 13px; color: #4fd57a; flex-shrink: 0; }
   .mobile-contact-divider { width: 1px; height: 14px; background: #e9f0dc40; }
@@ -3661,7 +3660,6 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
 }
 @media (max-width: 374px) {
   .mobile-contact-bar { gap: 8px; padding-left: 6px; padding-right: 6px; }
-  .mobile-contact-label { font-size: 10px; }
   .mobile-contact-bar a { font-size: 11px; gap: 4px; }
 }
 
@@ -4215,4 +4213,22 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
     min-height: 64px;
     align-self: stretch;
   }
+}
+
+/* Product buy row: quantity, Add to Cart and Order Now share one line; both contact numbers share the line below. */
+.qv .qv-buy { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); }
+.qv .qv-order { grid-column: auto; }
+.qv .qv-add, .qv .qv-order { white-space: nowrap; min-width: 0; padding: 6px 12px; justify-content: center; gap: 8px; }
+.qv .qv-add .cta-icon { width: 26px; height: 26px; }
+.qv-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qv .qv-contact .qv-whatsapp { gap: 7px; min-height: 40px; font-size: 12px; white-space: nowrap; }
+.qv .qv-contact svg { color: #25d366; flex-shrink: 0; }
+.qv .qv-contact .qv-call svg { color: #3c7050; }
+@media (max-width: 480px) {
+  .qv .qv-buy { grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+  .qv .qv-qty button { width: 28px; }
+  .qv .qv-add, .qv .qv-order { font-size: 12px; padding: 6px 8px; }
+  .qv .qv-add .cta-icon { display: none; }
+  .qv-contact { gap: 6px; }
+  .qv .qv-contact .qv-whatsapp { font-size: 11px; padding: 6px 8px; }
 }
