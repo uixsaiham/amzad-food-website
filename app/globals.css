@@ -2845,7 +2845,8 @@ html body .shop-promo-label, html body .video-card-category, html body .jn-tag-i
 .brand-strip-heading .eyebrow { display: block; color: #718267; font-size: 10px; letter-spacing: .12em; margin: 0 0 8px; text-transform: uppercase; }
 .brand-strip-heading h2 { color: var(--deep); font-family: 'Gelasio', serif; font-size: 30px; font-weight: 500; letter-spacing: -.035em; line-height: 1.15; margin: 0; }
 .brand-strip-heading h2 span { color: #cf8040; }
-.brand-strip-logos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; list-style: none; margin: 0; padding: 0; }
+.brand-strip-logos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center; list-style: none; margin: 0; padding: 0; }
+.brand-hajam-wordmark { color: #7d4325; font-family: 'Gelasio', serif; font-size: clamp(28px, 3vw, 44px); font-weight: 700; font-style: italic; letter-spacing: -.05em; }
 .brand-strip-item { mix-blend-mode: multiply; display: flex; align-items: center; justify-content: center; min-width: 0; height: 90px; padding: 10px 28px; }
 .brand-strip-item + .brand-strip-item { border-left: 1px solid #dfe6d8; }
 .brand-strip-item img { display: block; width: 100%; max-width: 172px; height: auto; max-height: 58px; object-fit: contain; transition: transform .3s ease; }
@@ -2854,15 +2855,18 @@ html body .shop-promo-label, html body .video-card-category, html body .jn-tag-i
 .brand-strip.is-visible .brand-strip-item { animation: brand-arrive .75s cubic-bezier(.22, 1, .36, 1) both; }
 .brand-strip.is-visible .brand-strip-item:nth-child(2) { animation-delay: .14s; }
 .brand-strip.is-visible .brand-strip-item:nth-child(3) { animation-delay: .28s; }
+.brand-strip.is-visible .brand-strip-item:nth-child(4) { animation-delay: .42s; }
 @keyframes brand-arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 800px) {
   .brand-strip { padding-top: 4px; padding-bottom: 22px; }
   .brand-strip-inner { grid-template-columns: 1fr; gap: 16px; padding: 22px 16px 16px; border-radius: 16px; }
   .brand-strip-heading { text-align: center; }
   .brand-strip-heading h2 { font-size: 25px; }
-  .brand-strip-item { height: 72px; padding: 8px 14px; }
-  .brand-strip-item img { max-height: 40px; }
-  .brand-strip-maza img { max-height: 58px; }
+  .brand-strip-item { height: 58px; padding: 6px 9px; }
+  .brand-strip-logos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .brand-strip-item img { max-height: 28px; }
+  .brand-strip-maza img { max-height: 38px; }
+  .brand-hajam-wordmark { font-size: clamp(20px, 5.5vw, 30px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .brand-strip.is-visible .brand-strip-item { animation: none; }
@@ -3629,9 +3633,16 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
 @media (max-width: 380px) { .nl-form-whatsapp { display: none; } .nl-form .nl-form-whatsapp + input { padding-left: 8px; } }
 @media (max-width: 600px) { .nl-form input { padding-right: 6px; } .nl-form input::placeholder { font-size: 14px; } }
 
-/* Brand strip: logos only, spread across the full width */
-.brand-strip-inner.brand-strip-logos-only { grid-template-columns: 1fr; padding-block: 22px; }
-@media (max-width: 800px) { .brand-strip-inner.brand-strip-logos-only { padding: 16px; } }
+/* Brand showcase with a label inset into its frame. */
+.brand-strip-inner.brand-strip-logos-only { position: relative; grid-template-columns: 1fr; padding-block: 28px 22px; gap: 0; border: 1px solid #e4e9de; }
+.brand-family-heading { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); padding: 0 22px; background: #f7f9f2; white-space: nowrap; }
+.brand-strip-heading.brand-family-heading h2 { display: flex; align-items: center; gap: 12px; font-family: inherit; font-size: 11px; font-weight: 700; letter-spacing: .2em; line-height: 1.5; text-transform: uppercase; }
+.brand-family-heading h2::before, .brand-family-heading h2::after { content: ''; width: 5px; height: 5px; background: #ff681c; transform: rotate(45deg); }
+@media (max-width: 800px) {
+  .brand-strip-inner.brand-strip-logos-only { padding: 22px 16px 16px; }
+  .brand-family-heading { padding-inline: 14px; }
+  .brand-strip-heading.brand-family-heading h2 { font-size: 10px; gap: 9px; }
+}
 
 /* Keep customer support visible above the mobile header on every route. */
 .mobile-contact-bar { display: none; }
