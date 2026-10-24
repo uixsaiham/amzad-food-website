@@ -122,6 +122,7 @@ export default function CheckoutPage() {
   const [promoError, setPromoError] = useState("");
   const [eta, setEta] = useState("");
   const [order, setOrder] = useState<Order | null>(null);
+  const [submitError, setSubmitError] = useState("");
   const [summaryOpen, setSummaryOpen] = useState(false);
 
   useEffect(() => {
@@ -129,7 +130,17 @@ export default function CheckoutPage() {
     setEta(deliveryWindow());
     try {
       const saved = localStorage.getItem("af_checkout_fields");
-      if (saved) setFields({ ...emptyFields, ...JSON.parse(saved) });
+      if (saved) {
+        const parsed: unknown = JSON.parse(saved);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          const safe = { ...emptyFields };
+          for (const key of Object.keys(emptyFields) as (keyof Fields)[]) {
+            const value = (parsed as Record<string, unknown>)[key];
+            if (typeof value === "string") safe[key] = value;
+          }
+          setFields(safe);
+        }
+      }
     } catch {}
   }, []);
 
@@ -166,6 +177,7 @@ export default function CheckoutPage() {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     if (cart.length === 0) return;
+    setSubmitError("");
     const nextErrors = validate(fields);
     setErrors(nextErrors);
     const firstInvalid = fieldOrder.find((field) => nextErrors[field]);
@@ -176,15 +188,16 @@ export default function CheckoutPage() {
       return;
     }
     const placed: Order = {
-      id: `AF${String(Date.now()).slice(-6)}`,
+      id: `AF${crypto.randomUUID().replace(/-/g, "").toUpperCase()}`,
       items: cart, subtotal, discount, deliveryFee, total,
       details: { ...fields, name: fields.name.trim(), phone: fields.phone.trim(), email: fields.email.trim(), address: fields.address.trim(), area: fields.area.trim(), notes: fields.notes.trim() },
       addressType, promoCode: promoActive ? appliedCode : null, eta,
       placedAt: new Date().toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
     };
-    setOrder(placed);
     const { details } = placed;
-    saveOrder({ id: placed.id, items: cart, total, deliveryFee, name: details.name, phone: details.phone, address: `${details.address}, ${details.area}, ${details.district}`, eta, placedAt: Date.now() });
+    const saved = saveOrder({ id: placed.id, items: cart, total, deliveryFee, name: details.name, phone: details.phone, address: `${details.address}, ${details.area}, ${details.district}`, eta, placedAt: Date.now() });
+    if (!saved) { setSubmitError("This preview could not be saved. Your cart is unchanged. Please enable browser storage or contact our team."); return; }
+    setOrder(placed);
     updateCart([]);
     try { localStorage.setItem("af_checkout_fields", JSON.stringify(details)); } catch {}
     window.scrollTo({ top: 0 });
@@ -210,8 +223,8 @@ export default function CheckoutPage() {
         <div className="co-success">
           <div className="co-success-head">
             <span className="co-success-icon"><CheckCircle2 size={40} /></span>
-            <h1>Order Confirmed!</h1>
-            <p>Thank you, <strong>{details.name}</strong>. Your order has been placed successfully.</p>
+            <h1>Order preview saved</h1>
+            <p>Thank you, <strong>{details.name}</strong>. This preview is saved on this device. Send it to our team on WhatsApp to request confirmation.</p>
             <span className="co-order-id">Order <b>#{order.id}</b></span>
           </div>
 
@@ -277,6 +290,8 @@ export default function CheckoutPage() {
         <Link className="cta" href="/"><span>Browse products</span><i className="cta-icon"><ShoppingBag size={15} /></i></Link>
       </div> : <div className="co-grid">
         <form className="co-form" id="checkout-form" onSubmit={submit} noValidate>
+          <p role="note">Checkout preview: no order is sent until you contact our team on WhatsApp.</p>
+          {submitError && <p role="alert" className="co-error">{submitError}</p>}
           <section className="co-card">
             <div className="co-card-head"><span className="co-num">1</span><div><h2>Contact information</h2><p>We will call this number to confirm your order.</p></div></div>
             <div className="co-row">

@@ -15,7 +15,7 @@ export default function MyOrders() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("Processing");
   const [demo, setDemo] = useState(false);
-  useEffect(() => { const saved = loadOrders(); setOrders(saved); setDemo(saved.length === 0); if (saved.length === 0) setFilter("All Orders"); setReady(true); }, []);
+  useEffect(() => { const saved = loadOrders(); setOrders(saved); setDemo(false); if (saved.length === 0) setFilter("All Orders"); setReady(true); }, []);
   const displayed = demo ? demoOrders() : orders;
   const matches = displayed.filter(order => order.id.toLowerCase().includes(query.trim().replace(/^#/, "").toLowerCase()) && (filter === "All Orders" || statusOf(order) === filter));
   return <Storefront>{({ addToCart }) => <section className="orders-page"><div className="page-width">

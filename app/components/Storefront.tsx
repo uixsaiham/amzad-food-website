@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { CartItem, CartLine, loadCart, saveCart } from "../lib/cart";
+import { CartItem, CartLine, loadCart, saveCart, clampQuantity } from "../lib/cart";
 import CartOffer from "./CartOffer";
 import { useDismissMenu } from "../lib/useDismissMenu";
 import { CATALOG_CATEGORY_EVENT, COMBO_CATEGORY, isCatalogPath, setCatalogCategory } from "../lib/navigation-events";
@@ -75,7 +75,7 @@ export function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWi
     <div className="pc-body">
       <p className="pc-cat">{product.bn}</p>
       <h3 className="pc-name"><Link href={`/products/${productSlug(product.name)}/`}>{product.name}</Link></h3>
-      <div className="pc-meta">{product.unit ? <span className="pc-unit">{product.unit}</span> : <span className="pc-unit pc-unit-category">{product.category}</span>}<span className="pc-mobile-category">{product.category === "Oil" ? "Ghee & Oil" : product.category}</span><span className="pc-rating"><Star size={12} fill="currentColor" />4.9<i>(46)</i></span></div>
+      <div className="pc-meta">{product.unit ? <span className="pc-unit">{product.unit}</span> : <span className="pc-unit pc-unit-category">{product.category}</span>}<span className="pc-mobile-category">{product.category === "Oil" ? "Ghee & Oil" : product.category}</span></div>
       <div className="pc-price"><strong>৳{product.price.toLocaleString("en-IN")}</strong>{product.oldPrice && <del>৳{product.oldPrice.toLocaleString("en-IN")}</del>}</div>
       <button className="pc-order cta cta-ghost cta-sm cta-block" onClick={() => onOrderNow()}><span>Order Now</span></button>
     </div>
@@ -251,16 +251,16 @@ function NewsletterBanner({ notify }: { notify: (message: string) => void }) {
     <div className="nl-copy">
       <span className="nl-pill"><Mail size={12} /> Newsletter · নিউজলেটার</span>
       <h2><span className="nl-intro">Join the family, </span><em>Get 10% off</em> your first order</h2>
-      <p>Fresh deals and recipes, straight to your WhatsApp.</p>
-      <NewsletterForm className="nl-form" channel="whatsapp" placeholder="WhatsApp number" buttonClassName="cta cta-sm" buttonLabel={<><span>Subscribe</span><i className="cta-icon"><Send size={13} /></i></>} onSubscribe={() => { setUnlocked(true); notify("Subscribed! Your 10% off code is unlocked."); }} />
+      <p>Preview the welcome offer. WhatsApp subscriptions are not available yet.</p>
+      <NewsletterForm className="nl-form" channel="whatsapp" placeholder="WhatsApp number" buttonClassName="cta cta-sm" buttonLabel={<><span>Preview offer</span><i className="cta-icon"><Send size={13} /></i></>} onSubscribe={() => { setUnlocked(true); notify("Preview code unlocked. Newsletter subscriptions are not available yet."); }} />
       <ul className="nl-perks"><li><Check size={14} /> Weekly deals</li><li><Check size={14} /> New arrivals first</li><li><Check size={14} /> No spam, ever</li></ul>
     </div>
     <div className="nl-visual">
       <div className="nl-ticket-wrap"><div className={unlocked ? "nl-ticket unlocked" : "nl-ticket"}>
         <div className="nl-ticket-top"><small>Welcome offer</small><strong>10<span>%</span></strong><b>OFF</b></div>
         <div className="nl-ticket-bottom">
-          <small>{unlocked ? "Tap to copy your code" : "Subscribe to unlock your code"}</small>
-          <button className="nl-code" onClick={copyCode} disabled={!unlocked} aria-label={unlocked ? `Copy code ${NEWSLETTER_CODE}` : "Code locked until you subscribe"}><span>{NEWSLETTER_CODE}</span>{!unlocked ? <Lock size={15} /> : copied ? <Check size={15} /> : <Copy size={15} />}</button>
+          <small>{unlocked ? "Tap to copy your code" : "Preview to unlock your code"}</small>
+          <button className="nl-code" onClick={copyCode} disabled={!unlocked} aria-label={unlocked ? `Copy code ${NEWSLETTER_CODE}` : "Code locked until you preview the offer"}><span>{NEWSLETTER_CODE}</span>{!unlocked ? <Lock size={15} /> : copied ? <Check size={15} /> : <Copy size={15} />}</button>
         </div>
       </div></div>
     </div>
@@ -347,20 +347,20 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
   const addToCart = (product: CartLine, qty = 1) => {
     setCart((items) => {
       const found = items.find((item) => item.name === product.name);
-      if (found) return items.map((item) => item.name === product.name ? { ...item, qty: item.qty + qty } : item);
-      return [...items, { name: product.name, price: product.price, image: product.image, qty }];
+      if (found) return items.map((item) => item.name === product.name ? { ...item, qty: clampQuantity(item.qty + qty) } : item);
+      return [...items, { name: product.name, price: product.price, image: product.image, qty: clampQuantity(qty) }];
     });
     notify(qty > 1 ? `Added ${qty} × ${product.name} to cart` : `Added ${product.name} to cart`);
   };
   const removeFromCart = (name: string) => setCart((items) => items.filter((item) => item.name !== name));
-  const changeQty = (name: string, delta: number) => setCart((items) => items.map((item) => item.name === name ? { ...item, qty: item.qty + delta } : item).filter((item) => item.qty > 0));
+  const changeQty = (name: string, delta: number) => setCart((items) => items.map((item) => item.name === name ? { ...item, qty: item.qty + delta <= 0 ? 0 : clampQuantity(item.qty + delta) } : item).filter((item) => item.qty > 0));
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const cartTotal = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
   const goToCheckout = (product?: CartLine, qty = 1) => {
     let next = cart;
     if (product) {
       const found = cart.find((item) => item.name === product.name);
-      next = found ? cart.map((item) => item.name === product.name ? { ...item, qty: item.qty + qty } : item) : [...cart, { name: product.name, price: product.price, image: product.image, qty }];
+      next = found ? cart.map((item) => item.name === product.name ? { ...item, qty: clampQuantity(item.qty + qty) } : item) : [...cart, { name: product.name, price: product.price, image: product.image, qty: clampQuantity(qty) }];
       setCart(next);
     }
     saveCart(next);

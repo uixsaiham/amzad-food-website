@@ -4216,3 +4216,6 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
     align-self: stretch;
   }
 }
+
+/* Long preview IDs must wrap on narrow order screens. */
+.co-order-id, .orders-card-heading strong, .order-metadata dd { overflow-wrap: anywhere; }
