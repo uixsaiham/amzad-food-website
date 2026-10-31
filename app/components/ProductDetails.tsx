@@ -30,7 +30,7 @@ function ProductTabs({ product }: { product: Product }) {
         </div>}
         {activeTab === "shipping" && <div>
           <h3>Shipping & Returns</h3>
-          <p><strong>Delivery Time:</strong> See the estimated delivery window at checkout.</p>
+          <p><strong>Delivery Time:</strong> Contact our team to confirm delivery availability and timing.</p>
           <p><strong>Shipping Cost:</strong> {DELIVERY_DESCRIPTION}</p>
           <p><strong>Returns:</strong> Contact our support team about damaged or incorrect products and confirm return eligibility before ordering.</p>
         </div>}

@@ -53,3 +53,7 @@ assert.deepEqual(orders.loadOrders(), []);
 global.localStorage.setItem = () => { throw new Error('Storage full'); };
 assert.equal(orders.saveOrder(order), false);
 console.log('Frontend storage, quantity, order and shipping checks passed.');
+
+for (const [value, expected] of [[0, 0], [250, 25], [500, 50], [999, 99.9], [1000, 100], [1500, 100], [-100, 0], [NaN, 0]]) {
+  assert.equal(offers.getFreeDeliveryProgress(value), expected);
+}

@@ -75,10 +75,11 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
 
           <ul className="qv-highlights">{info.highlights.map((item) => <li key={item}><Check size={14} />{item}</li>)}</ul>
 
-          <div className="qv-offer"><Truck size={16} /><span>Cash on Delivery available · Estimated delivery shown at checkout</span></div>
+          <div className="qv-offer"><Truck size={16} /><span>Cash on Delivery available · Free delivery on orders ৳1,000+</span></div>
 
           <div className="qv-buy">
             <div className="qv-qty"><button onClick={() => setQty((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" disabled={qty === 1}><Minus size={14} /></button><b aria-live="polite">{qty}</b><button onClick={() => setQty((value) => Math.min(20, value + 1))} aria-label="Increase quantity" disabled={qty === 20}><Plus size={14} /></button></div>
+            <strong className="qv-line-total" aria-live="polite">Total: ৳{price * qty}</strong>
             <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }}><span>Add to Cart · ৳{price * qty}</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
             <button className="qv-order cta cta-dark" onClick={() => { onOrderNow(line, qty); onClose(); }}><span>Order Now</span></button>
           </div>

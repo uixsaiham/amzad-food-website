@@ -17,7 +17,7 @@ const perks = [
 ];
 
 // Account UI preview: never authenticate locally; wire verified sessions through the backend.
-export default function AuthModal({ open, onClose, onSignIn }: { open: boolean; onClose: () => void; onSignIn: (name: string) => void }) {
+export default function AuthModal({ open, onClose, onSignIn, initialMode = "signin" }: { initialMode?: Mode; open: boolean; onClose: () => void; onSignIn: (name: string) => void }) {
   const [mode, setMode] = useState<Mode>("signin");
   const [name, setName] = useState("");
   const [login, setLogin] = useState("");
@@ -30,8 +30,8 @@ export default function AuthModal({ open, onClose, onSignIn }: { open: boolean; 
   useModalDialog(dialog, open, onClose);
   useEffect(() => {
     setError("");
-    if (open) firstField.current?.focus();
-  }, [mode, open]);
+    if (open) { setMode(initialMode); firstField.current?.focus(); }
+  }, [initialMode, open]);
 
   if (!open) return null;
 

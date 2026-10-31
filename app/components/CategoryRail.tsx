@@ -13,6 +13,14 @@ type RailCategory = {
 
 const img = (name: string) => `/amzad-food-website/icons/${name}.png`;
 const productImage = "/amzad-food-website/product-honey.png";
+const categoryBanners: Record<string, string> = {
+  honey: "honey-bg.png", ghee: "products/mustard-oil-5-ltr.png",
+  dates: "icons/category-dates.png", spices: "products/deli-spice-combo-pack.png",
+  nuts: "icons/category-peanuts.png", seeds: "products/slim-key-multi-seeds-combo.png",
+  mango: "icons/category-mango.png", salt: "icons/category-salt.png",
+  rice: "products/chatur-naru.png", tea: "icons/category-basket.png",
+  combo: "products/delight-naru-combo.png",
+};
 
 export const railCategories: RailCategory[] = [
   { key: "honey", label: "Honey", bn: "মধু", count: 18, accent: "#e59a12", tint: "#fff4dc", icon: img("category-honey"), tagline: "Raw, unheated honey from the Sundarbans and mustard fields.", tags: ["Sundarbans", "Black Seed", "Mustard Flower", "Litchi Flower", "Comb Honey"], deal: "Up to 20% off on honey jars", top: [
@@ -166,9 +174,10 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
     <div className={current ? "cat-flyout open" : "cat-flyout"} onMouseEnter={keepOpen} aria-hidden={!current}>
       {current && <div className="cat-flyout-inner" key={current.key} style={{ "--accent": current.accent, "--tint": current.tint } as React.CSSProperties}>
         <div className="cat-flyout-intro">
-          <span className="cat-flyout-badge"><CategoryIcon icon={current.icon} size={24} /></span>
-          <p className="cat-flyout-kicker">{current.count} products</p>
-          <h3>{current.label} <em>{current.bn}</em></h3>
+          <button type="button" className="cat-category-banner" onClick={() => browse(current.label)} aria-label={`Shop ${current.label}`}>
+            <span className="cat-category-banner-copy"><span className="cat-flyout-kicker">Explore the collection</span><span className="cat-category-banner-title">{current.label}</span><span className="cat-category-banner-bn" lang="bn">{current.bn}</span><span className="cat-category-banner-link">Shop now <ArrowRight size={13} /></span></span>
+            <img src={`/amzad-food-website/${categoryBanners[current.key]}`} alt={`${current.label} collection`} />
+          </button>
           <p className="cat-flyout-tagline">{current.tagline}</p>
           <div className="cat-flyout-tags">{current.tags.map((tag) => <button key={tag} onClick={() => browse(`${current.label} · ${tag}`)}>{tag}</button>)}</div>
         </div>

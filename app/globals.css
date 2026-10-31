@@ -479,8 +479,8 @@ body { overflow-x: hidden; }
 .co-num { align-items: center; background: #142f24; border-radius: 50%; color: #fff; display: inline-flex; flex: none; font-size: 14px; font-weight: 700; height: 34px; justify-content: center; width: 34px; }
 .co-row { display: grid; gap: 18px; grid-template-columns: 1fr 1fr; }
 .co-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
-.co-field > label, .co-label { align-items: center; color: #33463b; display: flex; font-size: 13px; font-weight: 600; gap: 8px; }
-.co-field > label em { background: #f0f3ec; border-radius: 999px; color: #718078; font-size: 10px; font-style: normal; font-weight: 600; padding: 2px 8px; }
+.co-field > label, .co-field-label-row > label, .co-label { align-items: center; color: #33463b; display: flex; font-size: 13px; font-weight: 600; gap: 8px; }
+.co-field > label em, .co-field-label-row > label em { background: #f0f3ec; border-radius: 999px; color: #718078; font-size: 10px; font-style: normal; font-weight: 600; padding: 2px 8px; }
 .co-field input, .co-field textarea, .co-field select { background: #f8faf4; border: 1.5px solid #e0e6da; border-radius: 12px; color: var(--ink); font: inherit; font-size: 14px; padding: 13px 15px; transition: background .2s, border-color .2s, box-shadow .2s; width: 100%; }
 .co-field input, .co-field select { height: 48px; }
 .co-field textarea { line-height: 1.5; resize: vertical; }
@@ -4219,3 +4219,321 @@ html body .blog-pick[lang="bn"] h3 { font-family: 'Anek Bangla', sans-serif; fon
 
 /* Long preview IDs must wrap on narrow order screens. */
 .co-order-id, .orders-card-heading strong, .order-metadata dd { overflow-wrap: anywhere; }
+
+/* Brand palette and compact storefront rhythm. */
+:root { --cream: #f1f7ef; --lime: #dfedda; --green: #246247; --orange: #246247; }
+html body p { line-height: 1.55; }
+html body .jn-detail-page .jn-article[lang="bn"] p { line-height: 1.7; }
+html body :is(.section, .review-section, .video-reviews, .pd-related) { padding-top: 36px; padding-bottom: 36px; }
+html body :is(.co-card, .product-review, .pd-tabs-section, .faq-item, .pc) { background-color: #f8fcf6; border-color: #d6e5d3; }
+html body :is(.hero-modern, .mega-promo, .co-account, .product-customer-reviews) { background: #e6f0df; }
+html body .cta { --cta-from: #2d7650; --cta-to: #246247; --cta-deep: #183f2e; --cta-glow: transparent; --cta-icon-ink: #246247; box-shadow: none; }
+html body :is(.product-review-submit, .auth-submit, .co-promo-form button) { background: #246247; color: #fff; box-shadow: none; }
+/* Buttons and button-like links keep their position and icons on every interaction. */
+html body :is(button, .cta, [role="button"]),
+html body :is(button, .cta, [role="button"]) *,
+html body :is(button, .cta, [role="button"])::before,
+html body :is(button, .cta, [role="button"])::after { animation: none !important; transition: none !important; }
+html body :is(button, .cta, [role="button"]):is(:hover, :active) { transform: none !important; }
+html body .cta::before, html body .cta::after { display: none; }
+html body .cta:hover :is(.cta-icon, .cta-arrow, svg) { transform: none; }
+html body .co-card { padding: 20px; gap: 14px; }
+html body .co-form, html body .co-summary, html body .co-summary-body { gap: 14px; }
+html body .co-field { gap: 5px; }
+.co-account { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-radius: 10px; padding: 12px; font-size: 13px; }
+.co-account button { border: 1px solid #246247; color: #246247; background: #fff; border-radius: 7px; padding: 7px 12px; }
+.co-account small { flex-basis: 100%; color: #526653; }
+.co-phone-input { display: flex; align-items: center; border: 1px solid #d6e1d3; border-radius: 10px; background: #fff; overflow: hidden; }
+.co-phone-input > span { padding: 0 10px; border-right: 1px solid #d6e1d3; font-size: 14px; font-weight: 600; }
+html body .co-phone-input input { border: 0; border-radius: 0; min-width: 0; width: 100%; }
+.co-phone-input:focus-within { outline: 2px solid #246247; outline-offset: 2px; }
+.co-notes-help { position: relative; color: #246247; font-size: 12px; }
+.co-notes-help summary { cursor: pointer; }
+.co-notes-help p { margin: 6px 0; padding: 10px; border-radius: 8px; background: #e6f0df; }
+.cart-offer-threshold { white-space: nowrap; }
+.qv-line-total { align-self: center; font-size: 14px; color: #246247; white-space: nowrap; }
+.product-customer-reviews { padding: 24px; border-radius: 18px; margin-top: 24px; }
+.product-customer-reviews h2 { margin: 0 0 16px; font-family: var(--font-heading); font-size: 25px; }
+.product-review-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.product-review-columns h3 { font-size: 15px; margin: 0 0 10px; }
+.product-review-columns p { font-size: 13px; color: #526653; }
+.product-review-columns iframe { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 10px; }
+.product-review-columns figure { margin: 0 0 12px; }
+.product-review-saved > span { display: block; color: #246247; margin-top: 8px; }
+@media (max-width: 800px) {
+  .mobile-contact-bar { justify-content: space-evenly; gap: 6px; padding-left: 8px; padding-right: 8px; }
+  .mobile-contact-bar a { font-size: 10px; gap: 4px; }
+  .mobile-track-order { font-weight: 700; border-right: 1px solid #547461; padding-right: 8px; }
+  html body .co-place-desktop { display: none; }
+  .product-review-columns { grid-template-columns: 1fr; gap: 16px; }
+  .product-customer-reviews { padding: 18px; }
+  html body .co-card { padding: 16px; }
+  html body :is(.review-section, .video-reviews, .pd-related) { padding-top: 24px; padding-bottom: 24px; }
+}
+html body .qv-buy .qv-add { grid-column: 1 / -1; background: #246247; }
+html body :is(.qv-offer, .cart-offer, .co-pay.active, .auth-tabs, .product-review-saved) { background: #e6f0df; color: #244f36; }
+html body :is(.hero, .shop-section, .category-section, .blog-section, .jn-section, .product-gallery, .co-header) { background-color: #f1f7ef; }
+html body .co-notes-help > p { display: none; }
+html body .co-notes-help:is([open], :hover, :focus-within) > p { display: block; }
+html body :is(.nav-pill, .pill-tabs-pill, .auth-tab-pill) { transition: none !important; animation: none !important; }
+
+/* Preserve hover colours without the sweeping shine on product cards. */
+html body .cta:hover { background: #183f2e; color: #fff; }
+html body .cta-ghost { color: #246247; border-color: #246247; }
+html body .cta-ghost:hover { background: #e1edda; color: #183f2e; }
+html body .pc-order.cta { background: #fff; color: #246247; border: 1px solid #246247; }
+html body .pc-order.cta:hover { background: #246247; color: #fff; border-color: #246247; }
+html body .pc-quick-btn:hover { background: #e1edda; color: #183f2e; }
+html body .pc-quick-btn.add:hover { background: #246247; color: #fff; }
+html body .pc .cta::after { content: none; animation: none; transition: none; }
+
+/* Product card states from the supplied default and hover references. */
+html body .pc { background: #fff; border-color: #dfe7d8; }
+html body .pc-order.cta { background: #fff; border: 1px solid #ff6418; color: #ff6418; box-shadow: none; }
+html body .pc-order.cta:is(:hover, :focus-visible),
+html body .pc:hover .pc-order.cta { background: #ff6418; border-color: #ff6418; color: #fff; box-shadow: none; }
+html body .pc-save { background: #ff6418; }
+html body .pc-quick-btn { background: #fff; color: #0e3325; }
+html body .pc-quick-btn.add { background: #0e3325; color: #fff; }
+html body .pc-quick-btn:hover { background: #e8f0e2; color: #0e3325; }
+html body .pc-quick-btn.add:hover { background: #246247; color: #fff; }
+html body .pc-order.cta::before,
+html body .pc-order.cta::after { content: none; display: none; }
+@media (hover: hover) and (pointer: fine) {
+  html body .pc-quick { opacity: 0; transform: translateY(calc(100% + 14px)); }
+  html body .pc:hover .pc-quick,
+  html body .pc:focus-within .pc-quick { opacity: 1; transform: translateY(0); }
+}
+
+/* A lighter image stage separates products from the green page background. */
+html body .pc-media {
+  background: radial-gradient(ellipse at 50% 35%, #ffffff 0%, #fcfdfb 65%, #f7faf4 100%);
+}
+
+/* Compact checkout heading; form and summary start on the same row. */
+html body .checkout-page { padding-top: 22px; }
+html body .co-title-row { margin-bottom: 18px; gap: 0; }
+html body .co-grid { gap: 24px; }
+@media (max-width: 800px) {
+  html body .checkout-page { padding-top: 16px; }
+  html body .co-title-row { margin-bottom: 14px; }
+  html body .co-grid { gap: 16px; }
+}
+
+/* Account entry sits independently above the checkout columns. */
+.co-account-banner { display: flex; align-items: center; gap: 18px; padding: 22px 24px; margin-bottom: 24px; border: 1px solid #d4e5cd; border-radius: 18px; background: linear-gradient(110deg, #e4efdd, #f7fbf3); }
+.co-account-icon { display: grid; place-items: center; flex: 0 0 52px; width: 52px; height: 52px; background: #fff; color: #246247; border: 1px solid #d8e7d1; border-radius: 16px; }
+.co-account-copy { flex: 1; min-width: 0; }
+.co-account-copy h2 { margin: 0 0 6px; font-family: var(--font-heading); font-weight: 500; font-size: 22px; color: #173f2c; }
+.co-account-copy p { margin: 0; color: #5e7463; font-size: 13px; }
+.co-account-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.co-account-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; border-radius: 10px; padding: 10px 18px; font-size: 13px; font-weight: 600; }
+.co-account-signin { background: #246247; border: 1px solid #246247; color: #fff; }
+.co-account-signin:hover { background: #183f2e; }
+.co-account-register { background: #fff; border: 1px solid #bdd2b6; color: #246247; }
+.co-account-register:hover { background: #e4efdd; }
+@media (max-width: 800px) {
+  .co-account-banner { flex-wrap: wrap; gap: 12px; padding: 16px; margin-bottom: 16px; border-radius: 16px; }
+  .co-account-icon { flex-basis: 42px; width: 42px; height: 42px; border-radius: 12px; }
+  .co-account-copy h2 { font-size: 19px; }
+  .co-account-copy p { font-size: 12px; }
+  .co-account-actions { width: 100%; }
+  .co-account-actions button { flex: 1; }
+}
+
+/* Orange action palette, shared by every page. */
+:root { --orange: #ff6418; --action-orange: #ff6418; --action-orange-hover: #df4d0b; --action-orange-soft: #fff1e8; }
+html body button { accent-color: var(--action-orange); }
+html body button:not(:disabled):hover { border-color: var(--action-orange); }
+html body :is(.cta, .qv-buy .qv-add, .product-review-submit, .auth-submit, .co-promo-form button, .footer-feedback-form button, .orders-primary, .co-account-signin, .pc-quick-btn.add) {
+  --cta-from: #ff7a2e; --cta-to: #ff6418; --cta-deep: #df4d0b; --cta-icon-ink: #ff6418;
+  background: var(--action-orange); color: #fff; border-color: var(--action-orange); box-shadow: none;
+}
+html body :is(.cta, .qv-buy .qv-add, .product-review-submit, .auth-submit, .co-promo-form button, .footer-feedback-form button, .orders-primary, .co-account-signin, .pc-quick-btn.add):hover:not(:disabled) { background: var(--action-orange-hover); color: #fff; border-color: var(--action-orange-hover); }
+html body :is(.cta-ghost, .cta-outline, .pc-order.cta, .co-account-register, .orders-outline, .co-account button) { background: #fff; color: var(--action-orange); border: 1px solid var(--action-orange); }
+html body :is(.cta-ghost, .cta-outline, .pc-order.cta, .co-account-register, .orders-outline, .co-account button):hover:not(:disabled),
+html body .pc:hover .pc-order.cta { background: var(--action-orange); color: #fff; border-color: var(--action-orange); }
+html body :is(.pc-quick-btn:not(.add), .co-qty button, .qv-qty button, .qty-stepper button, .co-promo-chips button, .auth-social button, .mega-menu-trigger) { color: #c9430a; border-color: #ffd3ba; }
+html body :is(.pc-quick-btn:not(.add), .co-qty button, .qv-qty button, .qty-stepper button, .co-promo-chips button, .auth-social button, .mega-menu-trigger):hover:not(:disabled) { background: var(--action-orange-soft); color: #c9430a; }
+html body :is(.catalog-options, .pill-tabs, .auth-tabs, .qv-tabs) button.active { background: var(--action-orange-soft); color: #c9430a; border-color: var(--action-orange); }
+html body :is(.nav-icon, .pc-wish, .auth-link, .auth-eye):hover { color: var(--action-orange); }
+html body .cta .cta-icon { background: #fff; color: var(--action-orange); }
+
+.cart-offer-heading > div { min-width: 0; flex: 1; }
+html body .cart-offer-threshold { white-space: nowrap; font-size: clamp(11px, 3vw, 13px); }
+html body .cart-offer > .cart-offer-value { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.cart-offer-value > span { white-space: nowrap; }
+.cart-offer-value b { font-weight: 600; }
+
+/* One-line delivery message with a quiet progress indicator. */
+html body .cart-offer { padding: 12px 14px; margin-top: 8px; border-radius: 12px; }
+html body .cart-offer-heading { gap: 8px; }
+html body .cart-offer-icon { flex-basis: 28px; height: 28px; }
+html body .cart-offer-icon svg { width: 15px; height: 15px; }
+html body .cart-offer-threshold { font-size: 12px; letter-spacing: -.02em; line-height: 1.4; }
+.cart-offer-threshold > span { font-weight: 500; color: #526653; }
+html body .cart-offer-progress { height: 4px; margin: 10px 0 0; }
+@media (max-width: 374px) {
+  html body .cart-offer { padding: 10px; }
+  html body .cart-offer-threshold { font-size: 10px; }
+  html body .cart-offer-heading { gap: 6px; }
+}
+
+/* Compact order item layout matching the supplied reference. */
+html body .co-items li { align-items: flex-start; gap: 14px; }
+html body .co-item-info { gap: 5px; }
+html body .co-item-info > span { font-size: 12px; }
+html body .co-item-info .co-qty { margin-top: 6px; }
+html body .co-item-side { padding-top: 3px; gap: 12px; }
+html body .co-item-side > strong { font-size: 14px; white-space: nowrap; }
+
+/* Unit price below the name; calculated total immediately after quantity. */
+.co-item-quantity-total { display: flex; align-items: center; flex-wrap: nowrap; gap: 12px; margin-top: 8px; }
+html body .co-item-quantity-total .co-qty { margin-top: 0; }
+html body .co-item-inline-total { font-size: 14px; white-space: nowrap; }
+.co-item-unit-price { color: #718078; font-size: 12px; white-space: nowrap; }
+html body .co-item-side { gap: 22px; }
+
+html body .co-items .co-item-side { align-self: flex-end; padding: 0; }
+html body .co-item-inline-total { flex-shrink: 0; }
+
+/* Align the unit price with the product name at the right edge. */
+html body .co-items > li { position: relative; padding-right: 0; }
+.co-item-name-price { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.co-item-name-price > strong { min-width: 0; }
+.co-item-name-price > .co-item-unit-price { flex-shrink: 0; text-align: right; }
+html body .co-items .co-item-side { position: absolute; right: 0; bottom: 0; }
+html body .co-item-quantity-total { padding-right: 30px; margin-top: 10px; }
+
+/* Payment methods: cash/card, then bKash/Nagad, at every screen size. */
+html body .co-pay-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+html body .co-pay { padding: 12px; gap: 10px; min-width: 0; border-radius: 10px; }
+html body .co-pay.disabled { opacity: 1; background: #fff; }
+html body .co-pay.active { border-color: #ff6418; background: #fff1e8; }
+html body .co-pay.active .co-pay-icon { color: #ff6418; background: #fff; }
+html body .co-pay-check { background: #ff6418; color: #fff; }
+.co-pay-icon img { display: block; width: 38px; max-height: 30px; object-fit: contain; }
+html body .co-pay-icon-card { color: #173c90; font-size: 25px; }
+html body .co-pay strong { font-size: 13px; }
+@media (max-width: 480px) {
+  html body .co-pay { padding: 10px 8px; gap: 7px; }
+  html body .co-pay-icon { width: 30px; height: 32px; border-radius: 7px; }
+  .co-pay-icon img { width: 30px; max-height: 26px; }
+  html body .co-pay strong { font-size: 11px; }
+  html body .co-pay small { font-size: 10px; }
+  html body .co-pay.active { padding-right: 20px; }
+  html body .co-pay-check { right: 5px; width: 14px; height: 14px; }
+}
+
+/* Equal compact payment tiles, with icon and method name only. */
+html body .co-pay-grid { grid-auto-rows: 56px; }
+html body .co-pay { height: 56px; min-height: 0; padding: 8px 10px; }
+html body .co-pay strong { line-height: 1.3; }
+html body .co-pay.active { padding-right: 24px; }
+
+/* Slim payment options, matching the compact reference. */
+html body .co-pay-grid { grid-auto-rows: 36px; gap: 8px; }
+html body .co-pay { height: 36px; padding: 5px 8px; gap: 7px; border-radius: 7px; }
+html body .co-pay-icon { width: 22px; height: 22px; border-radius: 4px; }
+html body .co-pay-icon img { width: 22px; max-height: 20px; }
+html body .co-pay-icon > svg { width: 18px; height: 18px; }
+html body .co-pay-icon-card { font-size: 19px; }
+html body .co-pay strong { font-size: 11px; font-weight: 500; line-height: 1.2; }
+html body .co-pay.active { padding-right: 22px; }
+html body .co-pay-check { width: 14px; height: 14px; right: 5px; }
+html body .co-pay-check svg { width: 10px; height: 10px; }
+@media (max-width: 374px) {
+  html body .co-pay { padding-left: 6px; gap: 5px; }
+  html body .co-pay strong { font-size: 10px; }
+  html body .co-pay-icon { width: 19px; }
+  html body .co-pay-icon img { width: 19px; }
+}
+
+/* Selected payment methods occupy one cell, keeping the two-by-two layout. */
+html body .co-pay-grid > .co-pay { grid-column: auto; }
+
+/* Inline, accessible notes help after the Optional badge. */
+.co-field-label-row { display: flex; align-items: center; gap: 6px; }
+.co-field-label-row > label { display: inline-flex; align-items: center; gap: 7px; margin: 0; }
+.co-info-tooltip { display: inline-flex; position: relative; }
+.co-info-tooltip > button { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #718078; }
+.co-info-tooltip > [role="tooltip"] { position: absolute; bottom: calc(100% + 8px); left: -110px; z-index: 10; width: min(260px, 70vw); padding: 10px 12px; border-radius: 9px; background: #17352a; color: #fff; font-size: 12px; font-weight: 400; line-height: 1.5; box-shadow: 0 5px 18px #17352a26; opacity: 0; visibility: hidden; pointer-events: none; }
+.co-info-tooltip:is(:hover, :focus-within) > [role="tooltip"] { opacity: 1; visibility: visible; }
+
+.mobile-contact-bar .mobile-track-order { border-right: 0; padding-right: 0; }
+
+@media (max-width: 800px) {
+  .mobile-contact-bar { justify-content: center; gap: 10px; }
+  .mobile-contact-bar a { gap: 4px; }
+}
+@media (max-width: 374px) {
+  .mobile-contact-bar { gap: 7px; }
+}
+
+/* Keep the Bangladesh prefix intact inside the mobile number field. */
+html body .co-phone-input { display: flex; align-items: center; min-height: 48px; }
+html body .co-phone-input > span { flex: 0 0 auto; white-space: nowrap; overflow-wrap: normal; word-break: normal; line-height: 1; padding: 0 12px; }
+html body .co-phone-input > input { flex: 1 1 0; min-width: 0; width: 0; height: 46px; padding: 12px; }
+
+/* White content surfaces contrast with the green site background. */
+html body :is(
+  .co-card, .co-account-banner, .co-promo, .co-empty,
+  .pc, .product-review, .product-customer-reviews, .product-review-saved,
+  .pd-tabs-section, .qv-body, .qv-panel,
+  .rv-card, .blog-card, .jn-card, .jn-sidebar-card,
+  .orders-card, .order-panel, .orders-empty, .to-card,
+  .faq-item, .shop-empty, .journey-card,
+  .auth-panel, .modal-box, .side-drawer
+) { background: #fff; }
+html body :is(.co-field input, .co-field textarea, .co-field select, .co-phone-input, .co-pay:not(.active)) { background: #fff; }
+
+/* Orange accents unify cards, badges, support links and selected controls. */
+html body :is(.co-assure li > svg, .co-account-icon, .cart-offer-icon, .cart-offer.unlocked .cart-offer-icon) { background: #fff0e5; color: #e45a12; border-color: #ffdcc6; }
+html body :is(.co-num, .co-item-img b, .co-summary-count, .pc-save) { background: #ff6418; color: #fff; }
+html body :is(.pc-tag, .pc-unit, .pc-mobile-category, .rv-kicker, .co-savings) { background: #fff0e5; color: #b8440b; }
+html body :is(.pd-eyebrow, .eyebrow, .video-eyebrow, .jn-eyebrow, .co-promo-chips b, .co-promo h3 > svg) { color: #cf4c0c; }
+html body :is(.co-help a, .order-phone) { color: #bd460c; border-color: #ffcbaa; background: #fff; }
+html body .co-help a:last-child { background: #ff6418; border-color: #ff6418; color: #fff; }
+html body .co-help a:hover { background: #df4d0b; border-color: #df4d0b; color: #fff; }
+html body :is(.cart-offer, .cart-offer.unlocked) { background: #fff5ed; border-color: #ffdcc6; }
+html body .cart-offer-progress { background: #ffe0cb; }
+html body .cart-offer .cart-offer-progress > span { background: #ff6418; }
+html body :is(.co-card, .pc, .product-review, .product-customer-reviews, .pd-tabs-section, .faq-item, .order-panel, .orders-card, .co-account-banner) { border-color: #eeded2; }
+html body :is(.co-promo, .co-promo-chips button) { border-color: #ffd1b5; }
+html body :is(input, textarea, select):focus-visible { outline-color: #ff6418; }
+html body .co-phone-input:focus-within { outline-color: #ff6418; }
+html body :is(.co-select > svg, .co-info-tooltip > button):hover { color: #ff6418; }
+
+/* Keep the order-summary item count green. */
+html body .co-summary-count { background: #edf7e5; color: #147c46; }
+
+/* Order Summary uses the green palette from the reference. */
+html body .co-summary-card { background: #fff; border-color: #e0e7dc; }
+html body .co-summary-card .co-summary-count { background: #edf7e5; color: #147c46; }
+html body .co-summary-card .co-item-img b { background: #17352a; color: #fff; }
+html body .co-summary-card .co-qty button { color: #526f60; border-color: #dce5d8; }
+html body .co-summary-card .co-qty button:hover { background: #edf7e5; color: #147c46; }
+html body .co-summary-card .cart-offer { background: #f4f8ec; border-color: #dce8ca; }
+html body .co-summary-card .cart-offer-icon { background: #e4eed5; color: #246247; }
+html body .co-summary-card .cart-offer-progress { background: #e0e8d4; }
+html body .co-summary-card .cart-offer-progress > span { background: #759b43; }
+html body .co-summary-card .cart-offer.unlocked .cart-offer-progress > span { background: #237847; }
+html body .co-summary-card .co-promo { background: #fafbf6; border-color: #d9dfc1; }
+html body .co-summary-card .co-promo h3 > svg { color: #17352a; }
+html body .co-summary-card .co-promo-form button { background: #17352a; color: #fff; border-color: #17352a; }
+html body .co-summary-card .co-promo-form button:hover { background: #246247; border-color: #246247; }
+html body .co-summary-card .co-promo-chips button { background: #fff; border-color: #bccda5; }
+html body .co-summary-card .co-promo-chips b { color: #147c46; }
+html body .co-summary-card .co-promo-chips button:hover { background: #edf7e5; }
+html body .co-summary-card .co-savings { background: #edf7e5; color: #246247; }
+
+/* Category-specific product banner in the hover menu intro. */
+html body .cat-flyout-intro { padding: 16px 20px 24px; }
+.cat-category-banner { position: relative; isolation: isolate; display: flex; align-items: center; width: 100%; min-height: 154px; padding: 16px; margin-bottom: 16px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 14px; text-align: left; background: linear-gradient(120deg, #fff, var(--tint)); }
+.cat-category-banner-copy { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; max-width: 54%; }
+.cat-category-banner .cat-flyout-kicker { font-size: 8px; letter-spacing: .08em; line-height: 1.4; }
+.cat-category-banner-title { font-family: var(--font-heading); font-size: 25px; line-height: 1.15; color: #17352a; margin: 6px 0 3px; }
+.cat-category-banner-bn { font-size: 14px; color: var(--accent); }
+.cat-category-banner-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; color: #bd460c; font-size: 11px; font-weight: 700; }
+.cat-category-banner > img { position: absolute; right: 4px; bottom: 8px; width: 49%; height: 130px; object-fit: contain; filter: drop-shadow(0 7px 8px #17352a16); }
+.cat-category-banner:hover { border-color: var(--accent); }

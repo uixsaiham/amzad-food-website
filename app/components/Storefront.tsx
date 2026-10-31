@@ -274,7 +274,7 @@ type StoreActions = {
   toggleWishlist: (product: CartLine) => void;
 };
 
-export default function Storefront({ children }: { children?: (actions: StoreActions) => React.ReactNode }) {
+export default function Storefront({ children, headerOnly = false }: { headerOnly?: boolean; children?: (actions: StoreActions) => React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
@@ -320,6 +320,12 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
   const [cartReady, setCartReady] = useState(false);
   useEffect(() => { setCart(loadCart()); setCartReady(true); }, []);
   useEffect(() => { if (cartReady) saveCart(cart); }, [cart, cartReady]);
+  useEffect(() => {
+    if (!headerOnly) return;
+    const sync = () => setCart(current => { const next = loadCart(); return JSON.stringify(current) === JSON.stringify(next) ? current : next; });
+    window.addEventListener("amzad-cart-updated", sync);
+    return () => window.removeEventListener("amzad-cart-updated", sync);
+  }, [headerOnly]);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setQuery(params.get("q") ?? "");
@@ -380,7 +386,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
   const browseMenuCategory = (category: { label: string; tab?: string }) => {
     const tab = resolveProductCategory(category.tab ?? category.label);
     closeMenus(); setQuery(""); setActiveCategory(tab);
-    if (children) router.push(`/?category=${encodeURIComponent(tab)}#shop`);
+    if (children || headerOnly) router.push(`/?category=${encodeURIComponent(tab)}#shop`);
     else requestAnimationFrame(() => scrollToShop());
     notify(`Browsing ${category.label}`);
   };
@@ -392,14 +398,14 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
     else if (link.action === "track") router.push("/track-order/");
     else notify("Coming soon");
   };
-  const scrollToShop = () => { setMenuOpen(false); if (children) { router.push(`/?q=${encodeURIComponent(query)}#shop`); } else { document.getElementById("shop")?.scrollIntoView({ behavior: "smooth" }); } };
+  const scrollToShop = () => { setMenuOpen(false); if (children || headerOnly) { router.push(`/?q=${encodeURIComponent(query)}#shop`); } else { document.getElementById("shop")?.scrollIntoView({ behavior: "smooth" }); } };
   const add = () => addToCart({ name: "Sundarbans Raw Honey", price: 350, image: "/amzad-food-website/honey-bg.png" });
-  return <main id="top" className={children ? "storefront" : "storefront storefront-home"}>
+  return <main id="top" className={headerOnly ? "storefront storefront-header-only" : children ? "storefront" : "storefront storefront-home"}>
     <div className="announcement"><div className="announcement-inner page-width"><span className="announcement-contacts-group"><span className="announcement-cta">প্রয়োজনে কল করুন</span><span className="announcement-contacts"><a className="announcement-contact" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={14} /> 01327406605</a><span className="announcement-divider" /><a className="announcement-contact" href="tel:+8809613824071"><Phone size={13} /> 09613824071</a></span></span><span className="announcement-links"><a className="announcement-link" href="/amzad-food-website/my-orders/">My Orders</a><a className="announcement-link" href="/amzad-food-website/track-order/"><PackageSearch size={13} /> Track Order</a></span></div></div>
     <nav ref={navRef} className={`navbar page-width site-nav${searchOpen ? " search-open" : ""}`}><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}><span className="burger" aria-hidden="true"><i /><i /><i /></span></button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div ref={mobileMenuRef} className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><a className="mobile-menu-logo" href="/amzad-food-website/" onClick={() => setMenuOpen(false)}><img src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><button ref={searchToggleRef} type="button" className="nav-icon nav-search-toggle" aria-label={searchOpen ? "Close product search" : "Open product search"} aria-expanded={searchOpen} aria-controls="top-nav-search" onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}><Search size={19} /></button><form id="top-nav-search" role="search" className="nav-search" hidden={!searchOpen} onSubmit={(event) => { event.preventDefault(); scrollToShop(); }} onKeyDown={(event) => { if (event.key === "Escape") closeSearch(); }}><button className="nav-search-submit" type="submit" aria-label="Search products"><Search size={18} /></button><input ref={searchRef} type="search" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" /><button type="button" className="nav-search-clear" onClick={closeSearch} aria-label="Close search"><X size={16} /></button>{query && <button type="button" className="desktop-search-clear" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><X size={13} /></button>}</form><div className="nav-icons"><button className="nav-icon nav-user" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={17} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><small>My Cart</small><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
     {menuProduct && <QuickView product={menuProduct} wishlisted={wishlist.some(item => item.name === menuProduct.name)} onToggleWishlist={() => toggleWishlist(menuProduct)} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => setMenuProduct(null)} />}
     {isHomePage && <CategoryRail selectedCategory={activeCategory} onView={setMenuProduct} onAdd={addToCart} onBrowse={(label) => browseMenuCategory({ label })} />}
-    {children ? <>
+    {headerOnly ? null : children ? <>
     {children({ addToCart, goToCheckout, isWishlisted, toggleWishlist })}
     </> : <>
     <HeroSlider />
@@ -434,7 +440,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
     <Reviews />
     <BlogSection withStats />
     </>}
-    <footer className="ft">
+    {!headerOnly && <footer className="ft">
       <div className="ft-cta page-width">
         <div className="ft-cta-copy">
           <span className="ft-kicker"><i />প্রতিদিন খোলা · রাত ১১টা পর্যন্ত</span>
@@ -492,7 +498,7 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
           <a className="ft-top" href="#top" aria-label="Back to top"><ArrowUp size={15} /></a>
         </div>
       </div>
-    </footer>
+    </footer>}
 
     <Drawer open={cartOpen} onClose={() => setCartOpen(false)} title={`Your Cart (${cartCount})`}>
       {cart.length === 0 ? <p className="empty-state">Your cart is empty.</p> : <>
@@ -529,13 +535,13 @@ export default function Storefront({ children }: { children?: (actions: StoreAct
       <div className="origin-story-list">{originStories.map((story) => <div className="origin-story-item" key={story.key}><span><story.icon size={16} /></span><div><strong>{story.place} · {story.product}</strong><p>{story.desc}</p></div></div>)}</div>
     </Modal>
 
-    <nav className="mobile-app-nav" aria-label="Mobile navigation">
+    {!headerOnly && <nav className="mobile-app-nav" aria-label="Mobile navigation">
       <Link href="/" aria-current={isHomePage ? "page" : undefined} onClick={() => { setMenuOpen(false); setSearchOpen(false); }}><Home size={23} /><span>Home</span></Link>
       <button type="button" aria-expanded={menuOpen} onClick={() => { setSearchOpen(false); setMenuOpen(!menuOpen); }}><LayoutGrid size={23} /><span>Menu</span></button>
       <button className="mobile-app-search" type="button" aria-label="Search products" aria-expanded={searchOpen} onClick={() => { setMenuOpen(false); setSearchOpen(!searchOpen); window.scrollTo({ top: 0, behavior: "auto" }); }}><span className="mobile-app-search-circle"><Search size={26} /></span><span>Search</span></button>
       <button type="button" onClick={() => { setMenuOpen(false); setCartOpen(true); }}><span className="mobile-app-cart"><ShoppingCart size={23} /><b>{cartCount}</b></span><span>Cart</span></button>
       <button type="button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={23} /><span>Account</span></button>
-    </nav>
+    </nav>}
 
     {toast && <div className="toast" role="status">{toast}</div>}
   </main>;
