@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Clock, Heart, Minus, Plus, ShoppingCart, Truck, X } from "lucide-react";
+import { Check, Clock, Heart, Minus, Phone, Plus, ShoppingCart, Truck, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
@@ -83,7 +83,10 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
             <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }}><span>Add to Cart · ৳{price * qty}</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
             <button className="qv-order cta cta-dark" onClick={() => { onOrderNow(line, qty); onClose(); }}><span>Order Now</span></button>
           </div>
-          <a className="qv-whatsapp cta cta-whatsapp cta-outline cta-block" href={`https://wa.me/8801327406605?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Order via WhatsApp · 01327406605</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={16} /></i></a>
+          <div className="qv-contact">
+            <a className="qv-whatsapp" href={`https://wa.me/8801327406605?text=${whatsappText}`} target="_blank" rel="noreferrer" aria-label="Order via WhatsApp 01327406605"><FontAwesomeIcon icon={faWhatsapp} fontSize={15} />01327406605</a>
+            <a className="qv-whatsapp qv-call" href="tel:+8809613824071" aria-label="Call 09613824071"><Phone size={14} />09613824071</a>
+          </div>
 
           <div className="qv-tabs" role="tablist" aria-label="Product details">{tabs.map((item) => <button key={item.key} role="tab" aria-selected={tab === item.key} className={tab === item.key ? "active" : ""} onClick={() => setTab(item.key)}>{item.label}</button>)}</div>
           <div className="qv-panel" role="tabpanel">

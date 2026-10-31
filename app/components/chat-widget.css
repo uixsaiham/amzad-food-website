@@ -73,6 +73,7 @@
 .chat-input button:disabled { opacity: .45; }
 /* Clear the checkout page's sticky mobile order bar. */
 @media (max-width: 960px) { body:has(.co-mobilebar) .chat-widget { bottom: 88px; } }
+@media (max-width: 800px) { .chat-hint { display: none; } }
 @media (max-width: 480px) {
   .chat-widget { bottom: 16px; right: 16px; }
   .chat-launcher { height: 52px; width: 52px; }

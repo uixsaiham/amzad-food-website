@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm run dev)",
+      "PowerShell(git fetch origin)",
+      "PowerShell(Start-Sleep 3; $r = Invoke-WebRequest http://localhost:3001 -UseBasicParsing -TimeoutSec 120; \"Status: $\\($r.StatusCode\\)\"; \\([regex]'mobile-contact-bar.{0,700}'\\).Match\\($r.Content\\).Value)"
+    ]
+  }
+}
