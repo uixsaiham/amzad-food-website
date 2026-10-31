@@ -79,18 +79,6 @@ function Field({ id, label, error, optional, hint, tooltip, children }: { id: st
   </div>;
 }
 
-function Steps({ current }: { current: 2 | 3 }) {
-  const steps = ["Cart", "Your details", "Confirmation"];
-  return <ol className="co-steps" aria-label="Checkout progress">
-    {steps.map((label, index) => {
-      const number = index + 1;
-      const done = number < current || (current === 3 && number === 3);
-      return <li key={label} className={done ? "done" : number === current ? "active" : ""} aria-current={number === current ? "step" : undefined}>
-        <span>{done ? <Check size={13} /> : number}</span>{label}
-      </li>;
-    })}
-  </ol>;
-}
 
 function Header() {
   return <Storefront headerOnly />;
@@ -193,26 +181,14 @@ export default function CheckoutPage() {
 
   if (order) {
     const { details } = order;
-    const whatsappText = encodeURIComponent([
-      `Hello Amzad Food, I placed order #${order.id}.`,
-      "",
-      ...order.items.map((item) => `• ${item.qty} × ${item.name} — ৳${item.qty * item.price}`),
-      "",
-      `Total (Cash on Delivery): ৳${order.total}`,
-      `Name: ${details.name}`,
-      `Phone: ${details.phone}`,
-      `Address: ${details.address}, ${details.area}, ${details.district}`,
-      details.notes ? `Notes: ${details.notes}` : "",
-    ].filter((line, index, lines) => line !== "" || lines[index - 1] !== "").join("\n"));
     return <>
       <Header />
       <main className="checkout-page page-width">
-        <div className="co-steps-center"><Steps current={3} /></div>
         <div className="co-success">
           <div className="co-success-head">
             <span className="co-success-icon"><CheckCircle2 size={40} /></span>
             <h1>Order preview saved</h1>
-            <p>Thank you, <strong>{details.name}</strong>. This preview is saved on this device. Send it to our team on WhatsApp to request confirmation.</p>
+            <p>Thank you, <strong>{details.name}</strong>. This order preview is saved on this device. Contact our team to request confirmation.</p>
             <span className="co-order-id">Order <b>#{order.id}</b></span>
           </div>
 
@@ -246,17 +222,17 @@ export default function CheckoutPage() {
                 </dl>
 
               </section>
-              <a className="co-whatsapp cta cta-whatsapp" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Send order details on WhatsApp</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={17} /></i></a>
               <Link className="co-secondary" href={`/track-order/?id=${order.id}`}>Track this order <ArrowRight size={14} /></Link>
               <Link className="co-secondary" href="/my-orders/">View my orders <ArrowRight size={14} /></Link>
+              <details className="co-next co-next-dropdown">
+                <summary><h2 className="co-card-title">What happens next</h2><ChevronDown size={18} aria-hidden="true" /></summary>
+                <ol>{nextSteps.map((step, index) => <li key={step.title}><span><step.icon size={18} /></span><div><strong>{index + 1}. {step.title}</strong><p>{step.note}</p></div></li>)}</ol>
+              </details>
               <Link className="co-secondary" href="/">Continue Shopping <ArrowRight size={14} /></Link>
             </div>
           </div>
 
-          <section className="co-next">
-            <h2 className="co-card-title">What happens next</h2>
-            <ol>{nextSteps.map((step, index) => <li key={step.title}><span><step.icon size={18} /></span><div><strong>{index + 1}. {step.title}</strong><p>{step.note}</p></div></li>)}</ol>
-          </section>
+
         </div>
       </main>
     </>;

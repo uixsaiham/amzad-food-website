@@ -161,8 +161,8 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
             aria-haspopup="true"
             aria-expanded={active === category.key}
           >
-            <span className="cat-chip-icon"><CategoryIcon icon={category.icon} size={17} /></span>
-            <span className="cat-chip-text"><b>{category.label}</b><small>{category.bn}</small></span>
+            <span className="cat-chip-icon"><CategoryIcon icon={category.icon} size={26} /></span>
+            <span className="cat-chip-text"><b>{category.label}</b></span>
           </button>)}
         </div>
         <div className="cat-rail-end">

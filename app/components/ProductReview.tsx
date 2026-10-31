@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { CheckCircle2, Star } from "lucide-react";
 import { productSlug } from "../lib/products";
 
+import ProductReviewStories from "./ProductReviewStories";
 import { productReviews } from "../lib/productReviews";
 
 type Review = { rating: number; comment: string };
@@ -43,7 +44,7 @@ export default function ProductReview({ product }: { product: string }) {
   }
 
   return <>
-    <section className="product-customer-reviews" aria-label={`Customer reviews for ${product}`}>
+    {!published.written.length && !published.videos.length ? <ProductReviewStories product={product} /> : <section className="product-customer-reviews" aria-label={`Customer reviews for ${product}`}>
       <h2>Reviews for {product}</h2>
       <div className="product-review-columns">
         <div><h3>Written reviews</h3>
@@ -56,7 +57,7 @@ export default function ProductReview({ product }: { product: string }) {
           {!published.videos.length && <p>No video reviews for this product yet.</p>}
         </div>
       </div>
-    </section>
+    </section>}
     <section className="product-review" id="product-reviews" aria-labelledby={`${id}-heading`}>
     <div className="product-review-intro">
       <span className="pd-eyebrow">YOUR EXPERIENCE MATTERS</span>
