@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { BadgeCheck, ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { BadgeCheck, ChevronLeft, ChevronRight, Play, Quote, Star } from "lucide-react";
+
+import { blogReviews } from "./BlogSection";
 
 export const customerReviews = [
   { name: "Rafiq Hasan", time: "3 days ago", rating: 4, color: "#fde3cf", text: "আমার অভিজ্ঞতা আমজাদ ফুডের সাথে অসাধারণ ছিল। সেবা ছিল অত্যন্ত সহায়ক এবং প্রয়োজনীয় তথ্য পেতে আমি খুব সহজেই যোগাযোগ করতে পেরেছিলাম। ধন্যবাদ আমজাদ ফুড।" },
@@ -26,6 +28,7 @@ function Stars({ value, size = 14 }: { value: number; size?: number }) {
 }
 
 export default function Reviews() {
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [scroll, setScroll] = useState({ progress: 0, atStart: true, atEnd: false });
   const update = () => {
@@ -40,14 +43,15 @@ export default function Reviews() {
     return () => window.removeEventListener("resize", update);
   }, []);
   const step = (direction: number) => {
+    setPlayingVideo(null);
     const track = trackRef.current;
     const card = track?.firstElementChild as HTMLElement | null;
     if (track && card) track.scrollBy({ left: direction * (card.offsetWidth + 18), behavior: "smooth" });
   };
 
-  return <section className="review-section" id="reviews"><div className="rv page-width">
+  return <section className="review-section review-section-mixed" id="reviews"><div className="rv page-width">
     <div className="rv-summary">
-      <span className="rv-kicker"><Star size={12} fill="currentColor" /> Customer Reviews</span>
+      <span className="rv-kicker"><Star size={12} fill="currentColor" /> Customer Reviews · Videos & Stories</span>
       <h2>Loved by families <em>across Bangladesh</em></h2>
       <div className="rv-score">
         <strong>{AVERAGE}</strong>
@@ -64,9 +68,10 @@ export default function Reviews() {
       </div>
     </div>
     <div className="rv-track" ref={trackRef} onScroll={update}>
-      {customerReviews.map((review) => {
+      {customerReviews.map((review, index) => {
         const initials = review.name.split(" ").map((part) => part[0]).slice(0, 2).join("");
-        return <article className="rv-card" key={review.name}>
+        const video = blogReviews[index];
+        return <Fragment key={review.name}><article className="rv-card">
           <div className="rv-card-top"><Stars value={review.rating} /><GoogleIcon /></div>
           <Quote className="rv-quote" size={30} fill="currentColor" strokeWidth={0} />
           <p>{review.text}</p>
@@ -74,7 +79,18 @@ export default function Reviews() {
             <span className="rv-avatar" style={{ background: review.color }}>{initials}</span>
             <div><strong>{review.name}</strong><small><BadgeCheck size={13} /> Verified buyer · {review.time}</small></div>
           </footer>
-        </article>;
+        </article>
+        {video && <article className="rv-card rv-video-card">
+          <div className="rv-video-media">
+            {playingVideo === video.videoId ? <iframe src={`https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1&playsinline=1&rel=0`} title={video.alt} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /> : <button type="button" onClick={() => setPlayingVideo(video.videoId)} aria-label={`Play ${video.alt}`}>
+              <img src={video.image} alt={video.alt} loading="lazy" />
+              <span className="rv-video-play"><Play size={20} fill="currentColor" /></span>
+              <span className="rv-video-label">Watch video</span>
+            </button>}
+          </div>
+          <div className="rv-video-copy"><span>Video story · Amzad Food</span><h3 lang="bn">{video.alt}</h3></div>
+        </article>}
+        </Fragment>;
       })}
     </div>
   </div></section>;
