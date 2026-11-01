@@ -1,4 +1,4 @@
-import { CartItem, isCartItem } from "./cart";
+import { CartItem } from "./cart";
 
 // Orders placed on this browser, so the Track Order page can find them. There is no backend yet.
 export type SavedOrder = {
@@ -11,39 +11,22 @@ export type SavedOrder = {
 
 const ORDERS_KEY = "amzad-orders";
 
-export function isSavedOrder(value: unknown): value is SavedOrder {
-  if (!value || typeof value !== "object") return false;
-  const order = value as Partial<SavedOrder>;
-  const amount = (v: unknown) => typeof v === "number" && Number.isFinite(v) && v >= 0;
-  return typeof order.id === "string" && order.id.length > 0 &&
-    Array.isArray(order.items) && order.items.every(isCartItem) &&
-    amount(order.total) && amount(order.deliveryFee) && amount(order.placedAt) &&
-    Math.abs(order.placedAt as number) <= 8.64e15 &&
-    [order.name, order.phone, order.address, order.eta].every(v => typeof v === "string") &&
-    (order.status === undefined || ["Processing", "Approved", "Delivered", "Completed", "Cancelled", "Returned", "Ready to Ship", "Shipped"].includes(order.status)) &&
-    (order.discount === undefined || amount(order.discount)) &&
-    (order.updates === undefined || (Array.isArray(order.updates) && order.updates.every(update =>
-      update && typeof update.label === "string" && typeof update.note === "string" && amount(update.at) && update.at <= 8.64e15)));
-}
-
 export function loadOrders(): SavedOrder[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(ORDERS_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter(isSavedOrder).slice(0, 20) : [];
+    return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
 }
 
 export function saveOrder(order: SavedOrder) {
-  if (typeof window === "undefined" || !isSavedOrder(order)) return false;
+  if (typeof window === "undefined") return;
   try {
     localStorage.setItem(ORDERS_KEY, JSON.stringify([order, ...loadOrders().filter(item => item.id !== order.id)].slice(0, 20)));
-    return true;
   } catch {
-    return false;
+    // localStorage unavailable — the order just can't be tracked from this browser
   }
 }
 

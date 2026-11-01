@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 const brands = [
-  { name: "Amzad", file: "amzad-original", width: 1320, height: 300 },
-  { name: "Moja", file: "moja-original", width: 1100, height: 520 },
-  { name: "Slifit", file: "slifit-original", width: 1310, height: 430 },
-  { name: "Hazmi", file: "hazmi-original", width: 360, height: 100 },
-  { name: "Slim Key", file: "slim-key-original", width: 770, height: 200 },
+  { name: "Amzad", file: "amzad", width: 511, height: 172 },
+  { name: "Maza — মজা", file: "maza", width: 440, height: 248 },
+  { name: "Slifit", file: "slifit", width: 494, height: 182 },
+  { name: "Hajam", file: "hajam", width: 494, height: 182 },
 ];
 
 export default function BrandStrip() {
@@ -39,7 +38,7 @@ export default function BrandStrip() {
       </div>
       <ul className="brand-strip-logos">
         {brands.map(brand => <li key={`${brand.file}-${animationCycle}`} className={`brand-strip-item brand-strip-${brand.file}`}>
-          <img src={`/amzad-food-website/brands/${brand.file}.png`} alt={brand.name} width={brand.width} height={brand.height} loading="lazy" decoding="async" />
+          {brand.file === "hajam" ? <span className="brand-hajam-wordmark">Hajam</span> : <img src={`/amzad-food-website/brands/${brand.file}.png`} alt={brand.name} width={brand.width} height={brand.height} loading="lazy" decoding="async" />}
         </li>)}
       </ul>
     </div>

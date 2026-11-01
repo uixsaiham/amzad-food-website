@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Storefront from "../components/Storefront";
-import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, ChevronDown, CreditCard, Info, Lock, Minus, PackageCheck, Phone, Plus, ShieldCheck, ShoppingBag, UserRound, Smartphone, Tag, Trash2, Truck, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import MegaMenu, { MenuLink } from "../components/MegaMenu";
+import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, ChevronDown, Clock, CreditCard, Lock, MapPin, Minus, PackageCheck, Phone, Plus, ShieldCheck, ShoppingBag, Smartphone, Tag, Trash2, Truck, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCcVisa, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartItem, loadCart, saveCart } from "../lib/cart";
 import { saveOrder } from "../lib/orders";
-import AuthModal from "../components/AuthModal";
-import { districtAreas, districts } from "../lib/checkoutLocations";
 import CartOffer from "../components/CartOffer";
 import { DELIVERY_FEE, FREE_DELIVERY_MINIMUM, qualifiesForFreeDelivery } from "../lib/offers";
 
 type Fields = { name: string; phone: string; email: string; address: string; area: string; district: string; notes: string };
 type Errors = Partial<Record<keyof Fields, string>>;
+type AddressType = "Home" | "Office";
 type Promo = { label: string; note: string; type: "percent" | "flat" | "shipping"; value: number; min?: number };
-type Order = { id: string; items: CartItem[]; subtotal: number; discount: number; deliveryFee: number; total: number; details: Fields; promoCode: string | null; eta: string; placedAt: string };
+type Order = { id: string; items: CartItem[]; subtotal: number; discount: number; deliveryFee: number; total: number; details: Fields; addressType: AddressType; promoCode: string | null; eta: string; placedAt: string };
 
 const emptyFields: Fields = { name: "", phone: "", email: "", address: "", area: "", district: "", notes: "" };
 const MAX_QTY = 20;
@@ -28,13 +28,13 @@ const promoCodes: Record<string, Promo> = {
   FREESHIP: { label: "Free delivery", note: "Automatic on orders ৳1,000+", type: "shipping", value: 0, min: FREE_DELIVERY_MINIMUM },
 };
 
-
+const districts = ["Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogura", "Brahmanbaria", "Chandpur", "Chapainawabganj", "Chattogram", "Chuadanga", "Cox's Bazar", "Cumilla", "Dhaka", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"];
 
 const paymentOptions = [
-  { key: "cod", label: "Cash on Delivery", note: "Pay when you receive", icon: Banknote, enabled: true },
-  { key: "card", label: "Credit / Visa Card", note: "Coming soon", icon: CreditCard, enabled: false },
+  { key: "cod", label: "Cash on Delivery", note: "Pay in cash when your order arrives", icon: Banknote, enabled: true },
   { key: "bkash", label: "bKash", note: "Coming soon", icon: Smartphone, enabled: false },
   { key: "nagad", label: "Nagad", note: "Coming soon", icon: Smartphone, enabled: false },
+  { key: "card", label: "Credit / Debit Card", note: "Coming soon", icon: CreditCard, enabled: false },
 ];
 
 const nextSteps = [
@@ -43,7 +43,7 @@ const nextSteps = [
   { icon: Truck, title: "Delivered to your door", note: "Pay in cash when the order arrives." },
 ];
 
-const fieldOrder: (keyof Fields)[] = ["name", "phone", "email", "address", "district", "area"];
+const fieldOrder: (keyof Fields)[] = ["name", "phone", "email", "address", "area", "district"];
 
 /** Two to three delivery days out, skipping Fridays (no courier deliveries). */
 function deliveryWindow(from = new Date()) {
@@ -63,61 +63,74 @@ function deliveryWindow(from = new Date()) {
 function validate(fields: Fields): Errors {
   const errors: Errors = {};
   if (fields.name.trim().length < 3) errors.name = "Enter your full name";
-  if (!/^(?:\+?88)?01[3-9]\d{8}$/.test(fields.phone.replace(/[\s-]/g, ""))) errors.phone = "Enter a valid mobile number, e.g. +8801712345678";
+  if (!/^(?:\+?88)?01[3-9]\d{8}$/.test(fields.phone.replace(/[\s-]/g, ""))) errors.phone = "Enter a valid mobile number, e.g. 01712345678";
   if (fields.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim())) errors.email = "Enter a valid email address";
   if (fields.address.trim().length < 6) errors.address = "Enter your house, road and block details";
-  if (!fields.area || ![...(districtAreas[fields.district] ?? []), "Other area / Thana"].includes(fields.area)) errors.area = "Select your area or thana";
-  if (!districts.includes(fields.district)) errors.district = "Select your district";
+  if (!fields.area.trim()) errors.area = "Enter your area or thana";
+  if (!fields.district) errors.district = "Select your district";
   return errors;
 }
 
-function Field({ id, label, error, optional, hint, tooltip, children }: { id: string; label: string; error?: string; optional?: boolean; hint?: string; tooltip?: string; children: React.ReactNode }) {
+function Field({ id, label, error, optional, hint, children }: { id: string; label: string; error?: string; optional?: boolean; hint?: string; children: React.ReactNode }) {
   return <div className={error ? "co-field has-error" : "co-field"}>
-    <div className="co-field-label-row"><label htmlFor={id}>{label}{optional && <em>Optional</em>}</label>{tooltip && <span className="co-info-tooltip"><button type="button" aria-label={`Information about ${label.toLowerCase()}`} aria-describedby={`${id}-tip`}><Info size={14} /></button><span role="tooltip" id={`${id}-tip`}>{tooltip}</span></span>}</div>
+    <label htmlFor={id}>{label}{optional && <em>Optional</em>}</label>
     {children}
     {error ? <span className="co-error" role="alert">{error}</span> : hint ? <span className="co-hint">{hint}</span> : null}
   </div>;
 }
 
+function Steps({ current }: { current: 2 | 3 }) {
+  const steps = ["Cart", "Your details", "Confirmation"];
+  return <ol className="co-steps" aria-label="Checkout progress">
+    {steps.map((label, index) => {
+      const number = index + 1;
+      const done = number < current || (current === 3 && number === 3);
+      return <li key={label} className={done ? "done" : number === current ? "active" : ""} aria-current={number === current ? "step" : undefined}>
+        <span>{done ? <Check size={13} /> : number}</span>{label}
+      </li>;
+    })}
+  </ol>;
+}
 
 function Header() {
-  return <Storefront headerOnly />;
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const onLink = (event: React.MouseEvent, link: MenuLink) => {
+    setMenuOpen(false);
+    if (link.href) return;
+    event.preventDefault();
+    if (link.action === "track") router.push("/track-order/");
+    else if (link.action === "account") router.push("/");
+  };
+  return <header className="co-header"><div className="co-header-inner page-width">
+    <Link className="brand amzad-brand" href="/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></Link>
+    <div className="co-header-actions">
+      <span className="co-secure"><Lock size={13} /> Secure checkout</span>
+      <button className={menuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMenuOpen(!menuOpen)} aria-haspopup="true" aria-expanded={menuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button>
+    </div>
+    <MegaMenu open={menuOpen} onClose={() => setMenuOpen(false)} onCategory={() => { setMenuOpen(false); router.push("/#shop"); }} onLink={onLink} />
+  </div></header>;
 }
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [fields, setFields] = useState<Fields>(emptyFields);
-  const [authMode, setAuthMode] = useState<"signin" | "signup" | null>(null);
+  const [addressType, setAddressType] = useState<AddressType>("Home");
   const [errors, setErrors] = useState<Errors>({});
   const [promoInput, setPromoInput] = useState("");
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [promoError, setPromoError] = useState("");
   const [eta, setEta] = useState("");
   const [order, setOrder] = useState<Order | null>(null);
-  const [submitError, setSubmitError] = useState("");
   const [summaryOpen, setSummaryOpen] = useState(false);
 
   useEffect(() => {
     setCart(loadCart());
-    const syncCart = () => setCart(loadCart());
-    window.addEventListener("amzad-cart-updated", syncCart);
     setEta(deliveryWindow());
     try {
       const saved = localStorage.getItem("af_checkout_fields");
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          const safe = { ...emptyFields };
-          for (const key of Object.keys(emptyFields) as (keyof Fields)[]) {
-            const value = (parsed as Record<string, unknown>)[key];
-            if (typeof value === "string") safe[key] = value;
-          }
-          if (![...(districtAreas[safe.district] ?? []), "Other area / Thana"].includes(safe.area)) safe.area = "";
-          setFields(safe);
-        }
-      }
+      if (saved) setFields({ ...emptyFields, ...JSON.parse(saved) });
     } catch {}
-    return () => window.removeEventListener("amzad-cart-updated", syncCart);
   }, []);
 
   const updateField = (field: keyof Fields, value: string) => {
@@ -153,7 +166,6 @@ export default function CheckoutPage() {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     if (cart.length === 0) return;
-    setSubmitError("");
     const nextErrors = validate(fields);
     setErrors(nextErrors);
     const firstInvalid = fieldOrder.find((field) => nextErrors[field]);
@@ -164,16 +176,15 @@ export default function CheckoutPage() {
       return;
     }
     const placed: Order = {
-      id: `AF${crypto.randomUUID().replace(/-/g, "").toUpperCase()}`,
+      id: `AF${String(Date.now()).slice(-6)}`,
       items: cart, subtotal, discount, deliveryFee, total,
       details: { ...fields, name: fields.name.trim(), phone: fields.phone.trim(), email: fields.email.trim(), address: fields.address.trim(), area: fields.area.trim(), notes: fields.notes.trim() },
-      promoCode: promoActive ? appliedCode : null, eta,
+      addressType, promoCode: promoActive ? appliedCode : null, eta,
       placedAt: new Date().toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
     };
-    const { details } = placed;
-    const saved = saveOrder({ id: placed.id, items: cart, total, deliveryFee, name: details.name, phone: details.phone, address: `${details.address}, ${details.area}, ${details.district}`, eta, placedAt: Date.now() });
-    if (!saved) { setSubmitError("This preview could not be saved. Your cart is unchanged. Please enable browser storage or contact our team."); return; }
     setOrder(placed);
+    const { details } = placed;
+    saveOrder({ id: placed.id, items: cart, total, deliveryFee, name: details.name, phone: details.phone, address: `${details.address}, ${details.area}, ${details.district}`, eta, placedAt: Date.now() });
     updateCart([]);
     try { localStorage.setItem("af_checkout_fields", JSON.stringify(details)); } catch {}
     window.scrollTo({ top: 0 });
@@ -181,14 +192,26 @@ export default function CheckoutPage() {
 
   if (order) {
     const { details } = order;
+    const whatsappText = encodeURIComponent([
+      `Hello Amzad Food, I placed order #${order.id}.`,
+      "",
+      ...order.items.map((item) => `• ${item.qty} × ${item.name} — ৳${item.qty * item.price}`),
+      "",
+      `Total (Cash on Delivery): ৳${order.total}`,
+      `Name: ${details.name}`,
+      `Phone: ${details.phone}`,
+      `Address: ${details.address}, ${details.area}, ${details.district}`,
+      details.notes ? `Notes: ${details.notes}` : "",
+    ].filter((line, index, lines) => line !== "" || lines[index - 1] !== "").join("\n"));
     return <>
       <Header />
       <main className="checkout-page page-width">
+        <div className="co-steps-center"><Steps current={3} /></div>
         <div className="co-success">
           <div className="co-success-head">
             <span className="co-success-icon"><CheckCircle2 size={40} /></span>
-            <h1>Order preview saved</h1>
-            <p>Thank you, <strong>{details.name}</strong>. This order preview is saved on this device. Contact our team to request confirmation.</p>
+            <h1>Order Confirmed!</h1>
+            <p>Thank you, <strong>{details.name}</strong>. Your order has been placed successfully.</p>
             <span className="co-order-id">Order <b>#{order.id}</b></span>
           </div>
 
@@ -216,23 +239,23 @@ export default function CheckoutPage() {
                   <div><dt>Deliver to</dt><dd>{details.name}</dd></div>
                   <div><dt>Phone</dt><dd>{details.phone}</dd></div>
                   {details.email && <div><dt>Email</dt><dd>{details.email}</dd></div>}
-                  <div><dt>Address</dt><dd>{details.address}, {details.area}, {details.district}</dd></div>
+                  <div><dt>Address</dt><dd>{details.address}, {details.area}, {details.district} <small>({order.addressType})</small></dd></div>
                   {details.notes && <div><dt>Notes</dt><dd>{details.notes}</dd></div>}
                   <div><dt>Placed on</dt><dd>{order.placedAt}</dd></div>
                 </dl>
-
+                <div className="co-eta"><Truck size={18} /><div><small>Estimated delivery</small><strong>{order.eta}</strong></div></div>
               </section>
+              <a className="co-whatsapp cta cta-whatsapp" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`} target="_blank" rel="noreferrer"><span>Send order details on WhatsApp</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={17} /></i></a>
               <Link className="co-secondary" href={`/track-order/?id=${order.id}`}>Track this order <ArrowRight size={14} /></Link>
               <Link className="co-secondary" href="/my-orders/">View my orders <ArrowRight size={14} /></Link>
-              <details className="co-next co-next-dropdown">
-                <summary><h2 className="co-card-title">What happens next</h2><ChevronDown size={18} aria-hidden="true" /></summary>
-                <ol>{nextSteps.map((step, index) => <li key={step.title}><span><step.icon size={18} /></span><div><strong>{index + 1}. {step.title}</strong><p>{step.note}</p></div></li>)}</ol>
-              </details>
               <Link className="co-secondary" href="/">Continue Shopping <ArrowRight size={14} /></Link>
             </div>
           </div>
 
-
+          <section className="co-next">
+            <h2 className="co-card-title">What happens next</h2>
+            <ol>{nextSteps.map((step, index) => <li key={step.title}><span><step.icon size={18} /></span><div><strong>{index + 1}. {step.title}</strong><p>{step.note}</p></div></li>)}</ol>
+          </section>
         </div>
       </main>
     </>;
@@ -241,15 +264,11 @@ export default function CheckoutPage() {
   return <>
     <Header />
     <main className="checkout-page page-width">
+      <Link className="checkout-back" href="/"><ArrowLeft size={15} /> Back to shop</Link>
       <div className="co-title-row">
         <h1>Checkout</h1>
+        <Steps current={2} />
       </div>
-
-      {cart.length > 0 && <section className="co-account-banner" aria-labelledby="checkout-account-title">
-        <span className="co-account-icon" aria-hidden="true"><UserRound size={24} /></span>
-        <div className="co-account-copy"><h2 id="checkout-account-title">Already part of the family?</h2><p>Sign in or create an account. You can also checkout below as a guest.</p></div>
-        <div className="co-account-actions"><button type="button" className="co-account-signin" onClick={() => setAuthMode("signin")}>Sign in <ArrowRight size={15} /></button><button type="button" className="co-account-register" onClick={() => setAuthMode("signup")}>Create account</button></div>
-      </section>}
 
       {cart.length === 0 ? <div className="co-empty">
         <span><ShoppingBag size={34} /></span>
@@ -258,63 +277,63 @@ export default function CheckoutPage() {
         <Link className="cta" href="/"><span>Browse products</span><i className="cta-icon"><ShoppingBag size={15} /></i></Link>
       </div> : <div className="co-grid">
         <form className="co-form" id="checkout-form" onSubmit={submit} noValidate>
-          {submitError && <p role="alert" className="co-error">{submitError}</p>}
           <section className="co-card">
-            <div className="co-card-head"><span className="co-num">1</span><div><h2>Delivery information</h2></div></div>
+            <div className="co-card-head"><span className="co-num">1</span><div><h2>Contact information</h2><p>We will call this number to confirm your order.</p></div></div>
             <div className="co-row">
               <Field id="co-name" label="Full name" error={errors.name}>
                 <input id="co-name" value={fields.name} onChange={(event) => updateField("name", event.target.value)} placeholder="e.g. Rahim Uddin" autoComplete="name" aria-invalid={!!errors.name} />
               </Field>
               <Field id="co-phone" label="Mobile number" error={errors.phone}>
-                <div className="co-phone-input"><span>+880</span><input id="co-phone" type="tel" inputMode="numeric" value={fields.phone.replace(/^(?:\+?88)?0/, "")} onChange={(event) => { const digits = event.target.value.replace(/[^0-9]/g, "").replace(/^(?:880|0)/, ""); updateField("phone", digits ? `+880${digits}` : ""); }} placeholder="1XXXXXXXXX" autoComplete="tel-national" aria-label="Mobile number, country code +880" aria-invalid={!!errors.phone} /></div>
+                <input id="co-phone" type="tel" inputMode="tel" value={fields.phone} onChange={(event) => updateField("phone", event.target.value)} placeholder="01XXXXXXXXX" autoComplete="tel" aria-invalid={!!errors.phone} />
               </Field>
             </div>
             <Field id="co-email" label="Email address" optional error={errors.email} hint="For your order receipt">
               <input id="co-email" type="email" value={fields.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" autoComplete="email" aria-invalid={!!errors.email} />
             </Field>
+          </section>
 
+          <section className="co-card">
+            <div className="co-card-head"><span className="co-num">2</span><div><h2>Delivery address</h2><p>Where should we deliver your order?</p></div></div>
             <Field id="co-address" label="Full address" error={errors.address}>
               <textarea id="co-address" value={fields.address} onChange={(event) => updateField("address", event.target.value)} placeholder="House / flat no., road, block, landmark" rows={3} autoComplete="street-address" aria-invalid={!!errors.address} />
             </Field>
             <div className="co-row">
+              <Field id="co-area" label="Area / Thana" error={errors.area}>
+                <input id="co-area" value={fields.area} onChange={(event) => updateField("area", event.target.value)} placeholder="e.g. Dhanmondi" autoComplete="address-level3" aria-invalid={!!errors.area} />
+              </Field>
               <Field id="co-district" label="District" error={errors.district}>
                 <div className="co-select">
-                  <select id="co-district" value={fields.district} onChange={(event) => { updateField("district", event.target.value); updateField("area", ""); }} autoComplete="address-level2" aria-invalid={!!errors.district}>
+                  <select id="co-district" value={fields.district} onChange={(event) => updateField("district", event.target.value)} autoComplete="address-level2" aria-invalid={!!errors.district}>
                     <option value="">Select district</option>
                     {districts.map((district) => <option key={district} value={district}>{district}</option>)}
                   </select>
                   <ChevronDown size={16} />
                 </div>
               </Field>
-              <Field id="co-area" label="Area / Thana" error={errors.area} hint={fields.area === "Other area / Thana" ? "Include your area / thana in the full address above." : undefined}>
-                <div className="co-select">
-                  <select id="co-area" value={fields.area} onChange={(event) => updateField("area", event.target.value)} disabled={!fields.district} autoComplete="address-level3" aria-invalid={!!errors.area}>
-                    <option value="">{fields.district ? "Select area / thana" : "Select district first"}</option>
-                    {(districtAreas[fields.district] ?? []).map(area => <option key={area} value={area}>{area}</option>)}
-                    {fields.district && <option value="Other area / Thana">Other area / Thana</option>}
-                  </select>
-                  <ChevronDown size={16} />
-                </div>
-              </Field>
             </div>
-            <Field id="co-notes" label="Order notes" optional tooltip="Add delivery directions, a landmark or access instructions. Do not include payment or password details.">
-
-              <textarea aria-describedby="co-notes-tip" id="co-notes" value={fields.notes} onChange={(event) => updateField("notes", event.target.value)} placeholder="Anything we should know?" rows={2} maxLength={300} />
+            <div className="co-field">
+              <span className="co-label">Address type</span>
+              <div className="co-segment" role="radiogroup" aria-label="Address type">
+                {(["Home", "Office"] as AddressType[]).map((type) => <button type="button" key={type} role="radio" aria-checked={addressType === type} className={addressType === type ? "active" : ""} onClick={() => setAddressType(type)}><MapPin size={14} /> {type}</button>)}
+              </div>
+            </div>
+            <Field id="co-notes" label="Order notes" optional hint="Delivery instructions, preferred time, gate code…">
+              <textarea id="co-notes" value={fields.notes} onChange={(event) => updateField("notes", event.target.value)} placeholder="Anything we should know?" rows={2} maxLength={300} />
             </Field>
           </section>
 
           <section className="co-card">
-            <div className="co-card-head"><span className="co-num">2</span><div><h2>Payment method</h2><p>All transactions are safe and simple.</p></div></div>
+            <div className="co-card-head"><span className="co-num">3</span><div><h2>Payment method</h2><p>All transactions are safe and simple.</p></div></div>
             <div className="co-pay-grid" role="radiogroup" aria-label="Payment method">
               {paymentOptions.map((option) => <div key={option.key} role="radio" aria-checked={option.enabled} aria-disabled={!option.enabled} className={option.enabled ? "co-pay active" : "co-pay disabled"}>
-                <span className={`co-pay-icon co-pay-icon-${option.key}`}>{option.key === "bkash" || option.key === "nagad" ? <img src={`/amzad-food-website/payments/${option.key}.svg`} alt="" /> : option.key === "card" ? <FontAwesomeIcon icon={faCcVisa} /> : <option.icon size={20} />}</span>
-                <div><strong>{option.label}</strong></div>
+                <span className="co-pay-icon"><option.icon size={18} /></span>
+                <div><strong>{option.label}</strong><small>{option.note}</small></div>
                 {option.enabled && <span className="co-pay-check"><Check size={13} /></span>}
               </div>)}
             </div>
           </section>
 
-          <button className="co-place co-place-desktop cta cta-lg cta-block" type="submit"><span>Order Now · ৳{total}</span><i className="cta-icon"><Lock size={16} /></i></button>
+          <button className="co-place co-place-desktop cta cta-lg cta-block" type="submit"><span>Place Order · ৳{total}</span><i className="cta-icon"><Lock size={16} /></i></button>
           <p className="co-legal">By placing your order, you agree to be contacted by our team to confirm delivery.</p>
         </form>
 
@@ -330,14 +349,16 @@ export default function CheckoutPage() {
             <ul className="co-items">{cart.map((item) => <li key={item.name}>
               <div className="co-item-img"><img src={item.image} alt="" /><b>{item.qty}</b></div>
               <div className="co-item-info">
-                <div className="co-item-name-price"><strong>{item.name}</strong><span className="co-item-unit-price">৳{item.price.toLocaleString("en-IN")} each</span></div>
-                <div className="co-item-quantity-total"><div className="co-qty">
+                <strong>{item.name}</strong>
+                <span>৳{item.price} each</span>
+                <div className="co-qty">
                   <button type="button" onClick={() => changeQty(item.name, -1)} aria-label={`Decrease ${item.name} quantity`}><Minus size={12} /></button>
-                  <b aria-live="polite">{item.qty}</b>
+                  <b>{item.qty}</b>
                   <button type="button" onClick={() => changeQty(item.name, 1)} disabled={item.qty >= MAX_QTY} aria-label={`Increase ${item.name} quantity`}><Plus size={12} /></button>
-                </div><strong className="co-item-inline-total" aria-live="polite" aria-label={`Total for ${item.name}`}>৳{(item.qty * item.price).toLocaleString("en-IN")}</strong></div>
+                </div>
               </div>
               <div className="co-item-side">
+                <strong>৳{item.qty * item.price}</strong>
                 <button type="button" onClick={() => removeItem(item.name)} aria-label={`Remove ${item.name}`}><Trash2 size={14} /></button>
               </div>
             </li>)}</ul>
@@ -368,14 +389,14 @@ export default function CheckoutPage() {
             </div>
             {savings > 0 && <p className="co-savings">🎉 You&apos;re saving ৳{savings} on this order</p>}
 
-
+            <div className="co-eta"><Truck size={18} /><div><small>Estimated delivery</small><strong>{eta || "2–3 business days"}</strong></div></div>
             </div>
           </section>
 
           <section className="co-card co-assure">
             <ul>
               <li><ShieldCheck size={17} /><div><strong>100% authentic products</strong><small>Quality checked before packing</small></div></li>
-
+              <li><Clock size={17} /><div><strong>Delivery in 2–3 business days</strong><small>Across Bangladesh</small></div></li>
               <li><Banknote size={17} /><div><strong>Pay when you receive</strong><small>Cash on Delivery on every order</small></div></li>
             </ul>
             <div className="co-help">
@@ -390,10 +411,9 @@ export default function CheckoutPage() {
       </div>}
     </main>
 
-    <AuthModal open={authMode !== null} initialMode={authMode ?? "signin"} onClose={() => setAuthMode(null)} onSignIn={() => setAuthMode(null)} />
     {cart.length > 0 && <div className="co-mobilebar">
       <div><small>Total to pay</small><strong>৳{total}</strong></div>
-      <button className="co-place cta" type="submit" form="checkout-form"><span>Order Now</span><i className="cta-icon"><Lock size={15} /></i></button>
+      <button className="co-place cta" type="submit" form="checkout-form"><span>Place Order</span><i className="cta-icon"><Lock size={15} /></i></button>
     </div>}
   </>;
 }

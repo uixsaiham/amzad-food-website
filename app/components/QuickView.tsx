@@ -1,21 +1,26 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Clock, Heart, Minus, Phone, Plus, ShoppingCart, Truck, X } from "lucide-react";
+import { Check, Clock, Heart, Minus, Phone, Plus, ShoppingCart, Star, Truck, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
 import { Product, getProductBrand } from "../lib/products";
 import ProductGallery from "./ProductGallery";
-import { useModalDialog } from "../lib/useModalDialog";
-import { DELIVERY_DESCRIPTION } from "../lib/offers";
 
 type QuickViewProduct = Product;
 type Details = { bn: string; blurb: string; highlights: string[]; usage: string[]; origin: string; shelfLife: string; storage: string; sold: number };
 type Tab = "info" | "usage" | "delivery";
 
+const sizes = [{ label: "250 gm", factor: 0.55 }, { label: "500 gm", factor: 1 }, { label: "1 kg", factor: 1.9 }];
 const tabs: { key: Tab; label: string }[] = [{ key: "info", label: "Product Info" }, { key: "usage", label: "How to Use" }, { key: "delivery", label: "Delivery" }];
+const assurances = [
+  { icon: "/amzad-food-website/icons/trust-authentic.png", label: "100% Authentic" },
+  { icon: "/amzad-food-website/icons/trust-lab-tested.png", label: "Lab Tested" },
+  { icon: "/amzad-food-website/icons/trust-no-preservatives.png", label: "No Preservatives" },
+];
+
 const honeyUsage = ["Take one teaspoon on an empty stomach each morning.", "Stir into warm (not boiling) water, milk or tea.", "Drizzle over bread, oats, yoghurt or fruit."];
 const details: Record<string, Details> = {
   "Wildflower Honey & Black Seed": { bn: "কালোজিরা মধু", blurb: "Raw wildflower honey blended with black seed — a traditional wellness pairing enjoyed in Bangladeshi homes for generations.", highlights: ["Raw wildflower honey, never overheated or diluted", "Infused with premium black seed (kalojira)", "No added sugar, colour or preservatives", "Sealed in a food-grade jar for freshness"], usage: honeyUsage, origin: "Sundarbans & northern Bangladesh", shelfLife: "18 months", storage: "Cool, dry place away from sunlight", sold: 320 },
@@ -28,8 +33,9 @@ const details: Record<string, Details> = {
   "Khejur Gur": { bn: "খেজুরের গুড়", blurb: "Traditional date-palm jaggery made by slow-boiling fresh sap — the taste of winter mornings in the village.", highlights: ["Made from fresh date-palm sap", "No sugar, chemicals or artificial colour", "Deep caramel flavour and natural sweetness", "Perfect for pitha, payesh and sweets"], usage: ["Use in pitha, payesh and traditional sweets.", "Grate over warm rice or roti for a natural sweet bite.", "Melt into warm milk or tea as a sugar substitute."], origin: "Jessore & Satkhira", shelfLife: "6 months", storage: "Airtight container in a cool, dry place", sold: 350 },
   "Mango Pickle": { bn: "আমের আচার", blurb: "Sun-dried green mango slices cured with mustard oil and hand-ground spices, the traditional way.", highlights: ["Made from fresh green mangoes", "Cured in mustard oil with traditional spices", "Perfect balance of tangy, spicy and sweet", "No artificial colour or flavour"], usage: ["Serve a spoonful with rice, khichuri or paratha.", "Use as a side with dal, bhorta or biryani.", "Always use a dry spoon to keep the pickle fresh."], origin: "Rajshahi", shelfLife: "9 months", storage: "Airtight jar; keep away from moisture", sold: 270 },
 };
-const fallbackDetails: Details = { bn: "আমজাদ ফুড", blurb: "Contact our team for product details before ordering.", highlights: [], usage: ["Follow the product label. Contact our team if you need more information."], origin: "", shelfLife: "", storage: "", sold: 0 };
+const fallbackDetails: Details = { bn: "আমজাদ ফুড", blurb: "A trusted Amzad Food essential, sourced with care and packed to keep its natural quality.", highlights: ["Sourced from trusted farmers", "No added colour or preservatives", "Quality checked before packing", "Sealed in premium packaging"], usage: ["Ready to use straight from the pack.", "Store tightly closed after opening."], origin: "Bangladesh", shelfLife: "12 months", storage: "Cool, dry place away from sunlight", sold: 200 };
 
+const roundTo5 = (value: number) => Math.round(value / 5) * 5;
 
 export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd, onOrderNow, onClose, embedded = false }: {
   embedded?: boolean;
@@ -41,46 +47,64 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
   onClose: () => void;
 }) {
   const info = details[product.name] ?? { ...fallbackDetails, bn: product.bn ?? fallbackDetails.bn };
-  const dialog = useRef<HTMLDivElement>(null);
-  useModalDialog(dialog, !embedded, onClose);
+  const [sizeIndex, setSizeIndex] = useState(1);
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<Tab>("info");
 
-  const price = product.price;
-  const saving = Math.max(0, (product.oldPrice ?? price) - price);
-  const line: CartLine = { name: product.name, price, image: product.image };
+  useEffect(() => {
+    if (embedded) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    const previousOverflow = document.body.style.overflow;
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = previousOverflow; };
+  }, [onClose, embedded]);
+
+  const size = sizes[sizeIndex];
+  const price = roundTo5(product.price * size.factor);
+  const saving = roundTo5((product.oldPrice ? product.oldPrice - product.price : 50) * size.factor);
+  const line: CartLine = { name: size.factor === 1 ? product.name : `${product.name} (${size.label})`, price, image: product.image };
+  const sku = `AF-${product.name.split(/\W+/).filter(Boolean).map((word) => word[0]).join("").toUpperCase()}${product.price}`;
   const whatsappText = encodeURIComponent(`Hello Amzad Food, I would like to order ${qty} × ${line.name} (৳${price * qty}).`);
-  const infoRows: [string, string][] = [["Brand", getProductBrand(product)], ["Category", product.category], ["Pack", product.unit ?? "Contact us for pack details"]];
+  const infoRows: [string, string][] = [["Brand", getProductBrand(product)], ["Category", product.category], ["Net weight", size.label], ["Origin", info.origin], ["Shelf life", info.shelfLife], ["Storage", info.storage], ["SKU", sku]];
 
   const content = (
     <div className={embedded ? "pd-product" : "qv-backdrop"} onClick={onClose} role="presentation">
-      <div ref={dialog} tabIndex={-1} className="qv" role={embedded ? undefined : "dialog"} aria-modal={embedded ? undefined : true} aria-label={`Quick view ${product.name}`} onClick={(event) => event.stopPropagation()}>
+      <div className="qv" role={embedded ? undefined : "dialog"} aria-modal={embedded ? undefined : true} aria-label={`Quick view ${product.name}`} onClick={(event) => event.stopPropagation()}>
         {!embedded && <button className="qv-close" onClick={onClose} aria-label="Close quick view"><X size={18} /></button>}
 
         <div className="qv-scroll">
         <div className="qv-media">
-          {saving > 0 && <span className="qv-save">Save ৳{saving}</span>}
+          <span className="qv-save">Save ৳{saving}</span>
           {product.tag && <span className="qv-tag">{product.tag}</span>}
           <button className={wishlisted ? "qv-wish active" : "qv-wish"} onClick={onToggleWishlist} aria-pressed={wishlisted} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}><Heart size={18} fill={wishlisted ? "currentColor" : "none"} /></button>
-          <ProductGallery key={product.name} product={product} />
+          <ProductGallery key={product.name} product={product}>
+            <ul className="qv-assure">{assurances.map((item) => <li key={item.label}><img src={item.icon} alt="" aria-hidden="true" />{item.label}</li>)}</ul>
+          </ProductGallery>
         </div>
 
         <div className="qv-body">
-          <div className="qv-meta"><span className="qv-cat">{product.category}</span></div>
+          <div className="qv-meta"><span className="qv-cat">{product.category}</span><span className="qv-stock"><i />In stock</span></div>
           {embedded ? <h1 className="qv-title"><span>{info.bn}</span>{product.name}</h1> : <h2 className="qv-title"><span>{info.bn}</span>{product.name}</h2>}
-          <div className="qv-price"><strong>৳{price}</strong>{saving > 0 && <><del>৳{product.oldPrice}</del><em>You save ৳{saving}</em></>}</div>
+          <div className="qv-rating">
+            <span className="qv-stars">{Array.from({ length: 5 }, (_, index) => <Star key={index} size={14} fill="currentColor" />)}</span>
+            <b>4.9</b><span>(46 reviews)</span><em>{info.sold}+ sold</em>
+          </div>
+          <div className="qv-price"><strong>৳{price}</strong><del>৳{price + saving}</del><em>You save ৳{saving}</em></div>
           <p className="qv-blurb">{info.blurb}</p>
-
-          <div className="qv-block"><h4>Pack <small>{product.unit ?? "Contact us for pack details"}</small></h4></div>
 
           <ul className="qv-highlights">{info.highlights.map((item) => <li key={item}><Check size={14} />{item}</li>)}</ul>
 
-          <div className="qv-offer"><Truck size={16} /><span>Cash on Delivery available · Free delivery on orders ৳1,000+</span></div>
+          <div className="qv-block">
+            <h4>Select size <small>{size.label}</small></h4>
+            <div className="qv-sizes">{sizes.map((option, index) => <button key={option.label} className={index === sizeIndex ? "active" : ""} onClick={() => setSizeIndex(index)} aria-pressed={index === sizeIndex}><b>{option.label}</b><span>৳{roundTo5(product.price * option.factor)}</span></button>)}</div>
+          </div>
+
+          <div className="qv-offer"><Truck size={16} /><span>Cash on Delivery available · Delivered within 2-3 business days</span></div>
 
           <div className="qv-buy">
             <div className="qv-qty"><button onClick={() => setQty((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" disabled={qty === 1}><Minus size={14} /></button><b aria-live="polite">{qty}</b><button onClick={() => setQty((value) => Math.min(20, value + 1))} aria-label="Increase quantity" disabled={qty === 20}><Plus size={14} /></button></div>
-            <strong className="qv-line-total" aria-live="polite">Total: ৳{price * qty}</strong>
-            <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }}><span>Add to Cart · ৳{price * qty}</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
+            <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }} aria-label={`Add to Cart, ৳${price * qty}`}><span>Add to Cart</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
             <button className="qv-order cta cta-dark" onClick={() => { onOrderNow(line, qty); onClose(); }}><span>Order Now</span></button>
           </div>
           <div className="qv-contact">
@@ -93,8 +117,8 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
             {tab === "info" && <dl className="qv-info">{infoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}
             {tab === "usage" && <ol className="qv-usage">{info.usage.map((step) => <li key={step}>{step}</li>)}</ol>}
             {tab === "delivery" && <ul className="qv-delivery">
-              <li><Truck size={15} /><span><b>Delivery time</b>See the estimated delivery window at checkout</span></li>
-              <li><Clock size={15} /><span><b>Delivery charge</b>{DELIVERY_DESCRIPTION}</span></li>
+              <li><Truck size={15} /><span><b>Delivery time</b>2-3 business days across Bangladesh</span></li>
+              <li><Clock size={15} /><span><b>Delivery charge</b>৳60 flat rate on every order</span></li>
               <li><Check size={15} /><span><b>Payment</b>Cash on Delivery — pay when you receive</span></li>
               <li><FontAwesomeIcon icon={faWhatsapp} fontSize={15} /><span><b>Need help?</b>Call 09613824071 or WhatsApp 01327406605</span></li>
             </ul>}

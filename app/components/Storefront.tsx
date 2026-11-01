@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { CartItem, CartLine, loadCart, saveCart, clampQuantity } from "../lib/cart";
+import { CartItem, CartLine, loadCart, saveCart } from "../lib/cart";
 import CartOffer from "./CartOffer";
 import { useDismissMenu } from "../lib/useDismissMenu";
 import { CATALOG_CATEGORY_EVENT, COMBO_CATEGORY, isCatalogPath, setCatalogCategory } from "../lib/navigation-events";
@@ -16,7 +16,6 @@ import MegaMenu, { MenuContact, MenuIcon, MenuLink, menuCategories, menuHelp, me
 import CategoryRail from "./CategoryRail";
 import PrayerTimes, { PrayerDock } from "./PrayerTimes";
 import Reviews from "./Reviews";
-import ImpactStats from "./ImpactStats";
 import BlogSection from "./BlogSection";
 import FooterFeedback from "./FooterFeedback";
 import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, ChevronLeft, ChevronRight, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Home, LayoutGrid, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Search, Send, ShoppingCart, Star, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
@@ -76,7 +75,7 @@ export function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWi
     <div className="pc-body">
       <p className="pc-cat">{product.bn}</p>
       <h3 className="pc-name"><Link href={`/products/${productSlug(product.name)}/`}>{product.name}</Link></h3>
-      <div className="pc-meta">{product.unit ? <span className="pc-unit">{product.unit}</span> : <span className="pc-unit pc-unit-category">{product.category}</span>}<span className="pc-mobile-category">{product.category === "Oil" ? "Ghee & Oil" : product.category}</span></div>
+      <div className="pc-meta">{product.unit ? <span className="pc-unit">{product.unit}</span> : <span className="pc-unit pc-unit-category">{product.category}</span>}<span className="pc-mobile-category">{product.category === "Oil" ? "Ghee & Oil" : product.category}</span><span className="pc-rating"><Star size={12} fill="currentColor" />4.9<i>(46)</i></span></div>
       <div className="pc-price"><strong>৳{product.price.toLocaleString("en-IN")}</strong>{product.oldPrice && <del>৳{product.oldPrice.toLocaleString("en-IN")}</del>}</div>
       <button className="pc-order cta cta-ghost cta-sm cta-block" onClick={() => onOrderNow()}><span>Order Now</span></button>
     </div>
@@ -252,16 +251,16 @@ function NewsletterBanner({ notify }: { notify: (message: string) => void }) {
     <div className="nl-copy">
       <span className="nl-pill"><Mail size={12} /> Newsletter · নিউজলেটার</span>
       <h2><span className="nl-intro">Join the family, </span><em>Get 10% off</em> your first order</h2>
-      <p>Preview the welcome offer. WhatsApp subscriptions are not available yet.</p>
-      <NewsletterForm className="nl-form" channel="whatsapp" placeholder="WhatsApp number" buttonClassName="cta cta-sm" buttonLabel={<><span>Preview offer</span><i className="cta-icon"><Send size={13} /></i></>} onSubscribe={() => { setUnlocked(true); notify("Preview code unlocked. Newsletter subscriptions are not available yet."); }} />
+      <p>Fresh deals and recipes, straight to your WhatsApp.</p>
+      <NewsletterForm className="nl-form" channel="whatsapp" placeholder="WhatsApp number" buttonClassName="cta cta-sm" buttonLabel={<><span>Subscribe</span><i className="cta-icon"><Send size={13} /></i></>} onSubscribe={() => { setUnlocked(true); notify("Subscribed! Your 10% off code is unlocked."); }} />
       <ul className="nl-perks"><li><Check size={14} /> Weekly deals</li><li><Check size={14} /> New arrivals first</li><li><Check size={14} /> No spam, ever</li></ul>
     </div>
     <div className="nl-visual">
       <div className="nl-ticket-wrap"><div className={unlocked ? "nl-ticket unlocked" : "nl-ticket"}>
         <div className="nl-ticket-top"><small>Welcome offer</small><strong>10<span>%</span></strong><b>OFF</b></div>
         <div className="nl-ticket-bottom">
-          <small>{unlocked ? "Tap to copy your code" : "Preview to unlock your code"}</small>
-          <button className="nl-code" onClick={copyCode} disabled={!unlocked} aria-label={unlocked ? `Copy code ${NEWSLETTER_CODE}` : "Code locked until you preview the offer"}><span>{NEWSLETTER_CODE}</span>{!unlocked ? <Lock size={15} /> : copied ? <Check size={15} /> : <Copy size={15} />}</button>
+          <small>{unlocked ? "Tap to copy your code" : "Subscribe to unlock your code"}</small>
+          <button className="nl-code" onClick={copyCode} disabled={!unlocked} aria-label={unlocked ? `Copy code ${NEWSLETTER_CODE}` : "Code locked until you subscribe"}><span>{NEWSLETTER_CODE}</span>{!unlocked ? <Lock size={15} /> : copied ? <Check size={15} /> : <Copy size={15} />}</button>
         </div>
       </div></div>
     </div>
@@ -275,20 +274,11 @@ type StoreActions = {
   toggleWishlist: (product: CartLine) => void;
 };
 
-export default function Storefront({ children, headerOnly = false }: { headerOnly?: boolean; children?: (actions: StoreActions) => React.ReactNode }) {
+export default function Storefront({ children }: { children?: (actions: StoreActions) => React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
   const navRef = useRef<HTMLElement>(null);
-  const footerEndRef = useRef<HTMLDivElement>(null);
-  const [atFooterEnd, setAtFooterEnd] = useState(false);
-  useEffect(() => {
-    const node = footerEndRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(([entry]) => setAtFooterEnd(entry.isIntersecting));
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [headerOnly]);
   const [menuProduct, setMenuProduct] = useState<Product | null>(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -331,12 +321,6 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
   useEffect(() => { setCart(loadCart()); setCartReady(true); }, []);
   useEffect(() => { if (cartReady) saveCart(cart); }, [cart, cartReady]);
   useEffect(() => {
-    if (!headerOnly) return;
-    const sync = () => setCart(current => { const next = loadCart(); return JSON.stringify(current) === JSON.stringify(next) ? current : next; });
-    window.addEventListener("amzad-cart-updated", sync);
-    return () => window.removeEventListener("amzad-cart-updated", sync);
-  }, [headerOnly]);
-  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setQuery(params.get("q") ?? "");
     const category = resolveProductCategory(params.get("category") ?? "All");
@@ -363,20 +347,20 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
   const addToCart = (product: CartLine, qty = 1) => {
     setCart((items) => {
       const found = items.find((item) => item.name === product.name);
-      if (found) return items.map((item) => item.name === product.name ? { ...item, qty: clampQuantity(item.qty + qty) } : item);
-      return [...items, { name: product.name, price: product.price, image: product.image, qty: clampQuantity(qty) }];
+      if (found) return items.map((item) => item.name === product.name ? { ...item, qty: item.qty + qty } : item);
+      return [...items, { name: product.name, price: product.price, image: product.image, qty }];
     });
     notify(qty > 1 ? `Added ${qty} × ${product.name} to cart` : `Added ${product.name} to cart`);
   };
   const removeFromCart = (name: string) => setCart((items) => items.filter((item) => item.name !== name));
-  const changeQty = (name: string, delta: number) => setCart((items) => items.map((item) => item.name === name ? { ...item, qty: item.qty + delta <= 0 ? 0 : clampQuantity(item.qty + delta) } : item).filter((item) => item.qty > 0));
+  const changeQty = (name: string, delta: number) => setCart((items) => items.map((item) => item.name === name ? { ...item, qty: item.qty + delta } : item).filter((item) => item.qty > 0));
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const cartTotal = cart.reduce((sum, item) => sum + item.qty * item.price, 0);
   const goToCheckout = (product?: CartLine, qty = 1) => {
     let next = cart;
     if (product) {
       const found = cart.find((item) => item.name === product.name);
-      next = found ? cart.map((item) => item.name === product.name ? { ...item, qty: clampQuantity(item.qty + qty) } : item) : [...cart, { name: product.name, price: product.price, image: product.image, qty: clampQuantity(qty) }];
+      next = found ? cart.map((item) => item.name === product.name ? { ...item, qty: item.qty + qty } : item) : [...cart, { name: product.name, price: product.price, image: product.image, qty }];
       setCart(next);
     }
     saveCart(next);
@@ -396,7 +380,7 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
   const browseMenuCategory = (category: { label: string; tab?: string }) => {
     const tab = resolveProductCategory(category.tab ?? category.label);
     closeMenus(); setQuery(""); setActiveCategory(tab);
-    if (children || headerOnly) router.push(`/?category=${encodeURIComponent(tab)}#shop`);
+    if (children) router.push(`/?category=${encodeURIComponent(tab)}#shop`);
     else requestAnimationFrame(() => scrollToShop());
     notify(`Browsing ${category.label}`);
   };
@@ -408,14 +392,14 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
     else if (link.action === "track") router.push("/track-order/");
     else notify("Coming soon");
   };
-  const scrollToShop = () => { setMenuOpen(false); if (children || headerOnly) { router.push(`/?q=${encodeURIComponent(query)}#shop`); } else { document.getElementById("shop")?.scrollIntoView({ behavior: "smooth" }); } };
+  const scrollToShop = () => { setMenuOpen(false); if (children) { router.push(`/?q=${encodeURIComponent(query)}#shop`); } else { document.getElementById("shop")?.scrollIntoView({ behavior: "smooth" }); } };
   const add = () => addToCart({ name: "Sundarbans Raw Honey", price: 350, image: "/amzad-food-website/honey-bg.png" });
-  return <main id="top" className={headerOnly ? "storefront storefront-header-only" : children ? "storefront" : "storefront storefront-home"}>
+  return <main id="top" className={children ? "storefront" : "storefront storefront-home"}>
     <div className="announcement"><div className="announcement-inner page-width"><span className="announcement-contacts-group"><span className="announcement-cta">প্রয়োজনে কল করুন</span><span className="announcement-contacts"><a className="announcement-contact" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={14} /> 01327406605</a><span className="announcement-divider" /><a className="announcement-contact" href="tel:+8809613824071"><Phone size={13} /> 09613824071</a></span></span><span className="announcement-links"><a className="announcement-link" href="/amzad-food-website/my-orders/">My Orders</a><a className="announcement-link" href="/amzad-food-website/track-order/"><PackageSearch size={13} /> Track Order</a></span></div></div>
-    <nav ref={navRef} className={`navbar page-width site-nav${searchOpen ? " search-open" : ""}`}><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}><span className="burger" aria-hidden="true"><i /><i /><i /></span></button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div ref={mobileMenuRef} className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><a className="mobile-menu-logo" href="/amzad-food-website/" onClick={() => setMenuOpen(false)}><img src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><button ref={searchToggleRef} type="button" className="nav-icon nav-search-toggle" aria-label={searchOpen ? "Close product search" : "Open product search"} aria-expanded={searchOpen} aria-controls="top-nav-search" onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}><Search size={19} /></button><form id="top-nav-search" role="search" className="nav-search" hidden={!searchOpen} onSubmit={(event) => { event.preventDefault(); scrollToShop(); }} onKeyDown={(event) => { if (event.key === "Escape") closeSearch(); }}><button className="nav-search-submit" type="submit" aria-label="Search products"><Search size={18} /></button><input ref={searchRef} type="search" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" /><button type="button" className="nav-search-clear" onClick={closeSearch} aria-label="Close search"><X size={16} /></button>{query && <button type="button" className="desktop-search-clear" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><X size={13} /></button>}</form><div className="nav-icons"><button className="nav-icon nav-user" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={22} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
+    <nav ref={navRef} className={`navbar page-width site-nav${searchOpen ? " search-open" : ""}`}><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}><span className="burger" aria-hidden="true"><i /><i /><i /></span></button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div ref={mobileMenuRef} className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><a className="mobile-menu-logo" href="/amzad-food-website/" onClick={() => setMenuOpen(false)}><img src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><button ref={searchToggleRef} type="button" className="nav-icon nav-search-toggle" aria-label={searchOpen ? "Close product search" : "Open product search"} aria-expanded={searchOpen} aria-controls="top-nav-search" onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}><Search size={19} /></button><form id="top-nav-search" role="search" className="nav-search" hidden={!searchOpen} onSubmit={(event) => { event.preventDefault(); scrollToShop(); }} onKeyDown={(event) => { if (event.key === "Escape") closeSearch(); }}><button className="nav-search-submit" type="submit" aria-label="Search products"><Search size={18} /></button><input ref={searchRef} type="search" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" /><button type="button" className="nav-search-clear" onClick={closeSearch} aria-label="Close search"><X size={16} /></button>{query && <button type="button" className="desktop-search-clear" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><X size={13} /></button>}</form><div className="nav-icons"><button className="nav-icon nav-user" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={17} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><small>My Cart</small><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
     {menuProduct && <QuickView product={menuProduct} wishlisted={wishlist.some(item => item.name === menuProduct.name)} onToggleWishlist={() => toggleWishlist(menuProduct)} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => setMenuProduct(null)} />}
     {isHomePage && <CategoryRail selectedCategory={activeCategory} onView={setMenuProduct} onAdd={addToCart} onBrowse={(label) => browseMenuCategory({ label })} />}
-    {headerOnly ? null : children ? <>
+    {children ? <>
     {children({ addToCart, goToCheckout, isWishlisted, toggleWishlist })}
     </> : <>
     <HeroSlider />
@@ -447,11 +431,26 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
         <small>{point.subtitle}</small>
       </li>)}</ul>
     </div></section>
-    <ImpactStats />
     <Reviews />
-    <BlogSection />
+    <BlogSection withStats />
     </>}
-    {!headerOnly && <footer className="ft">
+    <footer className="ft">
+      <div className="ft-cta page-width">
+        <div className="ft-cta-copy">
+          <span className="ft-kicker"><i />প্রতিদিন খোলা · রাত ১১টা পর্যন্ত</span>
+          <h2>Let&apos;s talk <em>about food.</em></h2>
+          <p>Questions about an order, a product or a gift box? Our team is happy to help, every day.</p>
+        </div>
+        <div className="ft-cta-actions">
+          <a className="cta cta-whatsapp" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><span>Chat on WhatsApp</span><i className="cta-icon"><FontAwesomeIcon icon={faWhatsapp} fontSize={16} /></i></a>
+          <a className="cta cta-light" href="tel:+8809613824071"><span>Call 09613824071</span><i className="cta-icon"><Phone size={15} /></i></a>
+        </div>
+        <a className="footer-orbit" href="/amzad-food-website/#shop" aria-label="Order now">
+          <svg viewBox="0 0 160 160"><path id="orbitPath" fill="none" d="M 80,80 m -68,0 a 68,68 0 1,1 136,0 a 68,68 0 1,1 -136,0" /><text><textPath href="#orbitPath" startOffset="0%">ORDER NOW · FREE DELIVERY · ORDER NOW · FREE DELIVERY ·</textPath></text></svg>
+          <ArrowRight className="footer-orbit-arrow" size={22} />
+        </a>
+      </div>
+
       <div className="ft-main page-width">
         <div className="ft-brand">
           <a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo-light.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a>
@@ -467,32 +466,33 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
         </div>
         <nav className="ft-col" aria-label="Shop"><strong>Shop</strong><a href="/amzad-food-website/#shop">Honey</a><a href="/amzad-food-website/#shop">Ghee &amp; Oil</a><a href="/amzad-food-website/#shop">Khejur</a><a href="/amzad-food-website/#shop">Mosla</a><a href="/amzad-food-website/#combo">Combo &amp; Gifts</a></nav>
         <nav className="ft-col" aria-label="Company"><strong>Company</strong><a href="/amzad-food-website/#story">Our Story</a><a href="/amzad-food-website/blogs/">Blogs</a><a href="/amzad-food-website/#reviews">Reviews</a><a href="/amzad-food-website/#prayer-times">Prayer Times</a></nav>
-        <nav className="ft-col" aria-label="Help"><strong>Help</strong><a href="/amzad-food-website/track-order/">Track Order</a><a href="/amzad-food-website/checkout/">Checkout</a><Link href="/faq/">FAQ</Link><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Returns</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Privacy Policy</a><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Terms</a></nav>
+        <nav className="ft-col" aria-label="Help"><strong>Help</strong><a href="/amzad-food-website/track-order/">Track Order</a><a href="/amzad-food-website/checkout/">Checkout</a><Link href="/faq/">FAQ</Link><a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Returns</a></nav>
         <FooterFeedback />
       </div>
 
 
-      <div className="ft-bottom ft-bottom-reference page-width">
-        <div className="ft-copyright">
-          <span>Copyright © {new Date().getFullYear()} Amzad Food</span>
+      <div className="ft-pay page-width">
+        <span>We accept</span>
+        <b className="on"><Check size={13} /> Cash on Delivery</b>
+        <div className="ft-payment-logos" role="group" aria-label="Online payment methods coming soon" tabIndex={0}>
+          {["Visa", "Mastercard", "American Express", "UnionPay", "Diners Club", "DBBL Nexus", "Q-Cash", "bKash", "Nagad", "Rocket", "tap", "Upay", "OK Wallet", "mCash", "Islamic Wallet", "MyCash", "Tap 'n Pay", "Citytouch"].map((method, index) => (
+            <span key={`${method}-${index}`} className="ft-payment-card" role="img" aria-label={method} title={method}>
+              <span className="ft-payment-logo" aria-hidden="true" style={{ backgroundPosition: `${-(24 + index * 72.75)}px -23px` }} />
+            </span>
+          ))}
         </div>
-        <div className="ft-payment-block">
-          <span className="ft-pay-label">Pay With</span>
-          <div className="ft-payment-methods">
-            <div className="ft-payment-logos" role="group" aria-label="Online payment methods coming soon">
-              {["Visa", "Mastercard", "American Express", "UnionPay", "Diners Club", "DBBL Nexus", "Q-Cash", "bKash", "Nagad", "Rocket", "tap", "Upay", "OK Wallet", "mCash", "Islamic Wallet", "MyCash", "Tap 'n Pay", "Citytouch"].map((method, index) => (
-                <span key={method} className="ft-payment-card" role="img" aria-label={method} title={method}>
-                  <span className="ft-payment-logo" aria-hidden="true" style={{ backgroundPosition: `${-(24 + index * 72.75)}px -23px` }} />
-                </span>
-              ))}
-            </div>
-            <small>Cash on Delivery available · Online payments coming soon</small>
-          </div>
-        </div>
-        <a className={`ft-top${atFooterEnd ? " at-footer-end" : ""}`} href="#top" aria-label="Back to top"><ArrowUp size={19} /></a>
+        <small>Online payments coming soon</small>
       </div>
-      <div ref={footerEndRef} className="ft-end-marker" aria-hidden="true" />
-    </footer>}
+
+      <div className="ft-bottom page-width">
+        <span>© {new Date().getFullYear()} Amzad Food. All rights reserved.</span>
+        <div className="ft-legal">
+          <a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Privacy Policy</a>
+          <a href="#" onClick={(event) => { event.preventDefault(); notify("Coming soon"); }}>Terms</a>
+          <a className="ft-top" href="#top" aria-label="Back to top"><ArrowUp size={15} /></a>
+        </div>
+      </div>
+    </footer>
 
     <Drawer open={cartOpen} onClose={() => setCartOpen(false)} title={`Your Cart (${cartCount})`}>
       {cart.length === 0 ? <p className="empty-state">Your cart is empty.</p> : <>
@@ -529,13 +529,13 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
       <div className="origin-story-list">{originStories.map((story) => <div className="origin-story-item" key={story.key}><span><story.icon size={16} /></span><div><strong>{story.place} · {story.product}</strong><p>{story.desc}</p></div></div>)}</div>
     </Modal>
 
-    {!headerOnly && <nav className="mobile-app-nav" aria-label="Mobile navigation">
+    <nav className="mobile-app-nav" aria-label="Mobile navigation">
       <Link href="/" aria-current={isHomePage ? "page" : undefined} onClick={() => { setMenuOpen(false); setSearchOpen(false); }}><Home size={23} /><span>Home</span></Link>
       <button type="button" aria-expanded={menuOpen} onClick={() => { setSearchOpen(false); setMenuOpen(!menuOpen); }}><LayoutGrid size={23} /><span>Menu</span></button>
       <button className="mobile-app-search" type="button" aria-label="Search products" aria-expanded={searchOpen} onClick={() => { setMenuOpen(false); setSearchOpen(!searchOpen); window.scrollTo({ top: 0, behavior: "auto" }); }}><span className="mobile-app-search-circle"><Search size={26} /></span><span>Search</span></button>
       <button type="button" onClick={() => { setMenuOpen(false); setCartOpen(true); }}><span className="mobile-app-cart"><ShoppingCart size={23} /><b>{cartCount}</b></span><span>Cart</span></button>
       <button type="button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={23} /><span>Account</span></button>
-    </nav>}
+    </nav>
 
     {toast && <div className="toast" role="status">{toast}</div>}
   </main>;

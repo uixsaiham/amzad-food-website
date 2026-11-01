@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Headset, Leaf, MessageCircle, Phone, SendHorizontal, X } from "lucide-react";
 import { productSlug, storeProducts, type Product } from "../lib/products";
-import { findOrder, loadOrders } from "../lib/orders";
+import { findOrder, loadOrders, sampleOrder } from "../lib/orders";
 import "./chat-widget.css";
 
 // Scripted help desk: answers common questions in the browser and hands off to WhatsApp or a call. There is no chat backend yet.
@@ -31,10 +31,11 @@ function searchProducts(text: string) {
 
 function reply(input: string, awaitingOrder: boolean): { message: Omit<Message, "id" | "from">; awaitingOrder: boolean } {
   const text = input.toLowerCase().trim();
-  const orderId = input.match(/\b(af(?:[a-f0-9]{32}|\s*-?\s*\d{4,}))\b/i)?.[1].replace(/[\s-]/g, "");
+  const orderId = input.match(/#?\s*(af\s*-?\s*\d{4,})/i)?.[1].replace(/[\s-]/g, "");
   if (orderId || (awaitingOrder && /\d{4,}/.test(text))) {
     const id = orderId ?? text.match(/\d{4,}/)![0];
-    const order = findOrder(id) ?? findOrder(`AF${id}`);
+    const sample = sampleOrder();
+    const order = findOrder(id) ?? findOrder(`AF${id}`) ?? ([sample.id, sample.id.slice(2)].includes(id.toUpperCase()) ? sample : undefined);
     if (!order) return { awaitingOrder: false, message: { text: `দুঃখিত, #${id.toUpperCase()} নম্বরের কোনো অর্ডার এই ডিভাইসে পাওয়া যায়নি। নম্বরটি আবার দেখে নিন, অথবা আমাদের প্রতিনিধির সাথে কথা বলুন।`, handoff: true } };
     const items = order.items.reduce((sum, item) => sum + item.qty, 0);
     return { awaitingOrder: false, message: { text: `অর্ডার #${order.id} পাওয়া গেছে — ${bnDigits(items)}টি পণ্য, মোট ৳${bnDigits(order.total.toLocaleString("en-IN"))}। আনুমানিক ডেলিভারি: ${order.eta}।`, orderLink: order.id } };
@@ -44,7 +45,7 @@ function reply(input: string, awaitingOrder: boolean): { message: Omit<Message, 
     return { awaitingOrder: true, message: { text: latest ? `আপনার অর্ডার আইডি লিখুন (যেমন ${latest.id})। কনফার্মেশন মেসেজে আইডিটি পাবেন।` : "আপনার অর্ডার আইডি লিখুন (যেমন AF102345)। কনফার্মেশন মেসেজে আইডিটি পাবেন।" } };
   }
   if (has(text, ["delivery", "ডেলিভারি", "চার্জ", "shipping", "কতদিন", "কবে"])) {
-    return { awaitingOrder, message: { text: "ডেলিভারি চার্জ ৳৬০। প্রোমো ডিসকাউন্টের আগে পণ্যের মোট মূল্য ৳১,০০০ বা বেশি হলে স্বয়ংক্রিয়ভাবে ডেলিভারি ফ্রি। আনুমানিক ডেলিভারির সময় চেকআউটে দেখুন।" } };
+    return { awaitingOrder, message: { text: "সারা বাংলাদেশে ডেলিভারি চার্জ ৳৬০, সময় লাগে ২–৩ কার্যদিবস। ৳১,০০০-এর বেশি অর্ডারে FREESHIP কোড দিলে ডেলিভারি ফ্রি।" } };
   }
   if (has(text, ["payment", "পেমেন্ট", "বিকাশ", "bkash", "নগদ", "nagad", "cod", "ক্যাশ", "টাকা"])) {
     return { awaitingOrder, message: { text: "এখন ক্যাশ অন ডেলিভারি চালু আছে — পণ্য হাতে পেয়ে টাকা দিন। বিকাশ, নগদ ও কার্ড পেমেন্ট শীঘ্রই আসছে।" } };

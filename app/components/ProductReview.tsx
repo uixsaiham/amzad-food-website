@@ -4,14 +4,10 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { CheckCircle2, Star } from "lucide-react";
 import { productSlug } from "../lib/products";
 
-import ProductReviewStories from "./ProductReviewStories";
-import { productReviews } from "../lib/productReviews";
-
 type Review = { rating: number; comment: string };
 
 export default function ProductReview({ product }: { product: string }) {
   const id = useId();
-  const published = productReviews[productSlug(product)] ?? { written: [], videos: [] };
   const storageKey = `amzad-product-review:${productSlug(product)}`;
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -43,26 +39,16 @@ export default function ProductReview({ product }: { product: string }) {
     setSaved(review); setError(""); setStatus("Your product review has been saved on this device.");
   }
 
-  return <>
-    {!published.written.length && !published.videos.length ? <ProductReviewStories product={product} /> : <section className="product-customer-reviews" aria-label={`Customer reviews for ${product}`}>
-      <h2>Reviews for {product}</h2>
-      <div className="product-review-columns">
-        <div><h3>Written reviews</h3>
-          {published.written.map((review, index) => <article className="product-review-saved" key={`${review.name}-${index}`}><strong>{review.name}</strong><span aria-label={`${review.rating} out of 5 stars`}>{"★".repeat(review.rating)}</span><p>{review.comment}</p></article>)}
-          {!published.written.length && !saved && <p>No written reviews for this product yet. Be the first to share your experience below.</p>}
-          {saved && <article className="product-review-saved"><strong><CheckCircle2 size={17} /> Your review · saved on this device</strong><span aria-label={`${saved.rating} out of 5 stars`}>{"★".repeat(saved.rating)}</span><p>{saved.comment || "Rating only"}</p></article>}
-        </div>
-        <div><h3>Video reviews</h3>
-          {published.videos.map(video => <figure key={video.youtubeId}><iframe loading="lazy" title={video.title} src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.youtubeId)}`} allow="encrypted-media; picture-in-picture" allowFullScreen /><figcaption>{video.title}</figcaption></figure>)}
-          {!published.videos.length && <p>No video reviews for this product yet.</p>}
-        </div>
-      </div>
-    </section>}
-    <section className="product-review" id="product-reviews" aria-labelledby={`${id}-heading`}>
+  return <section className="product-review" id="product-reviews" aria-labelledby={`${id}-heading`}>
     <div className="product-review-intro">
       <span className="pd-eyebrow">YOUR EXPERIENCE MATTERS</span>
       <h2 id={`${id}-heading`}>Write a product review</h2>
       <p>How was {product}? Share your experience to help us improve.</p>
+      {saved && <article className="product-review-saved" aria-label="Your saved product review">
+        <strong><CheckCircle2 size={17} /> Your saved review</strong>
+        <div className="product-review-rating" aria-label={`${saved.rating} out of 5 stars`}>{[1, 2, 3, 4, 5].map(value => <Star key={value} size={18} aria-hidden="true" fill={value <= saved.rating ? "currentColor" : "none"} />)}</div>
+        {saved.comment && <p>{saved.comment}</p>}
+      </article>}
     </div>
     <form className="product-review-form" onSubmit={submit}>
       <fieldset aria-describedby={error ? `${id}-error` : undefined}>
@@ -79,5 +65,5 @@ export default function ProductReview({ product }: { product: string }) {
       <button type="submit" className="product-review-submit" disabled={!ready}>{saved ? "Update review" : "Save review"}</button>
       <p className="product-review-status" role="status">{status}</p>
     </form>
-  </section></>;
+  </section>;
 }

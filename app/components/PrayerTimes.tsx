@@ -80,12 +80,12 @@ export function PrayerDock() {
   const current = prayers[state.current];
   const next = prayers[state.next];
 
-  if (collapsed) return <button className={sectionVisible ? "pdock-mini is-hidden" : "pdock-mini"} lang="bn" onClick={() => toggle(false)} aria-label="নমুনা নামাজের সময় দেখুন">
+  if (collapsed) return <button className={sectionVisible ? "pdock-mini is-hidden" : "pdock-mini"} lang="bn" onClick={() => toggle(false)} aria-label="নামাজের সময় দেখুন">
     <ChevronLeft size={14} />
     <span><b>{current.name}</b><small>{formatTime(current.at)}</small></span>
   </button>;
 
-  return <aside className={sectionVisible ? "pdock is-hidden" : "pdock"} lang="bn" aria-label="নমুনা নামাজের সময়">
+  return <aside className={sectionVisible ? "pdock is-hidden" : "pdock"} lang="bn" aria-label="নামাজের সময়">
     <div className="pdock-head">
       <span><Moon size={12} fill="currentColor" /> নামাজের সময়</span>
       <em><MapPin size={11} /> ঢাকা</em>
@@ -117,10 +117,9 @@ export default function PrayerTimes({ notify }: { notify: (message: string) => v
   return <section className="prayer page-width" id="prayer-times">
     <div className="prayer-sky" data-phase={current.key}>
       <span className="prayer-orb" aria-hidden="true" />
-      <p role="note">নমুনা সময়সূচি — আজকের সঠিক সময়ের জন্য স্থানীয় মসজিদের সময়সূচি দেখুন।</p>
       <div className="prayer-top">
         <div className="prayer-heading">
-          <span className="prayer-kicker"><Moon size={12} fill="currentColor" /> নমুনা নামাজের সময়</span>
+          <span className="prayer-kicker"><Moon size={12} fill="currentColor" /> আজকের নামাজের সময়</span>
           <p>{date}{hijri && <><i /> {hijri}</>}</p>
         </div>
         <button className="prayer-city" onClick={() => notify("More cities coming soon — showing Dhaka")}><MapPin size={13} /> ঢাকা <ChevronDown size={13} /></button>

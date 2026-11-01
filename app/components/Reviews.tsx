@@ -1,11 +1,9 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
-import { BadgeCheck, ChevronLeft, ChevronRight, Play, Quote, Star } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { BadgeCheck, ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 
-import { blogReviews } from "./BlogSection";
-
-export const customerReviews = [
+const customerReviews = [
   { name: "Rafiq Hasan", time: "3 days ago", rating: 4, color: "#fde3cf", text: "আমার অভিজ্ঞতা আমজাদ ফুডের সাথে অসাধারণ ছিল। সেবা ছিল অত্যন্ত সহায়ক এবং প্রয়োজনীয় তথ্য পেতে আমি খুব সহজেই যোগাযোগ করতে পেরেছিলাম। ধন্যবাদ আমজাদ ফুড।" },
   { name: "Arif Chowdhury", time: "20 hours ago", rating: 5, color: "#dbe9ff", text: "এজেন্টের সহায়তা আমাকে আমজাদ ফুডের বিভিন্ন পণ্য সম্পর্কে জানাতে সাহায্য করেছে। তারা সবকিছু পরিষ্কারভাবে ব্যাখ্যা করেছে, যা আমাকে সিদ্ধান্ত নিতে সহজ করেছে।" },
   { name: "Samiul Rahman", time: "2 days ago", rating: 4, color: "#e3ddff", text: "আমি দীর্ঘদিন ধরে আমজাদ ফুড কিনতে চেয়েছিলাম, কিন্তু তাদের সহায়তায় সবকিছু সহজ হয়ে গেছে। তাদের ধন্যবাদ।" },
@@ -13,7 +11,7 @@ export const customerReviews = [
   { name: "Tanvir Ahmed", time: "5 days ago", rating: 5, color: "#ffe1e6", text: "প্রতিবার অর্ডার করার পর দ্রুত ডেলিভারি পেয়েছি এবং পণ্যের মান সবসময় অসাধারণ। আমজাদ ফুড আমার পরিবারের প্রথম পছন্দ।" },
 ];
 
-export function GoogleIcon() {
+function GoogleIcon() {
   return <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-3.5z" /><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 6.1 29.5 4 24 4c-7.6 0-14.2 4.3-17.7 10.7z" /><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.5c-2.1 1.6-4.8 2.5-7.5 2.5-5.3 0-9.7-3.1-11.3-7.6l-6.5 5c3.5 6.5 10.1 11.1 17.8 11.1z" /><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.5 5.5C40.9 36.8 44 31.3 44 24c0-1.4-.1-2.7-.4-3.5z" /></svg>;
 }
 
@@ -28,7 +26,6 @@ function Stars({ value, size = 14 }: { value: number; size?: number }) {
 }
 
 export default function Reviews() {
-  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [scroll, setScroll] = useState({ progress: 0, atStart: true, atEnd: false });
   const update = () => {
@@ -43,15 +40,14 @@ export default function Reviews() {
     return () => window.removeEventListener("resize", update);
   }, []);
   const step = (direction: number) => {
-    setPlayingVideo(null);
     const track = trackRef.current;
     const card = track?.firstElementChild as HTMLElement | null;
     if (track && card) track.scrollBy({ left: direction * (card.offsetWidth + 18), behavior: "smooth" });
   };
 
-  return <section className="review-section review-section-mixed" id="reviews"><div className="rv page-width">
+  return <section className="review-section" id="reviews"><div className="rv page-width">
     <div className="rv-summary">
-      <span className="rv-kicker"><Star size={12} fill="currentColor" /> Customer Reviews · Videos & Stories</span>
+      <span className="rv-kicker"><Star size={12} fill="currentColor" /> Customer Reviews</span>
       <h2>Loved by families <em>across Bangladesh</em></h2>
       <div className="rv-score">
         <strong>{AVERAGE}</strong>
@@ -68,10 +64,9 @@ export default function Reviews() {
       </div>
     </div>
     <div className="rv-track" ref={trackRef} onScroll={update}>
-      {customerReviews.map((review, index) => {
+      {customerReviews.map((review) => {
         const initials = review.name.split(" ").map((part) => part[0]).slice(0, 2).join("");
-        const video = blogReviews[index];
-        return <Fragment key={review.name}><article className="rv-card">
+        return <article className="rv-card" key={review.name}>
           <div className="rv-card-top"><Stars value={review.rating} /><GoogleIcon /></div>
           <Quote className="rv-quote" size={30} fill="currentColor" strokeWidth={0} />
           <p>{review.text}</p>
@@ -79,18 +74,7 @@ export default function Reviews() {
             <span className="rv-avatar" style={{ background: review.color }}>{initials}</span>
             <div><strong>{review.name}</strong><small><BadgeCheck size={13} /> Verified buyer · {review.time}</small></div>
           </footer>
-        </article>
-        {video && <article className="rv-card rv-video-card">
-          <div className="rv-video-media">
-            {playingVideo === video.videoId ? <iframe src={`https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1&playsinline=1&rel=0`} title={video.alt} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /> : <button type="button" onClick={() => setPlayingVideo(video.videoId)} aria-label={`Play ${video.alt}`}>
-              <img src={video.image} alt={video.alt} loading="lazy" />
-              <span className="rv-video-play"><Play size={20} fill="currentColor" /></span>
-              <span className="rv-video-label">Watch video</span>
-            </button>}
-          </div>
-          <div className="rv-video-copy"><span>Video story · Amzad Food</span><h3 lang="bn">{video.alt}</h3></div>
-        </article>}
-        </Fragment>;
+        </article>;
       })}
     </div>
   </div></section>;

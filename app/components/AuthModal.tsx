@@ -5,8 +5,6 @@ import { ArrowRight, Eye, EyeOff, Gift, Heart, Lock, Mail, PackageSearch, Shield
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
-import { useModalDialog } from "../lib/useModalDialog";
-
 type Mode = "signin" | "signup";
 
 const perks = [
@@ -16,8 +14,8 @@ const perks = [
   { icon: Gift, title: "Member-only deals", text: "Early access to offers and new arrivals" },
 ];
 
-// Account UI preview: never authenticate locally; wire verified sessions through the backend.
-export default function AuthModal({ open, onClose, onSignIn, initialMode = "signin" }: { initialMode?: Mode; open: boolean; onClose: () => void; onSignIn: (name: string) => void }) {
+// Mock sign-in: no backend yet, so any valid input signs the visitor in locally.
+export default function AuthModal({ open, onClose, onSignIn }: { open: boolean; onClose: () => void; onSignIn: (name: string) => void }) {
   const [mode, setMode] = useState<Mode>("signin");
   const [name, setName] = useState("");
   const [login, setLogin] = useState("");
@@ -26,12 +24,17 @@ export default function AuthModal({ open, onClose, onSignIn, initialMode = "sign
   const [error, setError] = useState("");
   const firstField = useRef<HTMLInputElement>(null);
 
-  const dialog = useRef<HTMLDivElement>(null);
-  useModalDialog(dialog, open, onClose);
   useEffect(() => {
-    setError("");
-    if (open) { setMode(initialMode); firstField.current?.focus(); }
-  }, [initialMode, open]);
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    const previousOverflow = document.body.style.overflow;
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    const focusTimer = window.setTimeout(() => firstField.current?.focus(), 60);
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = previousOverflow; window.clearTimeout(focusTimer); };
+  }, [open, onClose]);
+
+  useEffect(() => { setError(""); window.setTimeout(() => firstField.current?.focus(), 30); }, [mode]);
 
   if (!open) return null;
 
@@ -44,13 +47,13 @@ export default function AuthModal({ open, onClose, onSignIn, initialMode = "sign
     if (mode === "signup" && !name.trim()) return setError("Please enter your full name.");
     if (!isPhone && !isEmail) return setError("Enter a valid Bangladeshi mobile number or email address.");
     if (password.length < 6) return setError("Password must be at least 6 characters.");
-    setPassword("");
-    setError("Account access is not available yet. Please order as a guest or contact our team.");
+    const displayName = mode === "signup" ? name.trim() : isEmail ? value.split("@")[0] : "Friend";
+    onSignIn(displayName.charAt(0).toUpperCase() + displayName.slice(1));
   };
-  const socialSignIn = (provider: string) => setError(`${provider} sign-in is not available yet.`);
+  const socialSignIn = (provider: string) => onSignIn(`${provider} user`);
 
   return <div className="auth-backdrop" onClick={onClose} role="presentation">
-    <div ref={dialog} tabIndex={-1} className="auth-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div className="auth-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <aside className="auth-brand" aria-hidden="true">
         <span className="auth-brand-glow" />
         <span className="auth-logo-chip"><img className="auth-logo" src="/amzad-food-website/logo.png" alt="" /></span>
@@ -69,7 +72,6 @@ export default function AuthModal({ open, onClose, onSignIn, initialMode = "sign
         <button className="auth-close" onClick={onClose} aria-label="Close"><X size={18} /></button>
         <img className="auth-logo auth-logo-mobile" src="/amzad-food-website/logo.png" alt="Amzad Food" />
         <h2 id="auth-title">{mode === "signin" ? "Sign in to your account" : "Create your account"}</h2>
-        <p className="auth-sub" role="note">Account preview only. Sign-in and account creation are not connected yet.</p>
         <p className="auth-sub">{mode === "signin" ? "Good to see you again! Enter your details to continue." : "It takes less than a minute — and your first order gets 10% off."}</p>
 
         <div className="auth-tabs" role="tablist" aria-label="Account">
@@ -97,7 +99,7 @@ export default function AuthModal({ open, onClose, onSignIn, initialMode = "sign
         </div>
 
         <p className="auth-switch">{mode === "signin" ? <>New to Amzad Food? <button type="button" onClick={() => switchMode("signup")}>Create an account</button></> : <>Already have an account? <button type="button" onClick={() => switchMode("signin")}>Sign in</button></>}</p>
-        <p className="auth-terms"><ShieldCheck size={13} /> No account is created or authenticated in this preview.</p>
+        <p className="auth-terms"><ShieldCheck size={13} /> Your details are safe with us. By continuing you agree to our Terms &amp; Privacy Policy.</p>
       </section>
     </div>
   </div>;
