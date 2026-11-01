@@ -4297,7 +4297,12 @@ html body .co-phone-input input { border: 0; border-radius: 0; min-width: 0; wid
   html body .co-card { padding: 16px; }
   html body :is(.review-section, .video-reviews, .pd-related) { padding-top: 24px; padding-bottom: 24px; }
 }
-html body .qv-buy .qv-add { grid-column: 1 / -1; background: #246247; }
+html body .qv .qv-buy { display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+html body .qv .qv-buy > .cta { width: 100%; min-width: 0; justify-self: stretch; }
+html body .qv-buy .qv-qty { justify-self: start; }
+html body .qv-buy .qv-line-total { justify-self: end; }
+html body .qv-buy .qv-add { grid-column: 1; grid-row: 2; background: #246247; }
+html body .qv-buy .qv-order { grid-column: 2; grid-row: 2; }
 html body :is(.qv-offer, .cart-offer, .co-pay.active, .auth-tabs, .product-review-saved) { background: #e6f0df; color: #244f36; }
 /* Let the shared homepage artwork show through the hero. */
 html body .hero.hero-modern { background: transparent; }
