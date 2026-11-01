@@ -4664,6 +4664,11 @@ html body .product-story-video > :is(.product-story-preview, .product-story-play
 html body .product-story-player iframe { display: block; height: 200px; }
 html body .product-story-caption { flex: 1; min-height: 0; overflow: hidden; }
 
+/* Selected product categories use the primary brand orange. */
+html body .pill-tabs .pill-tabs-pill { background: #ff6418; }
+html body .pill-tabs button.active { background: #ff6418; color: #fff; }
+html body .pill-tabs button.active:hover { color: #fff; }
+
 /* Savings badges use the brand's secondary green. */
 html body .pc-save { background: #147c46; color: #fff; box-shadow: 0 6px 12px -4px rgba(20, 124, 70, .3); }
 
