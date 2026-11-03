@@ -19,7 +19,7 @@ import Reviews from "./Reviews";
 import ImpactStats from "./ImpactStats";
 import BlogSection from "./BlogSection";
 import FooterFeedback from "./FooterFeedback";
-import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, ChevronLeft, ChevronRight, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Home, LayoutGrid, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Search, Send, ShoppingCart, Star, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
+import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, ChevronLeft, ChevronRight, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Home, LayoutGrid, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Search, Send, ShoppingCart, Star, Trash2, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
@@ -496,18 +496,25 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
 
     <Drawer open={cartOpen} onClose={() => setCartOpen(false)} title={`Your Cart (${cartCount})`}>
       {cart.length === 0 ? <p className="empty-state">Your cart is empty.</p> : <>
-        <ul className="drawer-list">{cart.map((item) => <li key={item.name}>
-          <img src={item.image} alt={item.name} />
-          <div className="drawer-item-info"><strong>{item.name}</strong><span>৳{item.price}</span>
-            <div className="qty-stepper"><button onClick={() => changeQty(item.name, -1)} aria-label={`Decrease ${item.name} quantity`}>-</button><b>{item.qty}</b><button onClick={() => changeQty(item.name, 1)} aria-label={`Increase ${item.name} quantity`}>+</button></div>
-          </div>
-          <button className="drawer-remove" aria-label={`Remove ${item.name}`} onClick={() => removeFromCart(item.name)}><X size={14} /></button>
-        </li>)}</ul>
+        <section className="cart-order-summary" aria-label="Order summary">
+          <div className="cart-summary-heading"><h3>Order Summary</h3><span>{cartCount} {cartCount === 1 ? "item" : "items"}</span></div>
+          <ul className="cart-summary-items">{cart.map((item) => <li key={item.name}>
+            <div className="cart-summary-image"><img src={item.image} alt={item.name} /><span>{item.qty}</span></div>
+            <div className="cart-summary-info">
+              <div className="cart-summary-name-price"><strong>{item.name}</strong><span>৳{item.price.toLocaleString("en-IN")} each</span></div>
+              <div className="cart-summary-controls">
+                <div className="cart-summary-stepper"><button onClick={() => changeQty(item.name, -1)} aria-label={`Decrease ${item.name} quantity`}>−</button><b aria-live="polite">{item.qty}</b><button onClick={() => changeQty(item.name, 1)} disabled={item.qty >= 20} aria-label={`Increase ${item.name} quantity`}>+</button></div>
+                <strong className="cart-summary-line-total" aria-live="polite">৳{(item.price * item.qty).toLocaleString("en-IN")}</strong>
+                <button className="cart-summary-remove" aria-label={`Remove ${item.name}`} onClick={() => removeFromCart(item.name)}><Trash2 size={15} /></button>
+              </div>
+            </div>
+          </li>)}</ul>
+        </section>
         <CartOffer subtotal={cartTotal} />
-        <div className="drawer-total"><span>Subtotal</span><strong>৳{cartTotal}</strong></div>
-        <div className="drawer-delivery"><span>Delivery</span><strong>{getDeliveryFee(cartTotal) === 0 ? "Free" : `৳${getDeliveryFee(cartTotal)}`}</strong></div>
+        <div className="drawer-total"><span>Subtotal</span><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></div>
+        <div className="drawer-delivery"><span>Delivery</span><strong>{getDeliveryFee(cartTotal) === 0 ? "Free" : `৳${getDeliveryFee(cartTotal).toLocaleString("en-IN")}`}</strong></div>
         <p className="drawer-offer-note">Have a promo code? Apply it at checkout.</p>
-        <button className="cta cta-block drawer-checkout" onClick={() => goToCheckout()}><span>Checkout · ৳{cartTotal + getDeliveryFee(cartTotal)}</span><i className="cta-icon cta-arrow"><ArrowRight size={15} /></i></button>
+        <button className="cta cta-block drawer-checkout" onClick={() => goToCheckout()}><span>Checkout · ৳{(cartTotal + getDeliveryFee(cartTotal)).toLocaleString("en-IN")}</span><i className="cta-icon cta-arrow"><ArrowRight size={15} /></i></button>
       </>}
     </Drawer>
 

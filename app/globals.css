@@ -574,7 +574,7 @@ body { overflow-x: hidden; }
 .co-lines em { color: #147c46; font-style: normal; font-weight: 700; }
 .co-lines .co-total { border-top: 1px solid #e6ebe2; color: #142f24; font-size: 18px; font-weight: 700; margin-top: 6px; padding-top: 14px; }
 .co-savings { background: #eef7e4; border-radius: 12px; color: #147c46; font-size: 13px; font-weight: 600; margin: -4px 0 0; padding: 10px 14px; text-align: center; }
-.co-eta { align-items: center; background: #f4f8ea; border-radius: 14px; display: flex; gap: 12px; padding: 13px 15px; }
+.co-eta { align-items: center; background: #fff; border-radius: 14px; display: flex; gap: 12px; padding: 13px 15px; }
 .co-eta svg { color: #147c46; flex: none; }
 .co-eta small { color: var(--muted); display: block; font-size: 11.5px; }
 .co-eta strong { color: #142f24; font-size: 14px; }
@@ -4813,3 +4813,36 @@ html body .cat-chip {
   padding-left: 12px;
   padding-right: 12px;
 }
+
+/* Menu cart: order summary and calculated line pricing. */
+.cart-order-summary { background: #fff; border: 0; border-radius: 0; padding: 0; color: #17392d; }
+.cart-summary-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+.cart-summary-heading h3 { font-family: 'Gelasio', 'Anek Bangla', serif; font-size: 20px; font-weight: 500; margin: 0; }
+.cart-summary-heading > span { background: #edf7e5; color: #168043; border-radius: 20px; padding: 3px 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.cart-summary-items { display: flex; flex-direction: column; gap: 19px; margin: 0; padding: 0; list-style: none; }
+.cart-summary-items > li { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+.cart-summary-image { position: relative; flex: 0 0 62px; height: 62px; }
+.cart-summary-image img { width: 100%; height: 100%; object-fit: contain; background: #f5f7e9; border: 1px solid #e5e9dc; border-radius: 13px; }
+.cart-summary-image > span { position: absolute; right: -7px; top: -7px; min-width: 20px; height: 20px; padding: 0 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #183d30; color: #fff; font-size: 11px; font-weight: 600; }
+.cart-summary-info { flex: 1; min-width: 0; }
+.cart-summary-name-price { display: grid; grid-template-columns: minmax(0, 1fr) 65px; align-items: start; gap: 10px; min-height: 36px; }
+.cart-summary-name-price > strong { font-size: 13px; line-height: 1.4; min-width: 0; }
+.cart-summary-name-price > span { color: #718078; font-size: 12px; white-space: nowrap; text-align: right; line-height: 1.5; }
+.cart-summary-controls { display: grid; grid-template-columns: 78px minmax(0, 1fr) 28px; align-items: center; gap: 10px; margin-top: 5px; }
+.cart-summary-stepper { display: flex; align-items: center; height: 28px; border: 1px solid #dfe5d8; border-radius: 9px; overflow: hidden; flex-shrink: 0; }
+html body .cart-summary-stepper button { display: flex; align-items: center; justify-content: center; min-width: 26px; width: 26px; min-height: 26px; height: 26px; background: transparent; border: 0; color: #718078; padding: 0; }
+html body .cart-summary-stepper button:hover:not(:disabled) { background: #edf7e5; color: #17392d; }
+.cart-summary-stepper button:disabled { opacity: .35; cursor: default; }
+.cart-summary-stepper b { width: 24px; text-align: center; font-size: 12px; }
+.cart-summary-line-total { font-size: 14px; white-space: nowrap; }
+html body .cart-summary-remove { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; min-width: 28px; min-height: 28px; margin-left: auto; padding: 0; border: 0; background: transparent; color: #9aa79f; }
+html body .cart-summary-remove:hover { color: #c9430a; }
+@media (max-width: 480px) {
+  .cart-order-summary { padding: 0; }
+  .cart-summary-items > li { gap: 12px; }
+  .cart-summary-name-price { gap: 8px; }
+  .cart-summary-controls { margin-top: 5px; }
+}
+
+.co-secondary.co-continue-shopping { border-color: var(--orange); color: var(--orange); }
+.co-secondary.co-continue-shopping:hover, .co-secondary.co-continue-shopping:focus-visible { background: var(--orange); border-color: var(--orange); color: #fff; }

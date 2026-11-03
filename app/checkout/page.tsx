@@ -222,13 +222,14 @@ export default function CheckoutPage() {
                 </dl>
 
               </section>
+              <div className="co-eta"><Truck size={20} aria-hidden="true" /><div><small>Estimated delivery</small><strong>{order.eta || "2–3 business days"}</strong></div></div>
               <Link className="co-secondary" href={`/track-order/?id=${order.id}`}>Track this order <ArrowRight size={14} /></Link>
               <Link className="co-secondary" href="/my-orders/">View my orders <ArrowRight size={14} /></Link>
               <details className="co-next co-next-dropdown">
                 <summary><h2 className="co-card-title">What happens next</h2><ChevronDown size={18} aria-hidden="true" /></summary>
                 <ol>{nextSteps.map((step, index) => <li key={step.title}><span><step.icon size={18} /></span><div><strong>{index + 1}. {step.title}</strong><p>{step.note}</p></div></li>)}</ol>
               </details>
-              <Link className="co-secondary" href="/">Continue Shopping <ArrowRight size={14} /></Link>
+              <Link className="co-secondary co-continue-shopping" href="/">Continue Shopping <ArrowRight size={14} /></Link>
             </div>
           </div>
 
