@@ -5231,3 +5231,70 @@ html body .origin-copy > p:not(.eyebrow) { display: block; margin: 14px 0 20px; 
  html body .cat-rail-offer b { display: block; max-width: 48px; white-space: normal; text-align: center; font-size: 11px; line-height: 1.35; }
  html body .cat-rail-offer::before, html body .cat-rail-offer::after { display: none; }
 }
+
+/* Align hero copy with the shared page gutter, without an extra inset. */
+html body .hero-modern .hero-stage { padding-left: 0; padding-right: 0; }
+html body .hero-modern .hero-copy { padding-left: 0; text-align: left; }
+html body .hero-modern .hero-actions { padding-left: 0; justify-content: flex-start; }
+html body .hero-modern .hero-slider-bar { padding-left: 0; }
+@media (max-width: 800px) {
+ html body .hero-modern h1 { margin-left: 0; text-align: left; }
+}
+
+/* Vertically balance the hero copy and artwork around the same center. */
+@media (min-width: 801px) {
+ html body .hero-modern .hero-stage { align-items: center; grid-template-rows: 1fr auto auto auto 1fr; }
+ html body .hero-modern .hero-art { align-self: center; }
+ html body .hero-modern .hero-image img,
+ html body .hero-modern .hero-spots { top: 50%; bottom: auto; height: 100%; transform: translateY(-60%); object-position: center; }
+}
+
+/* Editorial promotional popup with product showcase and delivery ticket. */
+html body .offer-popup-backdrop { padding: 24px; background: #10261ec2; backdrop-filter: blur(5px); }
+html body .offer-popup { display: grid; grid-template-columns: .95fr 1.05fr; width: min(100%, 780px); padding: 0; overflow: hidden; background: #fffefa; max-height: calc(100dvh - 48px); overflow-y: auto; box-shadow: 0 24px 90px #0004; }
+html body .offer-popup-close { top: 12px; right: 12px; z-index: 3; width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid #e2e7dd; background: #fffefa; color: #315344; }
+.offer-visual { position: relative; display: flex; flex-direction: column; padding: 28px 24px 20px; background: #eaf0df; overflow: hidden; }
+.offer-edition { display: flex; align-items: center; gap: 6px; color: #54734d; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.offer-visual-title { position: relative; z-index: 1; margin-top: 28px; font-family: var(--font-heading); color: #173d2c; font-size: 36px; line-height: 1.14; letter-spacing: -.04em; }
+.offer-visual-title em { font-weight: 400; color: #da5818; }
+.offer-product-stage { position: relative; flex: 1; display: grid; place-items: center; min-height: 225px; }
+.offer-product-stage img { position: relative; z-index: 1; width: 100%; height: 230px; object-fit: contain; mix-blend-mode: multiply; }
+.offer-stage-ring { position: absolute; width: 210px; height: 165px; border: 1px solid #c6d7b6; transform: rotate(-12deg); }
+.offer-curated { position: absolute; right: -8px; bottom: 6px; z-index: 2; display: flex; align-items: center; gap: 5px; padding: 8px 10px; background: #fffefa; color: #47693d; font-size: 10px; border: 1px solid #dce5d1; transform: rotate(-4deg); }
+.offer-visual-footer { margin-top: 20px; font-size: 8px; letter-spacing: .1em; color: #698263; text-align: center; }
+.offer-content { display: flex; flex-direction: column; justify-content: center; padding: 44px 30px 28px; }
+.offer-invitation { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #7c6d5e; }
+.offer-invitation > span { width: 6px; height: 6px; background: #ff6418; }
+html body .offer-popup h2 { font-size: 35px; line-height: 1.16; letter-spacing: -.045em; margin: 16px 0 12px; color: #173d2c; }
+.offer-popup h2 em { font-weight: 400; color: #ed601c; }
+html body .offer-intro { margin: 0; color: #738074; font-size: 13px; line-height: 1.65; }
+.offer-perk-ticket { position: relative; display: flex; gap: 12px; align-items: center; margin: 24px 0; padding: 16px 12px; border: 1px dashed #e8bf96; background: #fff6e9; overflow: hidden; }
+.offer-ticket-icon { flex-shrink: 0; color: #dc5a15; }
+.offer-ticket-label { display: block; font-size: 8px; color: #aa7b49; letter-spacing: .12em; font-weight: 700; margin-bottom: 5px; }
+.offer-perk-ticket strong { font-size: 17px; color: #214933; }
+html body .offer-perk-ticket p { font-size: 10px; color: #877964; margin: 5px 0 0; }
+.offer-shop-button { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 12px 16px; background: #ff6418; color: #fff; font-size: 13px; font-weight: 700; }
+.offer-shop-button:hover { background: #e6500b; }
+.offer-continue { align-self: center; margin: 14px 0 0; background: transparent; border: 0; padding: 5px; color: #607567; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.offer-fineprint { text-align: center; color: #929b8f; font-size: 9px; margin-top: 18px; }
+@media (max-width: 600px) {
+ html body .offer-popup-backdrop { padding: 16px; }
+ html body .offer-popup { grid-template-columns: 1fr; width: min(100%, 390px); max-height: calc(100dvh - 32px); }
+ .offer-visual { min-height: 180px; padding: 20px; }
+ .offer-edition { font-size: 8px; }
+ .offer-visual-title { margin-top: 22px; font-size: 28px; width: 53%; }
+ .offer-product-stage { position: absolute; right: 4px; top: 18px; width: 48%; min-height: 150px; }
+ .offer-product-stage img { height: 155px; }
+ .offer-stage-ring { width: 130px; height: 110px; }
+ .offer-curated, .offer-visual-footer { display: none; }
+ .offer-content { padding: 22px; }
+ html body .offer-popup h2 { font-size: 30px; margin: 12px 0 10px; }
+ .offer-perk-ticket { margin: 18px 0; }
+ .offer-fineprint { margin-top: 12px; }
+}
+
+/* Add breathing room between the category rail and hero. */
+html body .cat-rail-wrap + .hero.hero-modern { margin-top: 28px; }
+@media (max-width: 800px) {
+ html body .cat-rail-wrap + .hero.hero-modern { margin-top: 18px; }
+}
