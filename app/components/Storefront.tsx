@@ -9,7 +9,8 @@ import { CATALOG_CATEGORY_EVENT, COMBO_CATEGORY, isCatalogPath, setCatalogCatego
 import { getDeliveryFee } from "../lib/offers";
 import Link from "next/link";
 import BrandStrip from "./BrandStrip";
-import { Product, products, comboProducts, exploreProducts, productSlug, catalog, storeProducts, productCategories, productBrands, getProductBrand, resolveProductCategory, productsForCategory } from "../lib/products";
+import OfferPopup from "./OfferPopup";
+import { Product, withDemoVariants, products, comboProducts, exploreProducts, productSlug, catalog, storeProducts, productCategories, productBrands, getProductBrand, resolveProductCategory, productsForCategory } from "../lib/products";
 import QuickView from "./QuickView";
 import AuthModal from "./AuthModal";
 import MegaMenu, { MenuContact, MenuIcon, MenuLink, menuCategories, menuHelp, menuPages } from "./MegaMenu";
@@ -19,12 +20,11 @@ import Reviews from "./Reviews";
 import ImpactStats from "./ImpactStats";
 import BlogSection from "./BlogSection";
 import FooterFeedback from "./FooterFeedback";
-import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, ChevronLeft, ChevronRight, Copy, Droplets, Eye, Facebook, Flame, Gift, Heart, Home, LayoutGrid, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Search, Send, ShoppingCart, Star, Trash2, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
+import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, ChevronLeft, ChevronRight, Copy, Droplets, Eye, Facebook, Flame, Gift, Home, LayoutGrid, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Search, Send, ShoppingCart, Star, Trash2, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faBoxOpen, faMagnifyingGlass, faTruckFast } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
-type WishItem = { name: string; price: number; image: string };
 const categories = ["All", "Offer Zone", ...productCategories];
 const shopCategories = [
   { icon: "/amzad-food-website/icons/category-salt.png", label: "Pink Salt" },
@@ -60,27 +60,43 @@ const originStories = [
   { key: "jessore", className: "jessore", icon: TreePalm, place: "Jessore", product: "Khejur Gur", desc: "Winter date-palm sap from Jessore is slow-boiled into rich patali and jhola gur." },
 ];
 
-export function ProductCard({ product, onAdd, onOrderNow, wishlisted, onToggleWishlist }: { product: Product; onAdd: (item?: CartLine, qty?: number) => void; onOrderNow: (item?: CartLine, qty?: number) => void; wishlisted: boolean; onToggleWishlist: () => void }) {
+export function ProductCard({ product, onAdd, onOrderNow }: { product: Product; onAdd: (item?: CartLine, qty?: number) => void; onOrderNow: (item?: CartLine, qty?: number) => void }) {
   const [quickView, setQuickView] = useState(false);
+  const [variantIndex, setVariantIndex] = useState(0);
+  const variants = withDemoVariants(product).variants!;
+  const selected = variants[variantIndex] ?? variants[0];
+  const selectedProduct = { ...product, price: selected.price, oldPrice: selected.oldPrice, image: selected.image, unit: selected.label, images: selected.image === product.image ? product.images : undefined };
+  const line: CartLine = { name: `${product.name} (${selected.label})`, price: selected.price, image: selected.image };
+  const [inCart, setInCart] = useState(false);
+  useEffect(() => {
+    const sync = () => setInCart(loadCart().some(item => item.name === line.name && item.qty > 0));
+    sync();
+    window.addEventListener("amzad-cart-updated", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("amzad-cart-updated", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [line.name]);
   const closeQuickView = useCallback(() => setQuickView(false), []);
+  const name = product.bn ? `${product.name} / ${product.bn}` : product.name;
   return <article className="pc">
+    <button className="pc-view" onClick={() => setQuickView(true)} aria-label={`Quick view ${name}`}><Eye size={18} /></button>
     <div className="pc-media">
-      <div className="pc-badges">{product.oldPrice && <span className="pc-save">Save ৳{product.oldPrice - product.price}</span>}{product.tag && <span className="pc-tag">{product.tag}</span>}</div>
-      <button className={wishlisted ? "pc-wish active" : "pc-wish"} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`} aria-pressed={wishlisted} onClick={onToggleWishlist}><Heart size={16} fill={wishlisted ? "currentColor" : "none"} /></button>
-      <Link className="pc-product-link" href={`/products/${productSlug(product.name)}/`} aria-label={`View ${product.name}`}><img src={product.image} alt={product.name} /></Link>
-      <div className="pc-quick">
-        <button className="pc-quick-btn" onClick={() => setQuickView(true)} aria-label={`Quick view ${product.name}`}><Eye size={15} /><span>Quick view</span></button>
-        <button className="pc-quick-btn add" onClick={() => onAdd()} aria-label={`Add ${product.name} to cart`}><ShoppingCart size={15} /><span>Add to cart</span></button>
-      </div>
+      <div className="pc-badges">{product.tag === "Best Seller" && <span className="pc-tag pc-best"><Flame size={12} /> Best Selling</span>}{selected.oldPrice && <span className="pc-save">Save {Math.round((1 - selected.price / selected.oldPrice) * 100)}%</span>}{product.tag && product.tag !== "Best Seller" && <span className="pc-tag">{product.tag}</span>}</div>
+      <Link className="pc-product-link pc-packs" href={`/products/${productSlug(product.name)}/`} aria-label={`View ${name}, ${selected.label}`}>
+        <img src={selected.image} alt={`${name} — ${selected.label}`} loading="lazy" />
+      </Link>
     </div>
     <div className="pc-body">
-      <p className="pc-cat">{product.bn}</p>
-      <h3 className="pc-name"><Link href={`/products/${productSlug(product.name)}/`}>{product.name}</Link></h3>
-      <div className="pc-meta">{product.unit ? <span className="pc-unit">{product.unit}</span> : <span className="pc-unit pc-unit-category">{product.category}</span>}<span className="pc-mobile-category">{product.category === "Oil" ? "Ghee & Oil" : product.category}</span></div>
-      <div className="pc-price"><strong>৳{product.price.toLocaleString("en-IN")}</strong>{product.oldPrice && <del>৳{product.oldPrice.toLocaleString("en-IN")}</del>}</div>
-      <button className="pc-order cta cta-ghost cta-sm cta-block" onClick={() => onOrderNow()}><span>Order Now</span></button>
+      <h3 className="pc-name" title={name}><Link href={`/products/${productSlug(product.name)}/`}>{product.name}{product.bn && <> / <span lang="bn">{product.bn}</span></>}</Link></h3>
+      <div className="pc-price"><strong>৳{selected.price.toLocaleString("en-IN")}</strong>{selected.oldPrice && <del>৳{selected.oldPrice.toLocaleString("en-IN")}</del>}</div>
+      <div className="pc-variants" role="group" aria-label={`Pack size for ${name}`}>
+        {variants.map((variant, index) => <button key={variant.id} type="button" className={index === variantIndex ? "active" : ""} aria-pressed={index === variantIndex} onClick={() => setVariantIndex(index)}>{variant.label}</button>)}
+      </div>
+      <div className="pc-actions"><button className="pc-order" onClick={() => onOrderNow(line, 1)}>Order Now</button><button className={inCart ? "pc-action in-cart" : "pc-action"} onClick={() => onAdd(line, 1)} aria-label={inCart ? `Add another ${name} to cart` : `Add ${name} to cart`} title={inCart ? "In cart — add another" : "Add to cart"}><ShoppingCart size={18} /></button></div>
     </div>
-    {quickView && <QuickView product={product} wishlisted={wishlisted} onToggleWishlist={onToggleWishlist} onAdd={onAdd} onOrderNow={onOrderNow} onClose={closeQuickView} />}
+    {quickView && <QuickView key={selected.id} product={selectedProduct} onAdd={(_, qty) => onAdd(line, qty)} onOrderNow={(_, qty) => onOrderNow(line, qty)} onClose={closeQuickView} />}
   </article>;
 }
 
@@ -109,10 +125,6 @@ function HeroSlider() {
     </div>
     <div className="hero-art" key={`art-${active}`}>
       <div className="hero-image">
-        <div className="hero-bn" lang="bn" style={{ ["--bn-top" as any]: slide.bangla.top }}>
-          <strong className="hero-bn-title">{slide.bangla.title}</strong>
-        </div>
-        <span className="hero-bn-seal" lang="bn" aria-hidden="true"><b>১০০%</b>খাঁটি</span>
         <img src={slide.image} alt={slide.title.join(" ")} />
         <svg className="hero-spots" viewBox={`0 0 ${slide.size[0]} ${slide.size[1]}`} preserveAspectRatio="xMidYMax meet">
           {slide.spots.map(([name, x, y, w, h]) => <a key={name} href={`/amzad-food-website/products/${productSlug(name)}/`} aria-label={`View ${name}`}><title>{name}</title><rect x={x} y={y} width={w} height={h} rx={28} /></a>)}
@@ -130,17 +142,18 @@ function HeroSlider() {
   </section>;
 }
 
-const navItems: { href: string; label: string; category?: string }[] = [{ href: "#top", label: "Home" }, { href: "products/", label: "All Products", category: "All" }, { href: `products/?category=${encodeURIComponent(COMBO_CATEGORY)}`, label: "Combo", category: COMBO_CATEGORY }, { href: "blogs/", label: "Blogs" }];
+const navItems: { href: string; label: string; category?: string }[] = [{ href: "?offers=1#shop", label: "Offers", category: "Offer Zone" }, { href: "products/", label: "All Products", category: "All" }, { href: `products/?category=${encodeURIComponent(COMBO_CATEGORY)}`, label: "Combo", category: COMBO_CATEGORY }, { href: "blogs/", label: "Blogs" }];
 
 // Which tab matches the current page; -1 on pages outside the main navigation (orders, checkout).
 function currentNavIndex(pathname: string) {
   if (/(?:^|\/)blogs(?:\/|$)/.test(pathname)) return 3;
-  if (isCatalogPath(pathname)) return new URLSearchParams(window.location.search).get("category") === COMBO_CATEGORY ? 2 : 1;
+  if (isCatalogPath(pathname)) { const category = new URLSearchParams(window.location.search).get("category"); return category === "Offer Zone" ? 0 : category === COMBO_CATEGORY ? 2 : 1; }
   if (/(?:^|\/)products\//.test(pathname)) return 1;
-  return pathname === "/" ? 0 : -1;
+  return pathname === "/" && new URLSearchParams(window.location.search).get("offers") === "1" ? 0 : -1;
 }
 
 function NavLinks({ onNavigate }: { onNavigate: () => void }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [active, setActive] = useState(-1);
   useEffect(() => {
@@ -157,7 +170,10 @@ function NavLinks({ onNavigate }: { onNavigate: () => void }) {
     const track = link?.parentElement;
     if (!link || !track) { setPill(null); return; }
     const place = () => {
-      const next = { left: link.offsetLeft, width: link.offsetWidth };
+      const label = link.querySelector<HTMLElement>(".nav-label");
+      const labelRect = (label ?? link).getBoundingClientRect();
+      const trackRect = track.getBoundingClientRect();
+      const next = { left: labelRect.left - trackRect.left + track.scrollLeft, width: labelRect.width };
       setPill(previous => previous?.left === next.left && previous.width === next.width ? previous : next);
     };
     place();
@@ -173,6 +189,13 @@ function NavLinks({ onNavigate }: { onNavigate: () => void }) {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       setActive(index);
       onNavigate();
+      if (item.label === "Offers") {
+        event.preventDefault();
+        setActive(0);
+        router.push("/?offers=1#shop");
+        window.dispatchEvent(new Event("amzad-show-offers"));
+        return;
+      }
       if (item.category && isCatalogPath(pathname)) {
         event.preventDefault();
         setCatalogCategory(item.category, "push");
@@ -187,7 +210,7 @@ function NavLinks({ onNavigate }: { onNavigate: () => void }) {
           target.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
         }
       }
-    }}>{item.label}</Link>)}
+    }}><span className="nav-label">{item.label}{item.label === "Offers" && <b className="nav-offer-count" aria-label="2 offers">2</b>}</span></Link>)}
   </div>;
 }
 
@@ -271,8 +294,6 @@ function NewsletterBanner({ notify }: { notify: (message: string) => void }) {
 type StoreActions = {
   addToCart: (product: CartLine, qty?: number) => void;
   goToCheckout: (product?: CartLine, qty?: number) => void;
-  isWishlisted: (name: string) => boolean;
-  toggleWishlist: (product: CartLine) => void;
 };
 
 export default function Storefront({ children, headerOnly = false }: { headerOnly?: boolean; children?: (actions: StoreActions) => React.ReactNode }) {
@@ -339,12 +360,18 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setQuery(params.get("q") ?? "");
-    const category = resolveProductCategory(params.get("category") ?? "All");
+    const category = resolveProductCategory(params.get("offers") === "1" ? "Offer Zone" : params.get("category") ?? "All");
     if (categories.includes(category)) setActiveCategory(category);
   }, []);
-  const [wishlist, setWishlist] = useState<WishItem[]>([]);
+  useEffect(() => {
+    const showOffers = () => {
+      setActiveCategory("Offer Zone");
+      document.getElementById("shop")?.scrollIntoView({ behavior: "smooth" });
+    };
+    window.addEventListener("amzad-show-offers", showOffers);
+    return () => window.removeEventListener("amzad-show-offers", showOffers);
+  }, []);
   const [cartOpen, setCartOpen] = useState(false);
-  const [wishlistOpen, setWishlistOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const closeAuth = useCallback(() => setAuthOpen(false), []);
   const [originOpen, setOriginOpen] = useState(false);
@@ -383,14 +410,7 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
     setCartOpen(false);
     router.push("/checkout/");
   };
-  const toggleWishlist = (product: { name: string; price: number; image: string }) => {
-    setWishlist((items) => {
-      if (items.some((item) => item.name === product.name)) { notify(`Removed ${product.name} from wishlist`); return items.filter((item) => item.name !== product.name); }
-      notify(`Added ${product.name} to wishlist`);
-      return [...items, { name: product.name, price: product.price, image: product.image }];
-    });
-  };
-  const isWishlisted = (name: string) => wishlist.some((item) => item.name === name);
+
   const handleAccountClick = () => { if (user) { setUser(null); notify("Signed out"); } else { setAuthOpen(true); } };
   const closeMenus = () => { setMenuOpen(false); setMegaMenuOpen(false); };
   const browseMenuCategory = (category: { label: string; tab?: string }) => {
@@ -411,24 +431,25 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
   const scrollToShop = () => { setMenuOpen(false); if (children || headerOnly) { router.push(`/?q=${encodeURIComponent(query)}#shop`); } else { document.getElementById("shop")?.scrollIntoView({ behavior: "smooth" }); } };
   const add = () => addToCart({ name: "Sundarbans Raw Honey", price: 350, image: "/amzad-food-website/honey-bg.png" });
   return <main id="top" className={headerOnly ? "storefront storefront-header-only" : children ? "storefront" : "storefront storefront-home"}>
+    {!headerOnly && <OfferPopup />}
     <div className="announcement"><div className="announcement-inner page-width"><span className="announcement-contacts-group"><span className="announcement-cta">প্রয়োজনে কল করুন</span><span className="announcement-contacts"><a className="announcement-contact" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faWhatsapp} fontSize={14} /> 01327406605</a><span className="announcement-divider" /><a className="announcement-contact" href="tel:+8809613824071"><Phone size={13} /> 09613824071</a></span></span><span className="announcement-links"><a className="announcement-link" href="/amzad-food-website/my-orders/">My Orders</a><a className="announcement-link" href="/amzad-food-website/track-order/"><PackageSearch size={13} /> Track Order</a></span></div></div>
-    <nav ref={navRef} className={`navbar page-width site-nav${searchOpen ? " search-open" : ""}`}><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}><span className="burger" aria-hidden="true"><i /><i /><i /></span></button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div ref={mobileMenuRef} className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><a className="mobile-menu-logo" href="/amzad-food-website/" onClick={() => setMenuOpen(false)}><img src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button><button className="nav-account wishlist" onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={16} /><small>Wishlist</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><button ref={searchToggleRef} type="button" className="nav-icon nav-search-toggle" aria-label={searchOpen ? "Close product search" : "Open product search"} aria-expanded={searchOpen} aria-controls="top-nav-search" onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}><Search size={19} /></button><form id="top-nav-search" role="search" className="nav-search" hidden={!searchOpen} onSubmit={(event) => { event.preventDefault(); scrollToShop(); }} onKeyDown={(event) => { if (event.key === "Escape") closeSearch(); }}><button className="nav-search-submit" type="submit" aria-label="Search products"><Search size={18} /></button><input ref={searchRef} type="search" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" /><button type="button" className="nav-search-clear" onClick={closeSearch} aria-label="Close search"><X size={16} /></button>{query && <button type="button" className="desktop-search-clear" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><X size={13} /></button>}</form><div className="nav-icons"><button className="nav-icon nav-user" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button><button className="nav-icon nav-wishlist" onClick={() => setWishlistOpen(true)} aria-label={`Wishlist, ${wishlist.length} items`} data-tip="Wishlist"><Heart size={18} />{wishlist.length > 0 && <b>{wishlist.length}</b>}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={22} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
-    {menuProduct && <QuickView product={menuProduct} wishlisted={wishlist.some(item => item.name === menuProduct.name)} onToggleWishlist={() => toggleWishlist(menuProduct)} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => setMenuProduct(null)} />}
+    <nav ref={navRef} className={`navbar page-width site-nav${searchOpen ? " search-open" : ""}`}><button className={menuOpen ? "mobile-menu icon-button open" : "mobile-menu icon-button"} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}><span className="burger" aria-hidden="true"><i /><i /><i /></span></button><a className="brand amzad-brand" href="/amzad-food-website/"><img className="brand-logo" src="/amzad-food-website/logo.png" alt="Amzad Food — নিরাপদ খাবার, আপনার অধিকার" width={1400} height={388} /></a><div ref={mobileMenuRef} className={`nav-links${menuOpen ? " open" : ""}${mobileTab === "category" ? " show-categories" : ""}`}><div className="mobile-menu-tabs" role="tablist" aria-label="Menu sections"><button role="tab" aria-selected={mobileTab === "menu"} className={mobileTab === "menu" ? "active" : ""} onClick={() => setMobileTab("menu")}>Menu</button><button role="tab" aria-selected={mobileTab === "category"} className={mobileTab === "category" ? "active" : ""} onClick={() => setMobileTab("category")}>Category</button></div><NavLinks onNavigate={() => setMenuOpen(false)} /><div className="mobile-menu-more">{[...menuPages.filter(link => !["Home", "Products", "Blogs"].includes(link.label)), ...menuHelp].map(link => <a key={link.label} className={link === menuHelp[0] ? "menu-help-start" : undefined} href={link.href ? `/amzad-food-website/${link.href}` : "#"} onClick={(event) => runMenuLink(event, link)}>{link.label}</a>)}</div><MenuContact /><div className="mobile-cat-list">{menuCategories.map(category => <a key={category.label} href="/amzad-food-website/#shop" onClick={(event) => { event.preventDefault(); browseMenuCategory(category); }}><span><MenuIcon icon={category.icon} /></span><b>{category.label}<small>{category.bn}</small></b><ArrowRight size={15} /></a>)}</div><form className="mobile-nav-search" onSubmit={(event) => { event.preventDefault(); scrollToShop(); }}><Search size={16} /><input type="search" aria-label="Search products on mobile" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} /><button type="submit" aria-label="Submit product search"><ArrowRight size={18} /></button></form><div className="nav-links-mobile-actions"><button className="nav-account" onClick={() => { setMenuOpen(false); handleAccountClick(); }}><UserRound size={16} /><small>{user ? user.name : "Sign in"}</small></button></div></div>{menuOpen && <button className="nav-backdrop" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}<div className="nav-actions"><button ref={searchToggleRef} type="button" className="nav-icon nav-search-toggle" aria-label={searchOpen ? "Close product search" : "Open product search"} aria-expanded={searchOpen} aria-controls="top-nav-search" onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}><Search size={19} /></button><form id="top-nav-search" role="search" className="nav-search" hidden={!searchOpen} onSubmit={(event) => { event.preventDefault(); scrollToShop(); }} onKeyDown={(event) => { if (event.key === "Escape") closeSearch(); }}><button className="nav-search-submit" type="submit" aria-label="Search products"><Search size={18} /></button><input ref={searchRef} type="search" placeholder="Search products..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search products" /><button type="button" className="nav-search-clear" onClick={closeSearch} aria-label="Close search"><X size={16} /></button>{query && <button type="button" className="desktop-search-clear" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><X size={13} /></button>}</form><div className="nav-icons"><button className="nav-icon nav-user" onClick={handleAccountClick} aria-label={user ? `Signed in as ${user.name}, sign out` : "Sign in"} data-tip={user ? "Sign out" : "Sign in"}>{user ? <span className="nav-avatar">{user.name.slice(0, 1).toUpperCase()}</span> : <UserRound size={18} />}</button></div><button className="nav-cart" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><span className="nav-cart-icon"><ShoppingCart size={22} /><b key={cartCount}>{cartCount}</b></span><span className="nav-cart-text"><strong>৳{cartTotal.toLocaleString("en-IN")}</strong></span></button><button className={megaMenuOpen ? "mega-menu-trigger open" : "mega-menu-trigger"} onClick={() => setMegaMenuOpen(!megaMenuOpen)} aria-haspopup="true" aria-expanded={megaMenuOpen} aria-label="Browse menu"><span className="burger"><i /><i /><i /></span></button></div><MegaMenu open={megaMenuOpen} onClose={() => setMegaMenuOpen(false)} onCategory={browseMenuCategory} onLink={runMenuLink} /></nav>
+    {menuProduct && <QuickView product={menuProduct} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => setMenuProduct(null)} />}
     {isHomePage && <CategoryRail selectedCategory={activeCategory} onView={setMenuProduct} onAdd={addToCart} onBrowse={(label) => browseMenuCategory({ label })} />}
     {headerOnly ? null : children ? <>
-    {children({ addToCart, goToCheckout, isWishlisted, toggleWishlist })}
+    {children({ addToCart, goToCheckout })}
     </> : <>
     <HeroSlider />
     <BrandStrip />
-    <ProductSection id="best-selling" maxRows={2} mobileMaxRows={2} title="Best Selling Products" eyebrow="" products={[...storeProducts.filter(product => product.tag === "Best Seller"), ...storeProducts.filter(product => product.tag !== "Best Seller").slice(0, 3)]} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
+    <ProductSection id="best-selling" maxRows={2} mobileMaxRows={2} title="Top Selling Products" eyebrow="" products={[...storeProducts.filter(product => product.tag === "Best Seller"), ...storeProducts.filter(product => product.tag !== "Best Seller").slice(0, 3)]} onAdd={addToCart} onOrderNow={goToCheckout} />
     <section className="journey page-width" aria-label="From source to your table"><div className="journey-card">
       <div className="journey-intro"><span className="journey-pill"><Leaf size={12} /> Our Promise</span><h2>From Source<br /><em>to Your Table</em></h2><p>A journey of trust &amp; quality, in four careful steps.</p></div>
       <ol className="journey-steps">{journeySteps.map(step => <li key={step.title} style={{ "--step-hue": step.hue } as React.CSSProperties}><span className="journey-node"><FontAwesomeIcon icon={step.icon} fontSize={17} /></span><strong>{step.title}</strong><p>{step.subtitle}</p></li>)}</ol>
     </div></section>
     <section className="feature-band page-width" id="story"><article className="origin-card"><div className="origin-copy"><p className="eyebrow">Rooted in Bangladesh</p><h2>Discover<br /><span className="origin-title-line">Our Origin <span>🍃</span></span></h2><p>Discover authentic Bangladeshi foods, trusted essentials and naturally sourced products — all in one place.</p><button className="cta" onClick={() => setOriginOpen(true)}><span>Explore Origin Stories</span><i className="cta-icon"><MapPin size={15} /></i></button></div><div className="origin-map"><div className="bd-map" role="img" aria-label="Map of Bangladesh showing where our products are sourced"><span className="bd-shadow" aria-hidden="true" /><span className="bd-shape" aria-hidden="true" /><span className="bd-texture" aria-hidden="true" />{originStories.map((story) => <span className={`bd-spot ${story.className}`} key={`spot-${story.key}`} aria-hidden="true" />)}{originStories.map((story) => <span className={`origin-pin ${story.className}`} key={story.key}><i><story.icon size={13} /></i><b>{story.place}<small>{story.product}</small></b></span>)}</div></div></article><article className="honey-card"><img className="honey-bg" src="/amzad-food-website/honey-bg.png" alt="" aria-hidden="true" /><span className="honey-callout">Pure Goodness<small>from Bangladesh</small><ArrowDownLeft size={20} /></span><div className="honey-copy"><h2>Sundarbans<br />Raw Honey</h2><p className="honey-subtitle">Cold Pressed <span>•</span> 100% Natural</p><div className="honey-badges"><span>100% Natural</span><span>Rich in Naturals</span></div><div className="honey-price"><strong>৳350</strong><del>৳450</del><em>Save ৳100</em></div><button className="cta" onClick={add}><span>Add to Cart</span><i className="cta-icon"><ShoppingCart size={15} /></i></button></div></article></section>
-    <ProductSection viewAllHref={activeCategory === "All" || activeCategory === "Offer Zone" ? "/products/" : `/products/?category=${encodeURIComponent(activeCategory)}`} title={activeCategory === "All" ? "All Products" : activeCategory === "Oil" ? "Ghee & Oil" : activeCategory} eyebrow="Best Sellers" products={visibleProducts} maxRows={8} mobileMaxRows={4} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
+    <ProductSection viewAllHref={activeCategory === "All" || activeCategory === "Offer Zone" ? "/products/" : `/products/?category=${encodeURIComponent(activeCategory)}`} title={activeCategory === "All" ? "All Products" : activeCategory === "Oil" ? "Ghee & Oil" : activeCategory} eyebrow="Best Sellers" products={visibleProducts} maxRows={8} mobileMaxRows={4} onAdd={addToCart} onOrderNow={goToCheckout} id="shop" tabs={{ categories, activeCategory, setActiveCategory }} />
     <NewsletterBanner notify={notify} />
-    <ProductSection id="combo" promotion viewAllHref="/products/?category=Combo%20Packs" title="Combo Packages" eyebrow="Value Packs" products={comboProducts} onAdd={addToCart} onOrderNow={goToCheckout} isWishlisted={isWishlisted} onToggleWishlist={toggleWishlist} />
+    <ProductSection id="combo" promotion viewAllHref="/products/?category=Combo%20Packs" title="Combo Packages" eyebrow="Value Packs" products={comboProducts} onAdd={addToCart} onOrderNow={goToCheckout} />
     <PrayerTimes notify={notify} />
     <PrayerDock />
     <section className="trust-section"><div className="tr page-width">
@@ -518,16 +539,6 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
       </>}
     </Drawer>
 
-    <Drawer open={wishlistOpen} onClose={() => setWishlistOpen(false)} title={`Wishlist (${wishlist.length})`}>
-      {wishlist.length === 0 ? <p className="empty-state">No items saved yet.</p> : <ul className="drawer-list">{wishlist.map((item) => <li key={item.name}>
-        <img src={item.image} alt={item.name} />
-        <div className="drawer-item-info"><strong>{item.name}</strong><span>৳{item.price}</span></div>
-        <div className="drawer-item-actions">
-          <button aria-label={`Add ${item.name} to cart`} onClick={() => addToCart(item)}><ShoppingCart size={14} /></button>
-          <button className="drawer-remove" aria-label={`Remove ${item.name} from wishlist`} onClick={() => toggleWishlist(item)}><X size={14} /></button>
-        </div>
-      </li>)}</ul>}
-    </Drawer>
 
     <AuthModal open={authOpen} onClose={closeAuth} onSignIn={(name) => { setUser({ name }); setAuthOpen(false); notify(`Welcome, ${name}!`); }} />
 
@@ -548,7 +559,7 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
   </main>;
 }
 
-function ProductSection({ maxRows, mobileMaxRows, carousel = false, cardPromotion = false, promotion = false, viewAllHref = "/products/", title, eyebrow, products, onAdd, onOrderNow, id, tabs, isWishlisted, onToggleWishlist }: { maxRows?: number; mobileMaxRows?: number; carousel?: boolean; cardPromotion?: boolean; promotion?: boolean; viewAllHref?: string; title: string; eyebrow: string; products: Product[]; onAdd: (product: CartLine, qty?: number) => void; onOrderNow: (product: CartLine, qty?: number) => void; id?: string; tabs?: { categories: string[]; activeCategory: string; setActiveCategory: (value: string) => void }; isWishlisted: (name: string) => boolean; onToggleWishlist: (product: Product) => void }) {
+function ProductSection({ maxRows, mobileMaxRows, carousel = false, cardPromotion = false, promotion = false, viewAllHref = "/products/", title, eyebrow, products, onAdd, onOrderNow, id, tabs }: { maxRows?: number; mobileMaxRows?: number; carousel?: boolean; cardPromotion?: boolean; promotion?: boolean; viewAllHref?: string; title: string; eyebrow: string; products: Product[]; onAdd: (product: CartLine, qty?: number) => void; onOrderNow: (product: CartLine, qty?: number) => void; id?: string; tabs?: { categories: string[]; activeCategory: string; setActiveCategory: (value: string) => void } }) {
   const [sortKey, setSortKey] = useState<SortKey>("featured");
   const sortedProducts = useMemo(() => sortProducts(products, sortKey), [products, sortKey]);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -595,7 +606,7 @@ function ProductSection({ maxRows, mobileMaxRows, carousel = false, cardPromotio
     </aside>}
     <div className={carousel ? "best-sellers-carousel" : undefined}>
     {carousel && <button className="best-sellers-arrow best-sellers-prev" type="button" disabled={edges.start} onClick={() => move(-1)} aria-label="Previous best-selling products"><ChevronLeft size={20} /></button>}
-    <div className={carousel ? "best-sellers-track" : "product-grid"} ref={gridRef} onScroll={carousel ? updateEdges : undefined} tabIndex={carousel ? 0 : undefined} role={carousel ? "region" : undefined} aria-label={carousel ? "Best-selling products" : undefined}>{pageProducts.map((product, index) => <ProductCard product={{ ...product, tag: product.tag || (index % 3 === 0 ? "New" : undefined) }} onAdd={(item, qty) => onAdd(item ?? product, qty)} onOrderNow={(item, qty) => onOrderNow(item ?? product, qty)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => onToggleWishlist(product)} key={`${product.name}-${index}`} />)}{cardPromotion && <aside className="grid-promo-card" aria-label="Discover the Amzad Food collection">
+    <div className={carousel ? "best-sellers-track" : "product-grid"} ref={gridRef} onScroll={carousel ? updateEdges : undefined} tabIndex={carousel ? 0 : undefined} role={carousel ? "region" : undefined} aria-label={carousel ? "Best-selling products" : undefined}>{pageProducts.map((product, index) => <ProductCard product={{ ...product, tag: product.tag || (index % 3 === 0 ? "New" : undefined) }} onAdd={(item, qty) => onAdd(item ?? product, qty)} onOrderNow={(item, qty) => onOrderNow(item ?? product, qty)} key={`${product.name}-${index}`} />)}{cardPromotion && <aside className="grid-promo-card" aria-label="Discover the Amzad Food collection">
       <span className="grid-promo-kicker"><Gift size={12} /> A LITTLE MORE GOODNESS</span>
       <h3>Made to share.<br /><em>Chosen with care.</em></h3>
       <div className="grid-promo-art"><img src="/amzad-food-website/hero-slide-2.png" alt="Amzad Food sweets and snacks" loading="lazy" /></div>
@@ -676,7 +687,7 @@ const categoryLabel = (category: string) => category === "Oil" ? "Ghee & Oil" : 
 const productTypeLabels: Record<string, string> = { all: "All types", single: "Single products", combo: "Combo packs" };
 
 // Full catalogue for the dedicated All Products page.
-export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWishlist }: StoreActions) {
+export function ProductCatalog({ addToCart, goToCheckout }: StoreActions) {
   const [category, setCategory] = useState("All");
   const [sortKey, setSortKey] = useState<SortKey>("featured");
   const [query, setQuery] = useState("");
@@ -811,7 +822,7 @@ export function ProductCatalog({ addToCart, goToCheckout, isWishlisted, toggleWi
             <button type="button" className="cta cta-sm" onClick={resetFilters}><span>Clear filters</span></button>
           </div>
         ) : (
-          <div className="product-grid">{pageProducts.map(product => <ProductCard key={product.name} product={product} onAdd={(item, qty) => addToCart(item ?? product, qty)} onOrderNow={(item, qty) => goToCheckout(item ?? product, qty)} wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} />)}</div>
+          <div className="product-grid">{pageProducts.map(product => <ProductCard key={product.name} product={product} onAdd={(item, qty) => addToCart(item ?? product, qty)} onOrderNow={(item, qty) => goToCheckout(item ?? product, qty)} />)}</div>
         )}
         <Pagination currentPage={currentPage} pageCount={pageCount} onChange={changePage} />
       </div>

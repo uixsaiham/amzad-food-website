@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Clock, Heart, Minus, Phone, Plus, ShoppingCart, Truck, X } from "lucide-react";
+import { Check, Clock, Minus, Phone, Plus, Truck, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
@@ -31,11 +31,10 @@ const details: Record<string, Details> = {
 const fallbackDetails: Details = { bn: "আমজাদ ফুড", blurb: "Contact our team for product details before ordering.", highlights: [], usage: ["Follow the product label. Contact our team if you need more information."], origin: "", shelfLife: "", storage: "", sold: 0 };
 
 
-export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd, onOrderNow, onClose, embedded = false }: {
+export default function QuickView({ product, onAdd, onOrderNow, onClose, embedded = false, initialQuantity = 1 }: {
   embedded?: boolean;
+  initialQuantity?: number;
   product: QuickViewProduct;
-  wishlisted: boolean;
-  onToggleWishlist: () => void;
   onAdd: (item: CartLine, qty: number) => void;
   onOrderNow: (item: CartLine, qty: number) => void;
   onClose: () => void;
@@ -43,7 +42,7 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
   const info = details[product.name] ?? { ...fallbackDetails, bn: product.bn ?? fallbackDetails.bn };
   const dialog = useRef<HTMLDivElement>(null);
   useModalDialog(dialog, !embedded, onClose);
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState(initialQuantity);
   const [tab, setTab] = useState<Tab>("info");
 
   const price = product.price;
@@ -61,7 +60,6 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
         <div className="qv-media">
           {saving > 0 && <span className="qv-save">Save ৳{saving}</span>}
           {product.tag && <span className="qv-tag">{product.tag}</span>}
-          <button className={wishlisted ? "qv-wish active" : "qv-wish"} onClick={onToggleWishlist} aria-pressed={wishlisted} aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}><Heart size={18} fill={wishlisted ? "currentColor" : "none"} /></button>
           <ProductGallery key={product.name} product={product} />
         </div>
 
@@ -80,7 +78,7 @@ export default function QuickView({ product, wishlisted, onToggleWishlist, onAdd
           <div className="qv-buy">
             <div className="qv-qty"><button onClick={() => setQty((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" disabled={qty === 1}><Minus size={14} /></button><b aria-live="polite">{qty}</b><button onClick={() => setQty((value) => Math.min(20, value + 1))} aria-label="Increase quantity" disabled={qty === 20}><Plus size={14} /></button></div>
             <strong className="qv-line-total" aria-live="polite">Total: ৳{price * qty}</strong>
-            <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }}><span>Add to Cart · ৳{price * qty}</span><i className="cta-icon"><ShoppingCart size={15} /></i></button>
+            <button className="qv-add cta" onClick={() => { onAdd(line, qty); onClose(); }}><span>Add to Cart · ৳{price * qty}</span></button>
             <button className="qv-order cta cta-dark" onClick={() => { onOrderNow(line, qty); onClose(); }}><span>Order Now</span></button>
           </div>
           <div className="qv-contact">

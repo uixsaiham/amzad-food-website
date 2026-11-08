@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Coffee, Flame, Gift, Plus, Sparkles, Star, Wheat } from "lucide-react";
 import { CartLine } from "../lib/cart";
-import { Product, catalog, resolveProductCategory } from "../lib/products";
+import { Product, catalog, productCategories, resolveProductCategory } from "../lib/products";
 
 type RailProduct = { name: string; bn: string; price: number; old?: number; unit: string; rating: number };
 type RailCategory = {
@@ -80,6 +80,20 @@ export const railCategories: RailCategory[] = [
   ] },
 ];
 
+// Include catalog categories that were missing from the original rail.
+for (const label of productCategories) {
+  if (railCategories.some(category => resolveProductCategory(category.label) === label)) continue;
+  const items = catalog.filter(product => product.category === label);
+  const key = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  categoryBanners[key] = items[0]?.image.replace("/amzad-food-website/", "") || "icons/category-basket.png";
+  railCategories.push({
+    key, label, bn: ({ "Wellness": "সুস্থতা", "Gur & Sugar": "গুড় ও চিনি", "Sweets & Snacks": "মিষ্টি ও স্ন্যাকস", "Shemai": "সেমাই" } as Record<string, string>)[label] || label,
+    count: items.length, accent: "#b66b18", tint: "#fff2e4", icon: img(label === "Wellness" ? "category-seeds" : "category-basket"),
+    tagline: `Explore our ${label.toLowerCase()} collection.`, tags: [], deal: `Discover ${label}`,
+    top: items.slice(0, 3).map(product => ({ name: product.name, bn: product.bn || product.name, price: product.price, old: product.oldPrice, unit: product.unit || "1 pack", rating: 4.8 })),
+  });
+}
+
 function CategoryIcon({ icon, size = 20 }: { icon: RailCategory["icon"]; size?: number }) {
   if (typeof icon === "string") return <img src={icon} alt="" aria-hidden="true" />;
   const Icon = icon;
@@ -143,11 +157,11 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
   return <div className="cat-rail-wrap page-width" onMouseLeave={scheduleClose}>
     <div className="cat-rail">
       <button className={selectedCategory === "Offer Zone" ? "cat-rail-offer active" : "cat-rail-offer"} aria-current={selectedCategory === "Offer Zone" ? "true" : undefined} onClick={() => browse("Offer Zone")} onMouseEnter={scheduleClose}>
-        <span className="cat-rail-offer-icon"><Sparkles size={15} /></span>
-        <span><b>Offer Zone</b><small>Up to 30% off</small></span>
+
+        <span><b>Offer Zone</b></span>
       </button>
       <div className="cat-rail-scroller">
-        <button disabled={!canScroll.left} className="cat-rail-arrow left" onClick={() => scrollBy(-1)} aria-label="Scroll categories left"><ChevronLeft size={15} /></button>
+        <button disabled={!canScroll.left} className="cat-rail-arrow left" style={{ visibility: canScroll.left ? "visible" : "hidden" }} onClick={() => scrollBy(-1)} aria-label="Scroll categories left"><ChevronLeft size={15} /></button>
         <div className="cat-rail-track" ref={trackRef} onScroll={updateScroll} role="menubar" aria-label="Shop categories">
           {railCategories.map((category) => <button
             key={category.key}
@@ -166,7 +180,7 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
           </button>)}
         </div>
         <div className="cat-rail-end">
-          {canScroll.right ? <button className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button> : <button className={selectedCategory === "All" ? "cat-rail-all active" : "cat-rail-all"} aria-current={selectedCategory === "All" ? "true" : undefined} onClick={() => browse("All")} onMouseEnter={scheduleClose}><span>All</span></button>}
+          {canScroll.right ? <button className="cat-rail-arrow right" onClick={() => scrollBy(1)} aria-label="Scroll categories right"><ChevronRight size={15} /></button> : <button className={selectedCategory === "All" ? "cat-rail-all active" : "cat-rail-all"} aria-current={selectedCategory === "All" ? "true" : undefined} onClick={() => browse("All")} onMouseEnter={scheduleClose}>All</button>}
         </div>
       </div>
     </div>
@@ -187,8 +201,8 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
             <button type="button" className="cat-product-open" onClick={() => viewProduct(product)} aria-label={`View ${product.name} details`} />
             <span className="cat-thumb"><img src={resolveProduct(product).image} alt="" /></span>
             <div className="cat-product-info">
-              <strong>{product.name}</strong>
-              <small>{product.bn} · {product.unit}</small>
+              <strong className="product-card-name" title={`${product.name} / ${product.bn}`}>{product.name} / <span lang="bn">{product.bn}</span></strong>
+              <small>{product.unit}</small>
               <span className="cat-product-price"><b>৳{product.price}</b>{product.old && <del>৳{product.old}</del>}<i><Star size={10} fill="currentColor" /> {product.rating}</i></span>
             </div>
             <button className="cat-add" onClick={() => onAdd(resolveProduct(product))} aria-label={`Add ${product.name} to cart`}><Plus size={15} /></button>

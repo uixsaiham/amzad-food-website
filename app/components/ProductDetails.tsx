@@ -40,15 +40,15 @@ function ProductTabs({ product }: { product: Product }) {
 }
 
 export default function ProductDetails({ product, related }: { product: Product; related: Product[] }) {
-  return <Storefront>{({ addToCart, goToCheckout, isWishlisted, toggleWishlist }) => <div className="pd-page">
+  return <Storefront>{({ addToCart, goToCheckout }) => <div className="pd-page">
     <div className="page-width">
       <div className="pd-topbar"><nav className="pd-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span><Link href="/products/">All Products</Link><span>/</span><Link href={`/products/?category=${encodeURIComponent(product.category)}`}>{product.category === "Oil" ? "Ghee & Oil" : product.category}</Link><span>/</span><span aria-current="page">{product.name}</span></nav></div>
-      <QuickView key={product.name} product={product} embedded wishlisted={isWishlisted(product.name)} onToggleWishlist={() => toggleWishlist(product)} onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => {}} />
+      <QuickView key={product.name} product={product} embedded onAdd={addToCart} onOrderNow={goToCheckout} onClose={() => {}} />
 
       <ProductTabs product={product} />
       <ProductReview key={product.name} product={product.name} />
 
     </div>
-    <section className="pd-related page-width"><div className="pd-section-heading"><div><span className="pd-eyebrow">A LITTLE MORE TO LOVE</span><h2>Explore related products</h2></div><Link href="/products/">Shop all <ArrowRight size={16} /></Link></div><div className="pd-related-grid">{related.map(item => <ProductCard key={item.name} product={item} onAdd={(line, qty) => addToCart(line ?? item, qty)} onOrderNow={(line, qty) => goToCheckout(line ?? item, qty)} wishlisted={isWishlisted(item.name)} onToggleWishlist={() => toggleWishlist(item)} />)}</div></section>
+    <section className="pd-related page-width"><div className="pd-section-heading"><div><span className="pd-eyebrow">A LITTLE MORE TO LOVE</span><h2>Explore related products</h2></div><Link href="/products/">Shop all <ArrowRight size={16} /></Link></div><div className="pd-related-grid">{related.map(item => <ProductCard key={item.name} product={item} onAdd={(line, qty) => addToCart(line ?? item, qty)} onOrderNow={(line, qty) => goToCheckout(line ?? item, qty)} />)}</div></section>
   </div>}</Storefront>;
 }

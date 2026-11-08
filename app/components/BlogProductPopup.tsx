@@ -52,7 +52,7 @@ export default function BlogProductPopup({ post, articleRef }: { post: BlogPost;
     <div className="blog-pick-main">
       <Link href={href} className="blog-pick-image" onClick={close} tabIndex={-1} aria-hidden="true"><img src={product.image} alt="" loading="lazy" /></Link>
       <div className="blog-pick-copy">
-        <h3><Link href={href} onClick={close}>{product.bn && bangla ? product.bn : product.name}</Link></h3>
+        <h3 className="product-card-name" title={product.bn ? `${product.name} / ${product.bn}` : product.name}><Link href={href} onClick={close}>{product.name}{product.bn && <> / <span lang="bn">{product.bn}</span></>}</Link></h3>
         <p className="blog-pick-benefit">{pick.benefit}</p>
         <p className="blog-pick-price"><strong>৳{product.price.toLocaleString("en-IN")}</strong>{product.oldPrice && <del>৳{product.oldPrice.toLocaleString("en-IN")}</del>}</p>
       </div>

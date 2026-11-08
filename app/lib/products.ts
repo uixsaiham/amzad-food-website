@@ -3,7 +3,8 @@ export type ProductBrand = typeof productBrands[number];
 export const getProductBrand = (product: { brand?: ProductBrand }): ProductBrand => product.brand ?? "Amzad";
 
 export type ProductImage = { src: string; label: string; scale?: number; x?: number; y?: number };
-export type Product = { brand?: ProductBrand; name: string; bn?: string; category: string; price: number; oldPrice?: number; unit?: string; image: string; images?: ProductImage[]; tag?: string };
+export type ProductVariant = { id: string; label: string; price: number; oldPrice?: number; image: string };
+export type Product = { variants?: ProductVariant[]; brand?: ProductBrand; name: string; bn?: string; category: string; price: number; oldPrice?: number; unit?: string; image: string; images?: ProductImage[]; tag?: string };
 
 export const getProductImages = (product: Product): ProductImage[] => [
   { src: product.image, label: "Full product" },
@@ -104,7 +105,36 @@ const sampleGroups: { category: string; image: string; items: [string, number, s
 ];
 const sampleProducts: Product[] = sampleGroups.flatMap(group => group.items.map(([name, price, unit]) => ({ name, price, unit, category: group.category, image: `/amzad-food-website/${group.image}`, tag: "Sample" })));
 
-export const catalog = Array.from(new Map([...legacyProducts, ...heroProducts, ...sampleProducts, ...Object.values(store)].map(product => [productSlug(product.name), product])).values());
+// Shared translations keep every product-card surface bilingual.
+const productBanglaNames: Record<string, string> = {
+  "Wildflower Honey & Black Seed": "কালোজিরা মধু", "Sundarbans Raw Honey": "সুন্দরবনের খাঁটি মধু", "Organic Black Seed Oil": "অর্গানিক কালোজিরা তেল", "Premium Date Syrup": "প্রিমিয়াম খেজুরের সিরাপ", "Pure Ghee": "খাঁটি ঘি", "Puffed Rice": "মুড়ি", "Premium Black Seed Oil": "প্রিমিয়াম কালোজিরা তেল", "Khejur Gur": "খেজুরের গুড়", "Mango Pickle": "আমের আচার",
+  "Kabab Queen Curry Powder": "কাবাব কুইন কারি পাউডার", "Cumin Powder": "জিরা গুঁড়া", "Garam Masala Powder": "গরম মসলা গুঁড়া", "Turmeric Powder": "হলুদ গুঁড়া", "Chili Powder": "মরিচ গুঁড়া", "Coriander Powder": "ধনিয়া গুঁড়া", "Badami Barfi": "বাদামি বরফি", "Chinabuti Naru": "চিনাবুটি নাড়ু", "Mixed Nuts": "মিশ্র বাদাম", "Isabgul Husk Fiber": "ইসবগুলের ভুসি", "SLFIT Support Capsules": "স্লিফিট সাপোর্ট ক্যাপসুল",
+  "Litchu Flower Honey": "লিচু ফুলের মধু", "Ajwa Dates": "আজওয়া খেজুর", "Medjool Dates": "মেডজুল খেজুর", "Mabroom Dates": "মাবরুম খেজুর", "Cold Pressed Mustard Oil": "কোল্ড প্রেসড সরিষার তেল", "Coconut Oil": "নারকেল তেল", "Premium Cashew": "প্রিমিয়াম কাজু বাদাম", "California Almond": "ক্যালিফোর্নিয়ার কাঠবাদাম", "Roasted Peanut": "ভাজা চিনাবাদাম", "Chia Seeds": "চিয়া সিড", "Black Seed (Kalojira)": "কালোজিরা", "Flax Seeds": "তিসি বীজ", "Pumpkin Seeds": "কুমড়ার বীজ", "Himsagar Mango": "হিমসাগর আম", "Langra Mango": "ল্যাংড়া আম", "Aamshotto": "আমসত্ত্ব", "Himalayan Pink Salt": "হিমালয়ান পিংক সল্ট", "Black Salt": "বিট লবণ", "Rock Salt Coarse": "দানাদার সৈন্ধব লবণ", "Chinigura Rice": "চিনিগুঁড়া চাল", "Chira": "চিড়া", "Khoi": "খই", "Sylhet Black Tea": "সিলেটের কালো চা", "Green Tea": "গ্রিন টি", "Masala Chai": "মসলা চা", "Laccha Shemai": "লাচ্ছা সেমাই", "Roasted Shemai": "ভাজা সেমাই",
+};
+// Preview pack sizes requested for the storefront. Replace with final inventory
+// sizes, prices and variant-specific photographs before taking live orders.
+export function withDemoVariants(product: Product): Product {
+  if (product.variants?.length) return product;
+  const unit = product.unit ?? "";
+  const liquid = /(?:ml|ltr|litre|liter|\bL\b)/i.test(unit) || /Oil|Syrup/.test(product.name);
+  const packs = /combo|box/i.test(unit) || product.category === "Combo Packs" || /Capsules/.test(product.name);
+  const options = packs ? [{ label: "1 pack", amount: 1 }, { label: "2 packs", amount: 2 }, { label: "3 packs", amount: 3 }]
+    : liquid ? [{ label: "500 ml", amount: 500 }, { label: "1 L", amount: 1000 }, { label: "5 L", amount: 5000 }]
+    : [{ label: "250 gm", amount: 250 }, { label: "500 gm", amount: 500 }, { label: "1 kg", amount: 1000 }];
+  const match = unit.match(/([\d.]+)\s*(kg|gm|g|ml|ltr|litre|liter|l)\b/i);
+  const base = packs ? 1 : match ? Number(match[1]) * (/^(kg|ltr|litre|liter|l)$/i.test(match[2]) ? 1000 : 1) : liquid ? 500 : 500;
+  const variants = options.map(({ label, amount }, index) => ({
+    id: `demo-${index}`, label,
+    price: Math.max(1, Math.round(product.price * amount / base)),
+    oldPrice: product.oldPrice ? Math.max(1, Math.round(product.oldPrice * amount / base)) : undefined,
+    image: product.image,
+  }));
+  // Preserve the existing pack as the initially selected option where possible.
+  variants.sort((a, b) => Number(b.price === product.price) - Number(a.price === product.price));
+  return { ...product, variants };
+}
+
+export const catalog: Product[] = Array.from(new Map([...legacyProducts, ...heroProducts, ...sampleProducts, ...Object.values(store)].map(product => [productSlug(product.name), product])).values()).map(product => ({ ...product, bn: product.bn ?? productBanglaNames[product.name] })).map(withDemoVariants);
 export const storeProducts: Product[] = catalog;
 export const productCategories: string[] = Array.from(new Set(storeProducts.map(product => product.category)));
 

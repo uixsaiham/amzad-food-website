@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Eye, EyeOff, Gift, Heart, Lock, Mail, PackageSearch, ShieldCheck, Star, UserRound, X, Zap } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Gift, Lock, Mail, PackageSearch, ShieldCheck, Star, UserRound, X, Zap } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
@@ -12,7 +12,6 @@ type Mode = "signin" | "signup";
 const perks = [
   { icon: PackageSearch, title: "Track every order", text: "Live status from packing to your door" },
   { icon: Zap, title: "Faster checkout", text: "Saved address and phone number" },
-  { icon: Heart, title: "Wishlist everywhere", text: "Your favourites on every device" },
   { icon: Gift, title: "Member-only deals", text: "Early access to offers and new arrivals" },
 ];
 
