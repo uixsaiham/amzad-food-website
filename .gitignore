@@ -25,3 +25,6 @@ yarn-error.log*
 next-env.d.ts
 
 .next-dev/
+
+# PDF generation previews and temporary files
+/tmp/pdfs/
