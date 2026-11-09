@@ -5249,52 +5249,81 @@ html body .hero-modern .hero-slider-bar { padding-left: 0; }
  html body .hero-modern .hero-spots { top: 50%; bottom: auto; height: 100%; transform: translateY(-60%); object-position: center; }
 }
 
-/* Editorial promotional popup with product showcase and delivery ticket. */
-html body .offer-popup-backdrop { padding: 24px; background: #10261ec2; backdrop-filter: blur(5px); }
-html body .offer-popup { display: grid; grid-template-columns: .95fr 1.05fr; width: min(100%, 780px); padding: 0; overflow: hidden; background: #fffefa; max-height: calc(100dvh - 48px); overflow-y: auto; box-shadow: 0 24px 90px #0004; }
-html body .offer-popup-close { top: 12px; right: 12px; z-index: 3; width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid #e2e7dd; background: #fffefa; color: #315344; }
-.offer-visual { position: relative; display: flex; flex-direction: column; padding: 28px 24px 20px; background: #eaf0df; overflow: hidden; }
-.offer-edition { display: flex; align-items: center; gap: 6px; color: #54734d; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
-.offer-visual-title { position: relative; z-index: 1; margin-top: 28px; font-family: var(--font-heading); color: #173d2c; font-size: 36px; line-height: 1.14; letter-spacing: -.04em; }
-.offer-visual-title em { font-weight: 400; color: #da5818; }
-.offer-product-stage { position: relative; flex: 1; display: grid; place-items: center; min-height: 225px; }
-.offer-product-stage img { position: relative; z-index: 1; width: 100%; height: 230px; object-fit: contain; mix-blend-mode: multiply; }
-.offer-stage-ring { position: absolute; width: 210px; height: 165px; border: 1px solid #c6d7b6; transform: rotate(-12deg); }
-.offer-curated { position: absolute; right: -8px; bottom: 6px; z-index: 2; display: flex; align-items: center; gap: 5px; padding: 8px 10px; background: #fffefa; color: #47693d; font-size: 10px; border: 1px solid #dce5d1; transform: rotate(-4deg); }
-.offer-visual-footer { margin-top: 20px; font-size: 8px; letter-spacing: .1em; color: #698263; text-align: center; }
-.offer-content { display: flex; flex-direction: column; justify-content: center; padding: 44px 30px 28px; }
-.offer-invitation { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #7c6d5e; }
-.offer-invitation > span { width: 6px; height: 6px; background: #ff6418; }
-html body .offer-popup h2 { font-size: 35px; line-height: 1.16; letter-spacing: -.045em; margin: 16px 0 12px; color: #173d2c; }
-.offer-popup h2 em { font-weight: 400; color: #ed601c; }
-html body .offer-intro { margin: 0; color: #738074; font-size: 13px; line-height: 1.65; }
-.offer-perk-ticket { position: relative; display: flex; gap: 12px; align-items: center; margin: 24px 0; padding: 16px 12px; border: 1px dashed #e8bf96; background: #fff6e9; overflow: hidden; }
-.offer-ticket-icon { flex-shrink: 0; color: #dc5a15; }
-.offer-ticket-label { display: block; font-size: 8px; color: #aa7b49; letter-spacing: .12em; font-weight: 700; margin-bottom: 5px; }
-.offer-perk-ticket strong { font-size: 17px; color: #214933; }
-html body .offer-perk-ticket p { font-size: 10px; color: #877964; margin: 5px 0 0; }
-.offer-shop-button { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 12px 16px; background: #ff6418; color: #fff; font-size: 13px; font-weight: 700; }
-.offer-shop-button:hover { background: #e6500b; }
-.offer-continue { align-self: center; margin: 14px 0 0; background: transparent; border: 0; padding: 5px; color: #607567; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
-.offer-fineprint { text-align: center; color: #929b8f; font-size: 9px; margin-top: 18px; }
+/* A small editorial offer card with a warm product spotlight. */
+html body .offer-popup-backdrop { padding: 20px; background: #10261e99; backdrop-filter: blur(6px); }
+html body .offer-popup { display: grid; grid-template-columns: 1fr 1.08fr; width: min(100%, 660px); padding: 7px; border: 1px solid #ffffff80; border-radius: 24px; overflow: hidden; background: #fffdf7; max-height: calc(100dvh - 40px); overflow-y: auto; box-shadow: 0 30px 100px #061a1950; animation: offer-reveal .4s ease-out both; }
+html body .offer-popup-close { top: 16px; right: 16px; z-index: 3; width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 1px solid #e8e7df; border-radius: 50%; background: transparent; color: #627364; cursor: pointer; transition: background .2s; }
+html body .offer-popup-close:hover { background: #edece3; }
+.offer-visual { position: relative; display: flex; flex-direction: column; padding: 24px 20px; border-radius: 18px; background: #234c3b; overflow: hidden; }
+.offer-visual::before { content: ''; position: absolute; width: 330px; height: 330px; top: 28px; left: -40px; border: 1px solid #ffffff0d; border-radius: 50%; }
+.offer-edition { position: relative; display: flex; align-items: center; gap: 7px; color: #e6e9ce; font-size: 9px; font-weight: 500; letter-spacing: .18em; }
+.offer-product-stage { position: relative; flex: 1; display: grid; place-items: center; min-height: 242px; }
+.offer-product-stage::after { content: ''; position: absolute; bottom: 21px; width: 155px; height: 18px; border-radius: 50%; background: #0d261e50; filter: blur(9px); }
+.offer-product-stage img { position: relative; z-index: 1; width: 112%; max-width: none; height: 238px; object-fit: contain; transform: rotate(-7deg); filter: drop-shadow(0 15px 12px #102e2630); }
+.offer-stage-ring { position: absolute; width: 216px; height: 216px; border: 8px solid #ffffff12; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f7ebce, #d8cba6); }
+.offer-product-spark { position: absolute; z-index: 2; color: #f5cc83; line-height: 1; }
+.offer-product-spark-one { right: 0; top: 22px; font-size: 38px; transform: rotate(12deg); }
+.offer-product-spark-two { left: 0; bottom: 31px; font-size: 27px; }
+.offer-visual-caption { position: relative; text-align: center; color: #e4e8d6; font-size: 10px; font-weight: 400; letter-spacing: .035em; }
+.offer-visual-caption em { font-family: var(--font-heading); font-size: 15px; color: #f2d19b; }
+.offer-content { display: flex; flex-direction: column; justify-content: center; padding: 38px 28px 21px; }
+.offer-invitation { display: flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 400; color: #8b806c; }
+.offer-invitation > span { width: 5px; height: 5px; border-radius: 50%; background: #ed601c; box-shadow: 0 0 0 4px #ed601c10; }
+html body .offer-popup h2 { font-size: clamp(32px, 4vw, 39px); font-weight: 400; line-height: 1.12; letter-spacing: -.045em; margin: 18px 0 0; color: #234c3b; }
+.offer-popup h2 em { position: relative; font-weight: 400; color: #e46a32; }
+.offer-perk-ticket { display: flex; gap: 11px; align-items: center; margin: 23px 0; padding: 13px 12px; border: 1px solid #e9e6d8; border-radius: 10px; background: #f6f5ec; }
+.offer-ticket-icon { display: grid; place-items: center; width: 33px; height: 33px; border-radius: 50%; background: #e6ebdc; flex-shrink: 0; color: #476547; }
+.offer-ticket-icon svg { width: 18px; height: 18px; stroke-width: 1.5; }
+.offer-perk-ticket strong { font-size: 12px; font-weight: 500; color: #31513b; }
+html body .offer-perk-ticket p { font-size: 10px; font-weight: 400; color: #82816f; margin: 3px 0 0; }
+.offer-shop-button { display: flex; align-items: center; justify-content: space-between; min-height: 46px; border-radius: 9px; padding: 9px 10px 9px 16px; background: #eb682d; color: #fff; font-size: 12px; font-weight: 500; box-shadow: 0 5px 12px #e56b2820; transition: background .2s, transform .2s; }
+.offer-shop-button > svg { box-sizing: content-box; padding: 6px; border-radius: 50%; background: #ffffff20; stroke-width: 1.5; }
+.offer-shop-button:hover { background: #dc5921; transform: translateY(-1px); }
+.offer-continue { align-self: center; margin: 10px 0 0; background: transparent; border: 0; padding: 6px; color: #899080; font-size: 10px; font-weight: 400; cursor: pointer; }
+.offer-continue:hover { color: #31513b; }
+@keyframes offer-reveal { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 600px) {
- html body .offer-popup-backdrop { padding: 16px; }
- html body .offer-popup { grid-template-columns: 1fr; width: min(100%, 390px); max-height: calc(100dvh - 32px); }
- .offer-visual { min-height: 180px; padding: 20px; }
- .offer-edition { font-size: 8px; }
- .offer-visual-title { margin-top: 22px; font-size: 28px; width: 53%; }
- .offer-product-stage { position: absolute; right: 4px; top: 18px; width: 48%; min-height: 150px; }
- .offer-product-stage img { height: 155px; }
- .offer-stage-ring { width: 130px; height: 110px; }
- .offer-curated, .offer-visual-footer { display: none; }
- .offer-content { padding: 22px; }
- html body .offer-popup h2 { font-size: 30px; margin: 12px 0 10px; }
- .offer-perk-ticket { margin: 18px 0; }
- .offer-fineprint { margin-top: 12px; }
+ html body .offer-popup { grid-template-columns: 1fr; width: min(100%, 350px); border-radius: 22px; }
+ html body .offer-popup-close { background: #fffdf7; }
+ .offer-visual { padding: 16px 20px 14px; border-radius: 16px; }
+ .offer-product-stage { min-height: 170px; }
+ .offer-product-stage img { width: 100%; height: 177px; }
+ .offer-stage-ring { width: 160px; height: 160px; border-width: 6px; }
+ .offer-product-spark-one { right: 29px; top: 12px; font-size: 30px; }
+ .offer-product-spark-two { left: 30px; bottom: 20px; }
+ .offer-content { padding: 22px 22px 12px; }
+ html body .offer-popup h2 { font-size: 33px; margin-top: 12px; }
+ .offer-perk-ticket { margin: 17px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+ html body .offer-popup { animation: none; }
+ .offer-shop-button { transition: none; }
 }
 
 /* Add breathing room between the category rail and hero. */
 html body .cat-rail-wrap + .hero.hero-modern { margin-top: 28px; }
 @media (max-width: 800px) {
  html body .cat-rail-wrap + .hero.hero-modern { margin-top: 18px; }
+}
+
+/* Both support numbers stay grouped on the left of the mobile top strip. */
+@media (max-width: 800px) {
+ html body .mobile-contact-bar { padding-inline: 12px; gap: 8px; }
+ .mobile-contact-numbers { display: flex; align-items: center; gap: 12px; min-width: 0; }
+ html body .mobile-contact-bar a { font-size: 10px; gap: 4px; }
+ html body .mobile-contact-numbers svg { width: 11px; height: 11px; }
+ html body .mobile-contact-bar .mobile-track-order { flex-shrink: 0; }
+}
+@media (max-width: 374px) {
+ html body .mobile-contact-bar { padding-inline: 8px; gap: 6px; }
+ .mobile-contact-numbers { gap: 8px; }
+ html body .mobile-contact-bar a { font-size: 9px; gap: 3px; }
+}
+
+/* Balanced side gutters on the mobile top contact bar. */
+@media (max-width: 800px) {
+ html body .mobile-contact-bar { padding-left: 16px; padding-right: 16px; }
+}
+@media (max-width: 374px) {
+ html body .mobile-contact-bar { padding-left: 12px; padding-right: 12px; }
 }

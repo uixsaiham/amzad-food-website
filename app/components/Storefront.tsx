@@ -441,7 +441,7 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
     </> : <>
     <HeroSlider />
     <BrandStrip />
-    <ProductSection id="best-selling" maxRows={2} mobileMaxRows={2} title="Top Selling Products" eyebrow="" products={[...storeProducts.filter(product => product.tag === "Best Seller"), ...storeProducts.filter(product => product.tag !== "Best Seller").slice(0, 3)]} onAdd={addToCart} onOrderNow={goToCheckout} />
+    <ProductSection id="best-selling" maxRows={3} mobileMaxRows={3} title="Top Selling Products" eyebrow="" products={[...storeProducts.filter(product => product.tag === "Best Seller"), ...storeProducts.filter(product => product.tag !== "Best Seller").slice(0, 3)]} onAdd={addToCart} onOrderNow={goToCheckout} />
     <section className="journey page-width" aria-label="From source to your table"><div className="journey-card">
       <div className="journey-intro"><span className="journey-pill"><Leaf size={12} /> Our Promise</span><h2>From Source<br /><em>to Your Table</em></h2><p>A journey of trust &amp; quality, in four careful steps.</p></div>
       <ol className="journey-steps">{journeySteps.map(step => <li key={step.title} style={{ "--step-hue": step.hue } as React.CSSProperties}><span className="journey-node"><FontAwesomeIcon icon={step.icon} fontSize={17} /></span><strong>{step.title}</strong><p>{step.subtitle}</p></li>)}</ol>
