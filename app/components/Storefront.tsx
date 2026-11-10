@@ -69,7 +69,6 @@ export function ProductCard({ product, onAdd, onOrderNow }: { product: Product; 
   const packCount = demoImage && /packs?$/.test(selected.label) ? Number.parseInt(selected.label, 10) : 1;
   const sizeRank = [...variants].sort((a, b) => a.price - b.price).findIndex(variant => variant.id === selected.id);
   const previewScale = demoImage && !/packs?$/.test(selected.label) ? [0.7, 0.85, 1][Math.min(sizeRank, 2)] : 1;
-  const selectedProduct = { ...product, price: selected.price, oldPrice: selected.oldPrice, image: selected.image, unit: selected.label, images: selected.image === product.image ? product.images : undefined };
   const line: CartLine = { name: `${product.name} (${selected.label})`, price: selected.price, image: selected.image };
   const [inCart, setInCart] = useState(false);
   useEffect(() => {
@@ -103,7 +102,7 @@ export function ProductCard({ product, onAdd, onOrderNow }: { product: Product; 
       </div>
       <div className="pc-actions"><button className="pc-order" onClick={() => onOrderNow(line, 1)}>Order Now</button><button className={inCart ? "pc-action in-cart" : "pc-action"} onClick={() => onAdd(line, 1)} aria-label={inCart ? `Add another ${name} to cart` : `Add ${name} to cart`} title={inCart ? "In cart — add another" : "Add to cart"}><ShoppingCart size={18} /></button></div>
     </div>
-    {quickView && <QuickView key={selected.id} product={selectedProduct} onAdd={(_, qty) => onAdd(line, qty)} onOrderNow={(_, qty) => onOrderNow(line, qty)} onClose={closeQuickView} />}
+    {quickView && <QuickView key={selected.id} product={{ ...product, variants, unit: selected.label }} onAdd={onAdd} onOrderNow={onOrderNow} onClose={closeQuickView} />}
   </article>;
 }
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Info, ShieldCheck, Leaf, Truck } from "lucide-react";
 import QuickView from "./QuickView";
+import { getProductDetails } from "../lib/product-details";
 import { Product } from "../lib/products";
 import Storefront, { ProductCard } from "./Storefront";
 import ProductReview from "./ProductReview";
@@ -20,7 +21,7 @@ function ProductTabs({ product }: { product: Product }) {
       <div className="pd-tabs-content">
         {activeTab === "description" && <div>
           <h3>About {product.name}</h3>
-          <p>View the selected pack and price above. Contact our team for product specifications before ordering.</p>
+          <p>{getProductDetails(product).blurb}</p>
         </div>}
         {activeTab === "nutrition" && <div>
           <h3>Ingredients & Nutrition</h3>

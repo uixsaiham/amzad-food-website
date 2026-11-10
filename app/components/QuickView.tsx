@@ -6,31 +6,16 @@ import { Check, Clock, Minus, Phone, Plus, Truck, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CartLine } from "../lib/cart";
-import { Product, getProductBrand } from "../lib/products";
+import { Product, getProductBrand, withDemoVariants } from "../lib/products";
 import ProductGallery from "./ProductGallery";
+import { getProductDetails } from "../lib/product-details";
 import { useModalDialog } from "../lib/useModalDialog";
 import { DELIVERY_DESCRIPTION } from "../lib/offers";
 
 type QuickViewProduct = Product;
-type Details = { bn: string; blurb: string; highlights: string[]; usage: string[]; origin: string; shelfLife: string; storage: string; sold: number };
 type Tab = "info" | "usage" | "delivery";
 
 const tabs: { key: Tab; label: string }[] = [{ key: "info", label: "Product Info" }, { key: "usage", label: "How to Use" }, { key: "delivery", label: "Delivery" }];
-const honeyUsage = ["Take one teaspoon on an empty stomach each morning.", "Stir into warm (not boiling) water, milk or tea.", "Drizzle over bread, oats, yoghurt or fruit."];
-const details: Record<string, Details> = {
-  "Wildflower Honey & Black Seed": { bn: "কালোজিরা মধু", blurb: "Raw wildflower honey blended with black seed — a traditional wellness pairing enjoyed in Bangladeshi homes for generations.", highlights: ["Raw wildflower honey, never overheated or diluted", "Infused with premium black seed (kalojira)", "No added sugar, colour or preservatives", "Sealed in a food-grade jar for freshness"], usage: honeyUsage, origin: "Sundarbans & northern Bangladesh", shelfLife: "18 months", storage: "Cool, dry place away from sunlight", sold: 320 },
-  "Sundarbans Raw Honey": { bn: "সুন্দরবনের খাঁটি মধু", blurb: "Wild honey collected sustainably from the mangrove forests of the Sundarbans — dark, rich and full of natural flavour.", highlights: ["Harvested by traditional honey collectors", "100% raw, unprocessed and unheated", "Naturally rich in antioxidants", "Lab tested for purity before packing"], usage: honeyUsage, origin: "Sundarbans, Khulna", shelfLife: "24 months", storage: "Room temperature; natural crystallisation is normal", sold: 410 },
-  "Organic Black Seed Oil": { bn: "কালোজিরা তেল", blurb: "Cold-pressed from carefully selected black seeds to keep the natural aroma and goodness — for wellness and care.", highlights: ["Cold-pressed, no heat or chemical extraction", "100% pure, no blending with other oils", "Rich, earthy aroma of fresh black seed", "Packed in a dark bottle to protect quality"], usage: ["Take half a teaspoon daily with honey or warm water.", "Massage gently on scalp or skin as a natural moisturiser.", "Store the bottle tightly capped after every use."], origin: "Bangladesh", shelfLife: "12 months", storage: "Cool, dry place away from sunlight", sold: 280 },
-  "Premium Black Seed Oil": { bn: "প্রিমিয়াম কালোজিরা তেল", blurb: "Premium cold-pressed black seed oil made from hand-selected seeds for a strong aroma and consistent quality.", highlights: ["Hand-selected black seeds, cold pressed", "No additives, colour or preservatives", "Strong, authentic black seed aroma", "Sealed, tamper-proof packaging"], usage: ["Take half a teaspoon daily with honey or warm water.", "Use a few drops for hair and skin massage.", "Keep the bottle tightly capped after use."], origin: "Bangladesh", shelfLife: "12 months", storage: "Cool, dry place away from sunlight", sold: 240 },
-  "Premium Date Syrup": { bn: "খেজুরের সিরাপ", blurb: "A thick, naturally sweet syrup made from ripe dates — a wholesome replacement for refined sugar.", highlights: ["Made from ripe, hand-picked dates", "No refined sugar or artificial sweeteners", "Naturally rich in iron and minerals", "Smooth, thick texture with a caramel-like taste"], usage: ["Pour over pancakes, oats, yoghurt or desserts.", "Stir into milk, smoothies or tea instead of sugar.", "Use as a natural glaze in baking and cooking."], origin: "Jessore, Bangladesh", shelfLife: "12 months", storage: "Cool, dry place; refrigerate after opening", sold: 190 },
-  "Pure Ghee": { bn: "খাঁটি ঘি", blurb: "Slow-cooked from fresh cow milk butter in small batches, with the golden colour and rich aroma of traditional ghee.", highlights: ["Made from fresh milk butter, slow cooked", "Golden colour with a rich, nutty aroma", "No vegetable fat or artificial flavour", "High smoke point — great for everyday cooking"], usage: ["Add a spoonful over hot rice, khichuri or polao.", "Use for frying, tempering and making sweets.", "Spread on roti or paratha instead of butter."], origin: "Bangladesh", shelfLife: "12 months", storage: "Airtight container in a cool, dry place", sold: 520 },
-  "Puffed Rice": { bn: "মুড়ি", blurb: "Light, crisp and freshly puffed — the classic Bangladeshi snack, packed to stay crunchy.", highlights: ["Freshly puffed from selected rice", "Light, crisp and easy to digest", "No added colour or preservatives", "Resealable packaging keeps it crunchy"], usage: ["Mix with mustard oil, onion, chilli and coriander for jhal muri.", "Enjoy with milk, jaggery or fresh fruit.", "Serve as a light evening snack with tea."], origin: "Bangladesh", shelfLife: "3 months", storage: "Airtight container, away from moisture", sold: 610 },
-  "Khejur Gur": { bn: "খেজুরের গুড়", blurb: "Traditional date-palm jaggery made by slow-boiling fresh sap — the taste of winter mornings in the village.", highlights: ["Made from fresh date-palm sap", "No sugar, chemicals or artificial colour", "Deep caramel flavour and natural sweetness", "Perfect for pitha, payesh and sweets"], usage: ["Use in pitha, payesh and traditional sweets.", "Grate over warm rice or roti for a natural sweet bite.", "Melt into warm milk or tea as a sugar substitute."], origin: "Jessore & Satkhira", shelfLife: "6 months", storage: "Airtight container in a cool, dry place", sold: 350 },
-  "Mango Pickle": { bn: "আমের আচার", blurb: "Sun-dried green mango slices cured with mustard oil and hand-ground spices, the traditional way.", highlights: ["Made from fresh green mangoes", "Cured in mustard oil with traditional spices", "Perfect balance of tangy, spicy and sweet", "No artificial colour or flavour"], usage: ["Serve a spoonful with rice, khichuri or paratha.", "Use as a side with dal, bhorta or biryani.", "Always use a dry spoon to keep the pickle fresh."], origin: "Rajshahi", shelfLife: "9 months", storage: "Airtight jar; keep away from moisture", sold: 270 },
-};
-const fallbackDetails: Details = { bn: "আমজাদ ফুড", blurb: "Contact our team for product details before ordering.", highlights: [], usage: ["Follow the product label. Contact our team if you need more information."], origin: "", shelfLife: "", storage: "", sold: 0 };
-
-
 export default function QuickView({ product, onAdd, onOrderNow, onClose, embedded = false, initialQuantity = 1 }: {
   embedded?: boolean;
   initialQuantity?: number;
@@ -39,17 +24,21 @@ export default function QuickView({ product, onAdd, onOrderNow, onClose, embedde
   onOrderNow: (item: CartLine, qty: number) => void;
   onClose: () => void;
 }) {
-  const info = details[product.name] ?? { ...fallbackDetails, bn: product.bn ?? fallbackDetails.bn };
+  const info = getProductDetails(product);
   const dialog = useRef<HTMLDivElement>(null);
   useModalDialog(dialog, !embedded, onClose);
   const [qty, setQty] = useState(initialQuantity);
   const [tab, setTab] = useState<Tab>("info");
+  const variants = withDemoVariants(product).variants!;
+  const [variantId, setVariantId] = useState(() => variants.find((variant) => variant.label === product.unit)?.id ?? variants[0].id);
+  const selected = variants.find((variant) => variant.id === variantId) ?? variants[0];
+  const selectedProduct = { ...product, price: selected.price, oldPrice: selected.oldPrice, unit: selected.label, image: selected.image, images: selected.image === product.image ? product.images : undefined };
 
-  const price = product.price;
-  const saving = Math.max(0, (product.oldPrice ?? price) - price);
-  const line: CartLine = { name: product.name, price, image: product.image };
+  const price = selected.price;
+  const saving = Math.max(0, (selected.oldPrice ?? price) - price);
+  const line: CartLine = { name: `${product.name} (${selected.label})`, price, image: selected.image };
   const whatsappText = encodeURIComponent(`Hello Amzad Food, I would like to order ${qty} × ${line.name} (৳${price * qty}).`);
-  const infoRows: [string, string][] = [["Brand", getProductBrand(product)], ["Category", product.category], ["Pack", product.unit ?? "Contact us for pack details"]];
+  const infoRows: [string, string][] = [["Brand", getProductBrand(product)], ["Category", product.category], ["Pack", selected.label]];
 
   const content = (
     <div className={embedded ? "pd-product" : "qv-backdrop"} onClick={onClose} role="presentation">
@@ -60,16 +49,21 @@ export default function QuickView({ product, onAdd, onOrderNow, onClose, embedde
         <div className="qv-media">
           {saving > 0 && <span className="qv-save">Save ৳{saving}</span>}
           {product.tag && <span className="qv-tag">{product.tag}</span>}
-          <ProductGallery key={product.name} product={product} />
+          <ProductGallery key={`${product.name}-${selected.id}`} product={selectedProduct} />
         </div>
 
         <div className="qv-body">
           <div className="qv-meta"><span className="qv-cat">{product.category}</span></div>
-          {embedded ? <h1 className="qv-title"><span>{info.bn}</span>{product.name}</h1> : <h2 className="qv-title"><span>{info.bn}</span>{product.name}</h2>}
-          <div className="qv-price"><strong>৳{price}</strong>{saving > 0 && <><del>৳{product.oldPrice}</del><em>You save ৳{saving}</em></>}</div>
+          {embedded ? <h1 className="qv-title"><span>{product.bn ?? product.name}</span>{product.name}</h1> : <h2 className="qv-title"><span>{product.bn ?? product.name}</span>{product.name}</h2>}
+          <div className="qv-price"><strong>৳{price}</strong>{saving > 0 && <><del>৳{selected.oldPrice}</del><em>You save ৳{saving}</em></>}</div>
           <p className="qv-blurb">{info.blurb}</p>
 
-          <div className="qv-block"><h4>Pack <small>{product.unit ?? "Contact us for pack details"}</small></h4></div>
+          <div className="qv-block">
+            <h4>Pack <small>{selected.label}</small></h4>
+            <div className="qv-sizes" role="group" aria-label={`Pack size for ${product.name}`}>
+              {variants.map((variant) => <button key={variant.id} type="button" className={variant.id === selected.id ? "active" : ""} aria-pressed={variant.id === selected.id} onClick={() => setVariantId(variant.id)}><b>{variant.label}</b><span>৳{variant.price}</span></button>)}
+            </div>
+          </div>
 
           <ul className="qv-highlights">{info.highlights.map((item) => <li key={item}><Check size={14} />{item}</li>)}</ul>
 
