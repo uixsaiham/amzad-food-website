@@ -29,7 +29,7 @@ const groups = [
 export default function FAQPage() {
   return <Storefront>{() => <div className="faq-page page-width">
     <nav className="pd-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">FAQ</span></nav>
-    <header className="faq-heading"><span className="pd-eyebrow">A LITTLE HELP, WHEN YOU NEED IT</span><h1>Frequently asked <em>questions.</em></h1><p>From your first order to your next favourite — find the answers here.</p></header>
+    <header className="faq-heading"><span className="pd-eyebrow">A LITTLE HELP, WHEN YOU NEED IT</span><h1>Frequently asked <em>questions.</em></h1></header>
     <div className="faq-layout">
       <div className="faq-groups">{groups.map((group, index) => <section className="faq-group" key={group.title} aria-labelledby={`faq-group-${index}`}><h2 id={`faq-group-${index}`}>{group.title}</h2>{group.items.map(item => <details className="faq-item" key={item.question}><summary><span>{item.question}</span><ChevronDown size={18} aria-hidden="true" /></summary><div className="faq-answer"><p>{item.answer}</p></div></details>)}</section>)}</div>
       <aside className="faq-support"><MessageCircle size={28} aria-hidden="true" /><span className="pd-eyebrow">WE’RE HERE TO HELP</span><h2>Still have a question?</h2><p>Talk to our team for help with your order or choosing a product.</p><a className="faq-whatsapp" href="https://wa.me/8801327406605" target="_blank" rel="noreferrer">Chat on WhatsApp <ArrowRight size={17} /></a><a className="faq-phone" href="tel:+8809613824071"><Phone size={16} />09613824071</a></aside>

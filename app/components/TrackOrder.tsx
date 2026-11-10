@@ -25,7 +25,7 @@ export default function TrackOrder() {
   const demo = !!order && (["AF102345", "AF102346"].includes(order.id) || demoOrders().some(item => item.id === order.id)) && !findOrder(order.id);
   return <Storefront>{() => <section className="orders-page track-page"><div className="page-width">
     <nav className="orders-breadcrumb" aria-label="Breadcrumb"><Link href="/my-orders/">My Orders</Link><ChevronRight size={14} /><span>{order ? "Order Details" : "Track Order"}</span></nav>
-    <div className="orders-title"><div><span className="orders-eyebrow">FROM OUR KITCHEN TO YOUR DOOR</span><h1>{order ? "Order Details" : "Track your order"}</h1>{!order && <p>Enter your order ID to see where your parcel is and when it will arrive.</p>}</div><Link className="orders-outline" href="/my-orders/">View all orders <ChevronRight size={16} /></Link></div>
+    <div className="orders-title"><div><span className="orders-eyebrow">FROM OUR KITCHEN TO YOUR DOOR</span><h1>{order ? "Order Details" : "Track your order"}</h1></div><Link className="orders-outline" href="/my-orders/">View all orders <ChevronRight size={16} /></Link></div>
     <form className={order ? "track-lookup compact" : "track-lookup"} onSubmit={event => { event.preventDefault(); search(query); }}>
       <label htmlFor="track-order-id">Enter your order ID</label>
       <div className="track-lookup-row"><Search size={20} aria-hidden="true" /><input id="track-order-id" required placeholder="e.g. AF102345" autoComplete="off" spellCheck={false} value={query} onChange={event => setQuery(event.target.value)} aria-describedby="track-order-hint" /><button className="cta" type="submit"><span>Track Order</span><i className="cta-icon cta-arrow"><Truck size={15} /></i></button></div>

@@ -58,7 +58,7 @@ export default function BlogCarousel({ posts = blogPosts, showHeading = true }: 
   return (
     <div className="jn-carousel-wrap">
       {showHeading && <div className="jn-carousel-head">
-        <div className="jn-carousel-title"><h2>From Our Blog</h2><p>Fresh ideas for your kitchen and everyday table.</p></div>
+        <div className="jn-carousel-title"><h2>From Our Blog</h2></div>
         <div className="jn-carousel-nav">
           <Link className="view-all" href="/blogs/"><span>View all blogs</span><i><ArrowRight size={14} /></i></Link>
         </div>

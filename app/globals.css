@@ -5372,3 +5372,62 @@ html body .pc-actions { padding-top: 4px; gap: 8px; }
  html body .pc-body, html body #best-selling .pc-body { gap: 10px; }
  html body .pc-actions, html body #best-selling .pc-actions { padding-top: 5px; gap: 8px; }
 }
+
+/* Keep product detail tab items and their active underline square. */
+html body .pd-tabs-nav,
+html body .pd-tabs-nav button,
+html body .pd-tabs-nav button::before,
+html body .pd-tabs-nav button::after { border-radius: 0 !important; }
+
+/* Compact page introductions after removing heading subtitles. */
+html body .jn-page { padding-top: 8px; }
+html body .pd-breadcrumb { padding-top: 12px; padding-bottom: 10px; }
+html body .jn-page-header { padding: 8px 0 20px; }
+html body .jn-page-header h1 { margin: 0; }
+html body .jn-detail-page .jn-article-header { margin-top: 8px; margin-bottom: 16px; }
+html body .catalog { padding-top: 16px; }
+html body .catalog-heading { margin-bottom: 16px; }
+html body .faq-heading { padding: 12px 0 24px; }
+html body .faq-heading h1 { margin: 0; }
+html body .orders-page { padding-top: 20px; }
+html body .orders-title { margin-bottom: 20px; gap: 12px; }
+html body .orders-title h1 { margin: 0; }
+html body .checkout-page { padding-top: 16px; }
+html body .co-title-row { margin-bottom: 16px; }
+html body .hero.hero-modern { padding-bottom: 8px; }
+html body .cat-rail-wrap + .hero.hero-modern { margin-top: 16px; }
+html body .hero-modern + .brand-strip { margin-top: 12px; }
+@media (min-width: 801px) {
+  html body .hero-modern .hero-stage { height: 300px; padding-block: 8px; }
+  html body .hero-modern .hero-art { height: 284px; }
+  html body .hero-modern .hero-slider-bar { margin-top: 12px; }
+}
+@media (max-width: 800px) {
+  html body .jn-page { padding-top: 4px; }
+  html body .pd-breadcrumb { padding-top: 8px; padding-bottom: 8px; }
+  html body .jn-page-header { padding: 6px 0 16px; }
+  html body .catalog, html body .checkout-page { padding-top: 12px; }
+  html body .faq-heading { padding: 8px 0 18px; }
+  html body .orders-page { padding-top: 16px; }
+  html body .orders-title { margin-bottom: 16px; }
+  html body .cat-rail-wrap + .hero.hero-modern { margin-top: 12px; }
+  html body .hero-modern .hero-stage { padding-top: 4px; gap: 4px; }
+  html body .hero-modern + .brand-strip { margin-top: 8px; }
+}
+
+/* Custom clear controls replace the browser's built-in search cancel icon. */
+html body :is(.nav-search, .catalog-search) input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+/* Compact category spacing; reserve the left arrow only when needed. */
+html body .cat-rail { gap: 6px; padding: 5px 8px; }
+html body .cat-rail-track { gap: 8px; }
+html body .cat-rail-scroller:has(.cat-rail-arrow.left:disabled) { grid-template-columns: 0 minmax(0, 1fr) 52px; }
+html body .cat-rail-scroller .cat-rail-arrow.left:disabled { width: 0; padding: 0; border: 0; overflow: hidden; }
+@media (max-width: 800px) {
+  html body .cat-rail { gap: 4px; padding: 4px 6px; }
+  html body .cat-rail-track { gap: 6px; }
+}

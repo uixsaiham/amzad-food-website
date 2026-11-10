@@ -42,7 +42,7 @@ export default function ImpactStats() {
     <div className="impact-intro">
       <span className="impact-kicker">Our impact</span>
       <h2>Trusted by <em>thousands</em> of families</h2>
-      <p>Integrity is the cornerstone of our mission, and these numbers keep growing every day.</p>
+
     </div>
     <ul className="impact-grid">{stats.map((stat) => {
       const Icon = stat.icon;

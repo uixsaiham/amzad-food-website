@@ -31,7 +31,7 @@ export function BlogsPage() {
           <header className="jn-page-header">
             <p className="eyebrow">From our kitchen to yours</p>
             <h1>Amzad Food <em>Blog</em></h1>
-            <p>Pantry tips, ingredient guides and food stories for your everyday table.</p>
+
           </header>
 
           {/* Featured hero post */}
@@ -156,7 +156,7 @@ export function BlogDetails({ post }: { post: BlogPost }) {
             <div className="jn-article-kicker"><span /> THE AMZAD JOURNAL <span className="jn-kicker-divider">/</span> {post.tag}</div>
             <span className="jn-tag jn-tag-inline">{post.tag}</span>
             <h1>{post.title}</h1>
-            <p className="jn-article-desc">{post.description}</p>
+
             <div className="jn-article-meta-row">
             <div className="jn-byline">
               <span className="jn-byline-avatar">AF</span>

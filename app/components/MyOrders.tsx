@@ -20,7 +20,7 @@ export default function MyOrders() {
   const matches = displayed.filter(order => order.id.toLowerCase().includes(query.trim().replace(/^#/, "").toLowerCase()) && (filter === "All Orders" || statusOf(order) === filter));
   return <Storefront>{({ addToCart }) => <section className="orders-page"><div className="page-width">
     <nav className="orders-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><ChevronRight size={14} /><span>My Orders</span></nav>
-    <div className="orders-title"><div><span className="orders-eyebrow">YOUR AMZAD FOOD ACCOUNT</span><h1>My Orders</h1><p>All your favourites, from our kitchen to your doorstep.</p></div><Link className="orders-outline" href="/products/"><ShoppingBag size={16} /> Continue shopping</Link></div>
+    <div className="orders-title"><div><span className="orders-eyebrow">YOUR AMZAD FOOD ACCOUNT</span><h1>My Orders</h1></div><Link className="orders-outline" href="/products/"><ShoppingBag size={16} /> Continue shopping</Link></div>
     <div className="orders-search"><Search size={20} /><input aria-label="Search orders by ID" placeholder="Search orders by ID" value={query} onChange={event => setQuery(event.target.value)} />{query && <button onClick={() => setQuery("")} aria-label="Clear search">×</button>}</div>
     <OrderStatusTabs selected={filter} onSelect={setFilter} />
     {demo && <div className="orders-demo">Client preview · The full product catalogue is shown across sample orders for every stage. These are demonstration orders.</div>}
