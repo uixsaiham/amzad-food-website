@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Eye, EyeOff, Gift, Lock, Mail, PackageSearch, ShieldCheck, Star, UserRound, X, Zap } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGoogle, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
 import { useModalDialog } from "../lib/useModalDialog";
 
@@ -91,7 +91,7 @@ export default function AuthModal({ open, onClose, onSignIn, initialMode = "sign
 
         <div className="auth-divider"><span>or continue with</span></div>
         <div className="auth-social">
-          <button type="button" onClick={() => socialSignIn("Google")}><FontAwesomeIcon icon={faGoogle} /> Google</button>
+          <button type="button" className="google" onClick={() => socialSignIn("Google")}><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M43.6 24.5c0-1.5-.1-2.9-.4-4.3H24v8.2h11a9.4 9.4 0 0 1-4.1 6.2v5.2h6.7c3.9-3.6 6-8.9 6-15.3Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.7-5.2c-1.8 1.2-4.1 1.9-6.8 1.9-5.3 0-9.8-3.6-11.4-8.4H5.7v5.4A20.4 20.4 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.6 27.4a12.2 12.2 0 0 1 0-7.8v-5.4H5.7a20.4 20.4 0 0 0 0 18.6l6.9-5.4Z"/><path fill="#EA4335" d="M24 11.2c3 0 5.7 1 7.8 3.1l5.9-5.9A19.7 19.7 0 0 0 24 3a20.4 20.4 0 0 0-18.3 11.2l6.9 5.4c1.6-4.8 6.1-8.4 11.4-8.4Z"/></svg> Google</button>
           <button type="button" className="whatsapp" onClick={() => socialSignIn("WhatsApp")}><FontAwesomeIcon icon={faWhatsapp} /> WhatsApp</button>
         </div>
 

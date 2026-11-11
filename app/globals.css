@@ -4393,6 +4393,22 @@ html body :is(.catalog-options, .pill-tabs, .auth-tabs, .qv-tabs) button.active 
 html body :is(.nav-icon, .pc-wish, .auth-link, .auth-eye):hover { color: var(--action-orange); }
 html body .cta .cta-icon { background: #fff; color: var(--action-orange); }
 
+/* Keep account controls aligned with the shared action palette. */
+html body .auth-tabs { background: var(--action-orange-soft); border-radius: 10px; }
+html body .auth-tabs button { border-radius: 8px; color: #75665e; }
+html body .auth-tabs button.active { background: transparent; color: #c9430a; }
+html body .auth-tab-pill { background: #fff; border-radius: 8px; box-shadow: 0 2px 6px rgb(96 45 18 / 10%); }
+html body .auth-social button { min-height: 44px; border-radius: 10px; }
+html body .auth-social button svg { color: currentColor; width: 16px; height: 16px; }
+html body .auth-social button:hover { transform: none; }
+html body .auth-social button.google { color: #3c4043; border-color: #dadce0; background: #fff; }
+html body .auth-social button.google:hover { color: #3c4043; border-color: #4285f4; background: #f8faff; }
+html body .auth-social button.whatsapp { color: #128c46; border-color: #25d366; background: #fff; }
+html body .auth-social button.whatsapp:hover { color: #0b7138; border-color: #128c46; background: #effbf3; }
+html body :is(.auth-tabs button, .auth-social button):focus-visible { outline: 2px solid var(--action-orange); outline-offset: 2px; }
+html body .auth-social button.google:focus-visible { outline-color: #4285f4; }
+html body .auth-social button.whatsapp:focus-visible { outline-color: #128c46; }
+
 .cart-offer-heading > div { min-width: 0; flex: 1; }
 html body .cart-offer-threshold { white-space: nowrap; font-size: clamp(11px, 3vw, 13px); }
 html body .cart-offer > .cart-offer-value { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
