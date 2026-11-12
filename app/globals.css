@@ -5431,6 +5431,28 @@ html body .hero-modern + .brand-strip { margin-top: 12px; }
   html body .hero-modern + .brand-strip { margin-top: 8px; }
 }
 
+/* Keep main page titles consistent on desktop and mobile; preserve the home hero. */
+:root { --page-title-size: 32px; }
+
+html body .catalog-heading h1,
+html body .pd-intro h1,
+html body .qv h1.qv-title,
+html body .jn-page-header h1,
+html body .jn-detail-page .jn-article-header h1,
+html body .faq-heading h1,
+html body .orders-title h1,
+html body .to-hero h1,
+html body .checkout-page h1 {
+  font-size: var(--page-title-size) !important;
+}
+
+/* Emphasized words in page heroes follow the same title size. */
+html body :is(.catalog-heading, .pd-intro, .jn-page-header,
+  .jn-article-header, .faq-heading, .orders-title, .to-hero,
+  .checkout-page) h1 em {
+  font-size: inherit;
+}
+
 /* Custom clear controls replace the browser's built-in search cancel icon. */
 html body :is(.nav-search, .catalog-search) input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
@@ -5446,4 +5468,30 @@ html body .cat-rail-scroller .cat-rail-arrow.left:disabled { width: 0; padding: 
 @media (max-width: 800px) {
   html body .cat-rail { gap: 4px; padding: 4px 6px; }
   html body .cat-rail-track { gap: 6px; }
+}
+
+/* Shared section-title size takes precedence over legacy page and breakpoint styles. */
+:root { --section-title-size: 24px; }
+
+html body :is(
+  .section-heading, .pd-section-heading, .journey-intro,
+  .origin-copy, .honey-copy, .story-copy, .story-banner,
+  .trust-section, .review-section, .video-reviews, .rv-summary,
+  .review-section-mixed, .impact-intro, .video-review-heading,
+  .brand-strip-heading, .brand-strip-heading.brand-family-heading, .jn-carousel-title,
+  .jn-related-head, .jn-article, .jn-sources, .jn-toc-heading,
+  .nl-copy, .snack-promo-copy, .ft-cta, .ft-main .footer-feedback,
+  .pd-reviews, .pd-related, .product-review, .product-customer-reviews,
+  .faq-group, .faq-support, .order-panel, .order-status-banner,
+  .co-card-head, .co-account-copy
+) h2,
+html body .jn-browse-title,
+html body .checkout-page .co-card-title,
+html body .checkout-page .co-summary-title,
+html body .checkout-page .co-summary-head,
+html body .pd-tabs-content h3,
+html body .shop-promo-copy h3,
+html body .snack-promo-copy h3,
+html body .grid-promo-card h3 {
+  font-size: var(--section-title-size) !important;
 }
