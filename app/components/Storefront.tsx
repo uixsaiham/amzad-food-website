@@ -18,7 +18,6 @@ import CategoryRail from "./CategoryRail";
 import PrayerTimes, { PrayerDock } from "./PrayerTimes";
 import Reviews from "./Reviews";
 import ImpactStats from "./ImpactStats";
-import BlogSection from "./BlogSection";
 import FooterFeedback from "./FooterFeedback";
 import { ArrowDownLeft, ArrowRight, ArrowUp, CakeSlice, Candy, Check, Cherry, Droplet, FileText, ChevronDown, ChevronLeft, ChevronRight, Copy, Droplets, Eye, Facebook, Flame, Gift, Home, LayoutGrid, Instagram, Leaf, Lock, Mail, MapPin, Menu, PackageSearch, Phone, Search, Send, ShoppingCart, Star, Trash2, TreePalm, UserRound, Wheat, X, Youtube } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -84,15 +83,14 @@ export function ProductCard({ product, onAdd, onOrderNow }: { product: Product; 
   const closeQuickView = useCallback(() => setQuickView(false), []);
   const name = product.bn ? `${product.name} / ${product.bn}` : product.name;
   return <article className="pc">
-    <button className="pc-view" onClick={() => setQuickView(true)} aria-label={`Quick view ${name}`}><Eye size={18} /></button>
     <div className="pc-media">
       <div className="pc-badges">{product.tag === "Best Seller" && <span className="pc-tag pc-best"><Flame size={12} /> Best Selling</span>}{selected.oldPrice && <span className="pc-save">Save {Math.round((1 - selected.price / selected.oldPrice) * 100)}%</span>}{product.tag && product.tag !== "Best Seller" && <span className="pc-tag">{product.tag}</span>}</div>
       <Link className="pc-product-link pc-packs" href={`/products/${productSlug(product.name)}/`} aria-label={`View ${name}, ${selected.label}`}>
         <span key={selected.id} className={`pc-quantity-preview pc-quantity-preview-${packCount}`} style={{ transform: `scale(${previewScale})` }}>
           {Array.from({ length: packCount }, (_, index) => <img key={index} src={selected.image} alt={index === 0 ? `${name} — ${selected.label}` : ""} aria-hidden={index > 0 ? true : undefined} loading="lazy" />)}
         </span>
-        <span className="pc-image-quantity">{selected.label}</span>
       </Link>
+      <button className="pc-view" onClick={() => setQuickView(true)} aria-label={`Quick view ${name}`}><Eye size={18} /></button>
     </div>
     <div className="pc-body">
       <h3 className="pc-name" title={name}><Link href={`/products/${productSlug(product.name)}/`}>{product.name}{product.bn && <> / <span lang="bn">{product.bn}</span></>}</Link></h3>
@@ -495,7 +493,6 @@ export default function Storefront({ children, headerOnly = false }: { headerOnl
     </div></section>
     <ImpactStats />
     <Reviews />
-    <BlogSection />
     </>}
     {!headerOnly && <footer className="ft">
       <div className="ft-main page-width">
@@ -590,7 +587,6 @@ function ProductSection({ maxRows, mobileMaxRows, carousel = false, cardPromotio
   const gridRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState(4);
   const [isMobile, setIsMobile] = useState(false);
-  const [page, setPage] = useState(1);
   const [edges, setEdges] = useState({ start: true, end: false });
   const updateEdges = useCallback(() => {
     const el = gridRef.current;
@@ -610,15 +606,8 @@ function ProductSection({ maxRows, mobileMaxRows, carousel = false, cardPromotio
     return () => observer.disconnect();
   }, [maxRows, carousel, updateEdges]);
   const rows = isMobile ? mobileMaxRows ?? maxRows : maxRows;
-  const pageSize = rows ? rows * columns : Math.max(1, sortedProducts.length);
-  const totalPages = Math.max(1, Math.ceil(sortedProducts.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const pageProducts = sortedProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  useEffect(() => { setPage(1); }, [products, sortKey, pageSize]);
-  const changePage = (next: number) => {
-    setPage(next);
-    document.getElementById(id ?? "")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  const pageSize = id === "best-selling" ? 6 : rows ? rows * columns : sortedProducts.length;
+  const pageProducts = sortedProducts.slice(0, pageSize);
   const move = (direction: number) => {
     const el = gridRef.current;
     if (el) el.scrollBy({ left: direction * el.clientWidth, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
@@ -640,7 +629,6 @@ function ProductSection({ maxRows, mobileMaxRows, carousel = false, cardPromotio
     </aside>}</div>
     {carousel && <button className="best-sellers-arrow best-sellers-next" type="button" disabled={edges.end} onClick={() => move(1)} aria-label="Next best-selling products"><ChevronRight size={20} /></button>}
     </div>
-    {maxRows && <Pagination currentPage={currentPage} pageCount={totalPages} onChange={changePage} label={`${title} pagination`} />}
     </section>;
 }
 
@@ -797,7 +785,7 @@ export function ProductCatalog({ addToCart, goToCheckout }: StoreActions) {
         <div className="catalog-field"><label htmlFor="desktop-price">Price</label><select id="desktop-price" value={priceFilter} onChange={event => setPriceFilter(event.target.value as PriceFilter)}>{(Object.keys(priceFilterLabels) as PriceFilter[]).map(value => <option key={value} value={value}>{priceFilterLabels[value]}</option>)}</select></div>
         <div className="catalog-field"><label htmlFor="desktop-brand">Brand</label><select id="desktop-brand" value={brand} onChange={event => setBrand(event.target.value)}>{["all", ...productBrands].map(value => <option key={value} value={value}>{value === "all" ? "All brands" : value}</option>)}</select></div>
         <div className="catalog-field"><label htmlFor="desktop-type">Product type</label><select id="desktop-type" value={productType} onChange={event => setProductType(event.target.value)}>{Object.keys(productTypeLabels).map(value => <option key={value} value={value}>{productTypeLabels[value]}</option>)}</select></div>
-        <div className="catalog-field catalog-desktop-search"><label htmlFor="desktop-search">Search products</label><div className="catalog-search"><Search size={17} aria-hidden="true" /><input id="desktop-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search products…" />{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14} /></button>}</div></div>
+        <div className="catalog-field catalog-desktop-sort"><label htmlFor="desktop-sort">Sort by</label><select id="desktop-sort" value={sortKey} onChange={event => setSortKey(event.target.value as SortKey)}>{(Object.keys(sortLabels) as SortKey[]).map(key => <option key={key} value={key}>{sortLabels[key]}</option>)}</select></div>
       </div>
       <aside className={filtersOpen ? "catalog-sidebar filters-open" : "catalog-sidebar"} aria-label="Product filters">
         <div className="catalog-search"><Search size={17} aria-hidden="true" /><input id="catalog-search" type="search" aria-label="Search products" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products…" />{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14} /></button>}</div>

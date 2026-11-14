@@ -1282,13 +1282,12 @@ body { overflow-x: hidden; }
 .tr-seal span { align-items: center; background: #dff2b8; border-radius: 50%; color: var(--deep); display: flex; height: 58px; justify-content: center; width: 58px; }
 @keyframes tr-spin { to { transform: rotate(360deg); } }
 .tr-grid { display: grid; gap: 20px; grid-template-columns: repeat(3, 1fr); list-style: none; margin: 0; padding: 0; }
-.tr-grid li { background: #f7faf4; border: 1px solid #edf2ea; border-radius: 22px; padding: 24px 22px 22px; transition: background .3s, border-color .3s, box-shadow .3s, transform .3s cubic-bezier(.2, .8, .2, 1); }
-.tr-grid li:hover { background: #fff; border-color: #d5e8d4; box-shadow: 0 22px 40px -24px rgba(20, 60, 38, .3); transform: translateY(-4px); }
+.tr-grid li { background: #fff; border: 1px solid #d5e8d4; border-radius: 22px; padding: 24px 22px 22px; box-shadow: 0 22px 40px -24px rgba(20, 60, 38, .3); transition: border-color .2s; }
+.tr-grid li:hover { border-color: #ff6418; }
 .tr-top { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 26px; }
 .tr-icon { align-items: center; background: #fff; border-radius: 16px; box-shadow: 0 8px 18px -10px rgba(20, 60, 38, .35); display: flex; height: 52px; justify-content: center; transition: background .3s, transform .3s; width: 52px; }
 .tr-icon img { height: 28px; transition: filter .3s; width: 28px; }
-.tr-top b { color: #e1eadd; font-family: 'Manrope', 'Anek Bangla', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -.03em; line-height: 1; transition: color .3s; }
-.tr-grid li:hover .tr-top b { color: #ffc9a3; }
+.tr-top b { color: #ffc9a3; font-family: 'Manrope', 'Anek Bangla', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
 .tr-grid strong { color: var(--deep); display: block; font-family: 'Manrope', 'Anek Bangla', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
 .tr-grid small { color: #7a887f; font-size: 13px; line-height: 1.5; }
 @media (max-width: 800px) {
@@ -4394,9 +4393,10 @@ html body :is(.nav-icon, .pc-wish, .auth-link, .auth-eye):hover { color: var(--a
 html body .cta .cta-icon { background: #fff; color: var(--action-orange); }
 
 /* Keep account controls aligned with the shared action palette. */
-html body .auth-tabs { background: var(--action-orange-soft); border-radius: 10px; }
-html body .auth-tabs button { border-radius: 8px; color: #75665e; }
-html body .auth-tabs button.active { background: transparent; color: #c9430a; }
+html body .auth-tabs { background: #fff0e5; border-radius: 10px; }
+html body .auth-tabs button { border-radius: 8px; color: #885138; }
+html body .auth-tabs button.active { background: transparent; color: #ff6418; }
+html body .auth-tabs button:not(.active):hover { color: #d94b08; }
 html body .auth-tab-pill { background: #fff; border-radius: 8px; box-shadow: 0 2px 6px rgb(96 45 18 / 10%); }
 html body .auth-social button { min-height: 44px; border-radius: 10px; }
 html body .auth-social button svg { color: currentColor; width: 16px; height: 16px; }
@@ -5255,6 +5255,9 @@ html body .origin-copy > p:not(.eyebrow) { display: block; margin: 14px 0 20px; 
 html body .hero-modern .hero-stage { padding-left: 0; padding-right: 0; }
 html body .hero-modern .hero-copy { padding-left: 0; text-align: left; }
 html body .hero-modern .hero-actions { padding-left: 0; justify-content: flex-start; }
+@media (min-width: 801px) {
+  html body .hero-modern .hero-actions { margin-top: 40px; }
+}
 html body .hero-modern .hero-slider-bar { padding-left: 0; }
 @media (max-width: 800px) {
  html body .hero-modern h1 { margin-left: 0; text-align: left; }
@@ -5491,6 +5494,15 @@ html body .cat-rail-offer .cat-offer-artwork { display: none; }
 }
 
 /* Attached search action, with the input and button sharing one outer shape. */
+@media (min-width: 1101px) {
+  html body .navbar .nav-search[hidden],
+  html body .navbar .nav-search:not([hidden]),
+  html body .navbar .nav-search:focus-within {
+    width: 360px;
+    flex-shrink: 1;
+    min-width: 240px;
+  }
+}
 html body .navbar .nav-search {
   padding-right: 56px;
   border-radius: 8px !important;
@@ -5532,6 +5544,104 @@ html body :is(.cat-chip, .cat-rail-offer) {
 @media (prefers-reduced-motion: reduce) {
   html body .navbar :is(.nav-track a, .nav-icon, .mega-menu-trigger, .nav-cart, .nav-search-submit),
   html body :is(.cat-chip, .cat-rail-offer) { transition: none; }
+}
+
+/* Product-card image area: opposing badges and a lower-right quick view. */
+html body .pc .pc-media { position: relative; }
+html body .pc .pc-media .pc-view {
+  top: auto; right: 0; bottom: 0;
+  width: 30px; height: 30px; color: #009b31;
+  background: #fff; border: 0;
+}
+html body .pc .pc-media .pc-view:hover { background: #e8f5eb; color: #007e29; }
+html body .pc .pc-media .pc-badges {
+  top: 0; left: 0; right: 0; align-items: flex-start; flex-direction: row;
+  flex-wrap: nowrap; pointer-events: none;
+}
+html body .pc .pc-media .pc-badges .pc-save {
+  order: 2; margin-left: auto; background: #21b980;
+  color: #fff; box-shadow: none;
+}
+html body .pc .pc-media .pc-badges .pc-tag { background: #ff841b; color: #fff; }
+html body .pc .pc-media .pc-badges .pc-best svg { display: none; }
+
+/* Compact catalog filters retain accessible names without visible labels. */
+html body .catalog-desktop-filters .catalog-field > label,
+html body .catalog-results .catalog-count {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+@media (min-width: 901px) {
+  html body .catalog-desktop-filters { grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(170px, 1.2fr); align-items: center; }
+  html body .catalog-results .catalog-summary-row { display: none; }
+}
+
+/* Flat outer footer edges on every screen size. */
+html body footer.ft { border-radius: 0 !important; }
+
+/* Balance the statistics strip and keep the review title beside its rating. */
+html body .tr { align-items: stretch; }
+html body .tr-grid { grid-auto-rows: 1fr; }
+html body .tr-grid li { display: flex; flex-direction: column; min-width: 0; }
+html body .tr-grid .tr-top { align-items: center; }
+html body .tr-grid strong { margin: auto 0 0; line-height: 1.4; }
+html body .trust-section .tr-intro h2 { margin-top: 0; }
+html body .impact { box-sizing: border-box; }
+html body .impact-intro h2 { margin: 0; line-height: 1.3; }
+html body .impact-grid { align-items: stretch; }
+html body .impact-grid li { min-width: 0; }
+html body .impact-grid strong { min-height: 34px; display: flex; align-items: baseline; }
+html body .impact-grid b { line-height: 1.4; }
+html body .review-section-mixed .rv-summary {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 16px 24px;
+}
+html body .review-section-mixed .rv-summary h2 { grid-column: 1; grid-row: 1; margin: 0; line-height: 1.3; }
+html body .review-section-mixed .rv-score { grid-column: 2; grid-row: 1; justify-self: end; align-self: center; }
+html body .review-section-mixed .rv-controls { grid-row: 2; }
+html body .review-section-mixed .rv-track { margin: 0; padding: 0; }
+html body .review-section-mixed .rv-score > div { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+html body .review-section-mixed .rv-score small { margin: 0; line-height: 1.4; }
+html body .review-section-mixed .rv-controls { align-items: center; gap: 10px; }
+html body .review-section-mixed .rv-controls button { flex-shrink: 0; }
+@media (min-width: 801px) {
+  html body .impact { width: calc(100% - 64px); max-width: 1216px; }
+}
+@media (max-width: 800px) {
+  html body .review-section-mixed .rv-summary { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  html body .review-section-mixed .rv-score { grid-column: 1; grid-row: 2; justify-self: start; }
+  html body .review-section-mixed .rv-controls { grid-row: 3; }
+}
+
+/* Home shopping sections use spacing instead of horizontal dividers. */
+html body .shop-section .section-heading,
+html body #best-selling .section-heading { border-bottom: 0; }
+
+/* Consistent leading accent for section headings, matching Top Selling Products. */
+html body :is(
+  .section-heading, .pd-section-heading, .brand-strip-heading.brand-family-heading,
+  .jn-carousel-title, .jn-related-head, .tr-intro, .rv-summary,
+  .impact-intro, .video-review-heading
+) h2 {
+  position: relative;
+  padding-left: 14px;
+}
+html body :is(
+  .section-heading, .pd-section-heading, .brand-strip-heading.brand-family-heading,
+  .jn-carousel-title, .jn-related-head, .tr-intro, .rv-summary,
+  .impact-intro, .video-review-heading
+) h2::before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 14%;
+  bottom: 14%;
+  width: 3px;
+  height: auto;
+  background: #ff6418;
+  transform: none;
+  border-radius: 2px !important;
 }
 
 /* Shared section-title size takes precedence over legacy page and breakpoint styles. */

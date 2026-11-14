@@ -58,16 +58,16 @@ export default function QuickView({ product, onAdd, onOrderNow, onClose, embedde
           <div className="qv-price"><strong>৳{price}</strong>{saving > 0 && <><del>৳{selected.oldPrice}</del><em>You save ৳{saving}</em></>}</div>
           <p className="qv-blurb">{info.blurb}</p>
 
+          <ul className="qv-highlights">{info.highlights.map((item) => <li key={item}><Check size={14} />{item}</li>)}</ul>
+
+          <div className="qv-offer"><Truck size={16} /><span>Cash on Delivery available · Free delivery on orders ৳1,000+</span></div>
+
           <div className="qv-block">
-            <h4>Pack <small>{selected.label}</small></h4>
+            <h4>Select Size <small>{selected.label}</small></h4>
             <div className="qv-sizes" role="group" aria-label={`Pack size for ${product.name}`}>
               {variants.map((variant) => <button key={variant.id} type="button" className={variant.id === selected.id ? "active" : ""} aria-pressed={variant.id === selected.id} onClick={() => setVariantId(variant.id)}><b>{variant.label}</b><span>৳{variant.price}</span></button>)}
             </div>
           </div>
-
-          <ul className="qv-highlights">{info.highlights.map((item) => <li key={item}><Check size={14} />{item}</li>)}</ul>
-
-          <div className="qv-offer"><Truck size={16} /><span>Cash on Delivery available · Free delivery on orders ৳1,000+</span></div>
 
           <div className="qv-buy">
             <div className="qv-qty"><button onClick={() => setQty((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" disabled={qty === 1}><Minus size={14} /></button><b aria-live="polite">{qty}</b><button onClick={() => setQty((value) => Math.min(20, value + 1))} aria-label="Increase quantity" disabled={qty === 20}><Plus size={14} /></button></div>
