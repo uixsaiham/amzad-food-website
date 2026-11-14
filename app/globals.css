@@ -5547,6 +5547,7 @@ html body :is(.cat-chip, .cat-rail-offer) {
 }
 
 /* Product-card image area: opposing badges and a lower-right quick view. */
+html body #best-selling .pc-view { display: none; }
 html body .pc .pc-media { position: relative; }
 html body .pc .pc-media .pc-view {
   top: auto; right: 0; bottom: 0;
