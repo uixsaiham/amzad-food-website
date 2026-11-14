@@ -33,10 +33,10 @@ export default function BrandStrip() {
   }, [visible]);
 
   return <section ref={section} className={`brand-strip page-width${visible ? " is-visible" : ""}`} aria-label="Our brands">
-    <div className="brand-strip-inner brand-strip-logos-only">
       <div className="brand-strip-heading brand-family-heading">
         <h2>Our Brands</h2>
       </div>
+    <div className="brand-strip-inner brand-strip-logos-only">
       <ul className="brand-strip-logos">
         {brands.map(brand => <li key={`${brand.file}-${animationCycle}`} className={`brand-strip-item brand-strip-${brand.file}`}>
           <img src={`/amzad-food-website/brands/${brand.file}.png`} alt={brand.name} width={brand.width} height={brand.height} loading="lazy" decoding="async" />

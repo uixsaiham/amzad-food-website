@@ -158,7 +158,8 @@ export default function CategoryRail({ selectedCategory, onAdd, onBrowse, onView
     <div className="cat-rail">
       <button className={selectedCategory === "Offer Zone" ? "cat-rail-offer active" : "cat-rail-offer"} aria-current={selectedCategory === "Offer Zone" ? "true" : undefined} onClick={() => browse("Offer Zone")} onMouseEnter={scheduleClose}>
 
-        <span><b>Offer Zone</b></span>
+        <span className="cat-offer-heading"><b>Offer Zone</b></span>
+        <img className="cat-offer-artwork" src="/amzad-food-website/Screenshot%20at%20Nov%2014%2012-55-35.png" alt="Offer Zone — Mega Bonus" width={132} height={64} />
       </button>
       <div className="cat-rail-scroller">
         <button disabled={!canScroll.left} className="cat-rail-arrow left" style={{ visibility: canScroll.left ? "visible" : "hidden" }} onClick={() => scrollBy(-1)} aria-label="Scroll categories left"><ChevronLeft size={15} /></button>

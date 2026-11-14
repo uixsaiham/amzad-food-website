@@ -5172,8 +5172,10 @@ html body .navbar .nav-cart-icon b { top: -5px; right: -5px; min-width: 17px; he
 
 /* Keep the brand heading and marks in separate rows without overlap. */
 html body .brand-strip-inner.brand-strip-logos-only { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px 16px; }
-html body .brand-family-heading { position: static; transform: none; justify-self: center; padding: 0; background: transparent; }
-html body .brand-strip-heading.brand-family-heading h2 { justify-content: center; margin: 0; font-size: 15px; letter-spacing: .14em; }
+html body .brand-family-heading { position: static; transform: none; justify-self: start; padding: 0; margin-bottom: 12px; background: transparent; text-align: left; }
+html body .brand-strip > .brand-strip-heading.brand-family-heading h2 { justify-content: flex-start; gap: 11px; margin: 0; color: var(--deep); font-family: var(--font-heading); font-size: var(--section-title-size) !important; font-weight: 500; line-height: 1.3; letter-spacing: -.06em; text-transform: none; }
+html body .brand-family-heading h2::before { width: 3px; height: .95em; transform: none; border-radius: 2px !important; }
+html body .brand-family-heading h2::after { content: none; }
 html body .brand-strip-logos { width: 100%; min-width: 0; gap: 0; }
 html body .brand-strip-item { min-width: 0; overflow: hidden; }
 html body .brand-strip-item img { max-width: 100%; }
@@ -5411,7 +5413,7 @@ html body .orders-title h1 { margin: 0; }
 html body .checkout-page { padding-top: 16px; }
 html body .co-title-row { margin-bottom: 16px; }
 html body .hero.hero-modern { padding-bottom: 8px; }
-html body .cat-rail-wrap + .hero.hero-modern { margin-top: 16px; }
+html body .cat-rail-wrap + .hero.hero-modern { margin-top: 48px; }
 html body .hero-modern + .brand-strip { margin-top: 12px; }
 @media (min-width: 801px) {
   html body .hero-modern .hero-stage { height: 300px; padding-block: 8px; }
@@ -5460,14 +5462,76 @@ html body :is(.nav-search, .catalog-search) input[type="search"]::-webkit-search
   display: none;
 }
 
-/* Compact category spacing; reserve the left arrow only when needed. */
-html body .cat-rail { gap: 6px; padding: 5px 8px; }
-html body .cat-rail-track { gap: 8px; }
+/* Reserve the left arrow only when needed; retain the compact mobile rail. */
 html body .cat-rail-scroller:has(.cat-rail-arrow.left:disabled) { grid-template-columns: 0 minmax(0, 1fr) 52px; }
 html body .cat-rail-scroller .cat-rail-arrow.left:disabled { width: 0; padding: 0; border: 0; overflow: hidden; }
 @media (max-width: 800px) {
   html body .cat-rail { gap: 4px; padding: 4px 6px; }
   html body .cat-rail-track { gap: 6px; }
+}
+
+/* Desktop offer ticket fills the category rail; mobile keeps its existing button. */
+html body .cat-rail-offer .cat-offer-artwork { display: none; }
+@media (min-width: 801px) {
+  html body .cat-rail { align-items: stretch; gap: 6px; padding: 8px; }
+  html body .cat-rail-track { gap: 16px; }
+  html body .cat-rail-offer {
+    flex-direction: column; justify-content: center; align-items: stretch;
+    gap: 0; width: 112px; min-width: 112px; height: 64px; box-sizing: border-box; align-self: center; padding: 0;
+    background: #fff;
+    border: 0; border-radius: 0;
+    box-shadow: none; cursor: pointer;
+  }
+  html body .cat-rail-offer .cat-offer-heading { display: none; }
+  html body .cat-rail-offer .cat-offer-artwork { display: block; width: 100%; height: 100%; object-fit: contain; }
+  html body .cat-rail-offer::before, html body .cat-rail-offer::after { display: none; }
+  html body .cat-rail-offer:hover { box-shadow: none; }
+  html body .cat-rail-offer.active { box-shadow: none; }
+  html body .cat-rail-offer:focus-visible { outline: 3px solid #174d32; outline-offset: 4px; }
+}
+
+/* Attached search action, with the input and button sharing one outer shape. */
+html body .navbar .nav-search {
+  padding-right: 56px;
+  border-radius: 8px !important;
+}
+html body .navbar .nav-search .nav-search-submit {
+  top: 0; right: 0; bottom: 0; width: 48px; height: auto;
+  border-radius: 0 7px 7px 0 !important;
+  background: #ff6418; color: #fff;
+}
+html body .navbar .nav-search .nav-search-submit svg { width: 23px; height: 23px; }
+html body .navbar .desktop-search-clear { right: 56px; }
+html body .navbar .nav-search:focus-within {
+  border-color: #ff6418; box-shadow: 0 0 0 2px #ff64184d;
+}
+html body :is(button, a.cta, .nav-track a) { cursor: pointer; }
+html body :is(button, a.cta, .nav-track a):focus-visible {
+  outline: 2px solid #e9510b; outline-offset: 3px;
+}
+@media (hover: hover) {
+  html body .navbar .nav-track a:hover {
+    background: #fff0e5; color: #c64408;
+    box-shadow: inset 0 0 0 1px #f5c4a6;
+  }
+  html body .navbar :is(.nav-icon, .mega-menu-trigger, .mobile-menu):hover {
+    background: #fff0e5; color: #c64408; box-shadow: inset 0 0 0 1px #f5c4a6;
+  }
+  html body .navbar .nav-cart:hover { background: #21583b; box-shadow: 0 3px 8px #153e2926; }
+  html body .navbar .nav-search .nav-search-submit:hover { background: #d94b08; }
+  html body .cat-chip:hover { background: var(--tint); box-shadow: inset 0 0 0 1px var(--accent); }
+  html body .cat-rail-offer:hover { filter: brightness(.94); }
+  html body :is(.cta, .pc-order, .pc-add, .offer-shop-button):hover {
+    filter: brightness(.92); box-shadow: 0 4px 10px #153e2926;
+  }
+}
+html body .navbar :is(.nav-track a, .nav-icon, .mega-menu-trigger, .nav-cart, .nav-search-submit),
+html body :is(.cat-chip, .cat-rail-offer) {
+  transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .navbar :is(.nav-track a, .nav-icon, .mega-menu-trigger, .nav-cart, .nav-search-submit),
+  html body :is(.cat-chip, .cat-rail-offer) { transition: none; }
 }
 
 /* Shared section-title size takes precedence over legacy page and breakpoint styles. */
